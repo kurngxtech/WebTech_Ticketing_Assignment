@@ -1,0 +1,24 @@
+/* Component-specific styles for header */
+
+.header {
+  background: linear-gradient(90deg, #3951d0, #1932b9 10%, #1932b9 27.85%, #1b9fe9 50%, #1932b9 76.15%, #1932b9 90%, #3951d0);
+  padding: 9px 0;
+  width: 100%;
+
+}
+
+
+
+.header p {
+  margin: 0 !important;
+}
+.header a {
+  font-family: 'Rubik', sans-serif;
+  color: white !important;
+}
+.header .container {
+  max-width: 1400px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
