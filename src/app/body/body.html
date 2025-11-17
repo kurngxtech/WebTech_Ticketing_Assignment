@@ -1,0 +1,26 @@
+<section class="ra-responsive-layout r-mt-70">
+  <div class="swiper-wrapper-center">
+    <!-- animasi gambar swiper -->
+    <swiper-container
+      class="mySwiper"
+      slides-per-view="1"
+      space-between="30"
+      loop="true"
+      autoplay-delay="3000"
+      autoplay-disable-on-interaction="false"
+      speed="800"
+      centered-slides="true"
+    >
+      <swiper-slide *ngFor="let slide of slides">
+        <a [href]="slide.link" target="_blank" class="slide-link">
+          <div
+            class="slide-bg"
+            [style.backgroundImage]="'url(' + slide.img + ')'"
+            role="img"
+            aria-label="carousel slide"
+          ></div>
+        </a>
+      </swiper-slide>
+    </swiper-container>
+  </div>
+</section>

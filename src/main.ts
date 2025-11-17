@@ -1,3 +1,6 @@
+import 'swiper/css';
+import 'swiper/css/autoplay';
+import 'swiper/css/free-mode';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';

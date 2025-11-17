@@ -1,63 +1,52 @@
-.navbar {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: none;
-    backdrop-filter: blur(10px);
-    padding: 15px 0;
+/* Navbar styling */
+.custom-navbar {
+  padding: 8px 0 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+} /* Navigation links */
+.nav-left .nav-link {
+  color: #3951d0 !important;
+  font-weight: 500;
+  transition: 0.2s ease;
 }
-
-.navbar 
-
-.navbar .navbar-brand {
-    color: #ffffffff !important;
+.nav-left .nav-link:hover {
+  transform: scale(1.1);
+} /* Vertical divider */
+.vr {
+  border-left: 2px solid #a8a8a8ff;
+  height: 46px;
+} /* Search Bar */
+.search-bar {
+  position: relative;
+  width: 640px;
+  align-self: center;
+  max-width: 100%;
 }
-
-.navbar .navbar-nav .nav-link {
-    color: #3951d0 !important;
-    transition: color 0.3s ease;
+.search-input {
+  padding-right: 40px;
+  border: 1px solid #3951d0;
 }
-
-.navbar .navbar-nav .nav-link:hover {
-    color: #3951d0 !important;
-    transform: scale(1.1);
-}
-
-.navbar .navbar-nav .nav-link.active {
-    color: #3951d0 !important;
-    font-weight: bold;
-}
-
-.navbar .btn-outline-info {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: #3951d0;
-    color: #3951d0;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.navbar .btn-outline-info:hover {
-    background-color: blue !important;
-    color: white;
-}
-
-.navbar-toggler {
-    border: none;
-    color: red;
-}
-
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-}
-
-.navbar .form-control {
-    background-color: #ffffffff;
-    border: 1px solid #3951d0;
-    color: black;
-}
-
-.navbar .form-control::placeholder {
-    color: #3951d0;
-}
-
-.navbar .form-control:focus {
-    background-color: rgba(255, 255, 255, 0.3);
-    color: black;
+.search-icon-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #3951d0;
+  font-size: 18px;
+} /* Mobile behavior */
+@media (max-width: 992px) {
+  /* Center items when collapsed */
+  .navbar-nav {
+    text-align: center;
+    margin-bottom: 10px;
+  } /* Show divider only on desktop */
+  .vr {
+    display: none !important;
+  }
+  .search-bar {
+    width: 100%;
+    margin-top: 10px;
+  }
 }
