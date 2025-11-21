@@ -10,9 +10,8 @@
       autoplay-disable-on-interaction="false"
       speed="800"
       centered-slides="true"
-      [attr.initial-slide]="newestIndex"
     >
-      <swiper-slide *ngFor="let slide of slides">
+      <swiper-slide *ngFor="let slide of swiperSlides">
         <a [href]="slide.link" target="_blank" class="slide-link">
           <div
             class="slide-bg"
@@ -24,10 +23,7 @@
       </swiper-slide>
     </swiper-container>
   </div>
-
-
 </section>
-
 
 <section class="cards-section">
   <div class="cards-header">
@@ -43,18 +39,17 @@
       role="button"
       tabindex="0"
     >
-      <div class="card-media" [style.backgroundImage]="'url(' + s.data.img + ')'" aria-hidden="true">
-        <button class="media-button" (click)="onCardButtonClick($event, s.index)">View</button>
-      </div>
-      <div class="card-body">
-        <h4 class="card-title">{{ s.data.title }}</h4>
-        <p class="card-date">{{ s.data.date }}</p>
-        <p class="card-location">{{ s.data.description }}</p>
-      </div>
-      <div class="card-footer">
-        <div class="card-start">Mulai Dari</div>
-        <div class="card-price">{{ s.data.price }}</div>
+      <div class="card-media" aria-hidden="true">
+        <img [src]="s.data.img" class="card-image" alt="event" />
+        <div class="overlay">
+          <h4 class="card-title">{{ s.data.title }}</h4>
+          <p class="card-date">{{ s.data.date }}</p>
+          <p class="card-location">{{ s.data.description }}</p>
+          <div class="card-price">{{ s.data.price }}</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+
