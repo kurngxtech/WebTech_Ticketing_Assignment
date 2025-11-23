@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "web-ass-ticket": {
+    "ticket": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -23,6 +23,11 @@
                 "input": "public"
               }
             ],
+<<<<<<< HEAD
+=======
+            "styles": ["src/styles.css",
+          "node_modules/bootstrap/dist/css/bootstrap.min.css"],
+>>>>>>> origin/adri/pages/home
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -57,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "web-ass-ticket:build:production"
+              "buildTarget": "ticket:build:production"
             },
             "development": {
-              "buildTarget": "web-ass-ticket:build:development"
+              "buildTarget": "ticket:build:development"
             }
           },
           "defaultConfiguration": "development"

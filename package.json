@@ -1,5 +1,5 @@
 {
-  "name": "web-ass-ticket",
+  "name": "ticket",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:web-ass-ticket": "node dist/web-ass-ticket/server/server.mjs"
+    "serve:ssr:ticket": "node dist/ticket/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -34,6 +34,7 @@
     "bootstrap": "^5.3.8",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
+    "swiper": "^12.0.3",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
