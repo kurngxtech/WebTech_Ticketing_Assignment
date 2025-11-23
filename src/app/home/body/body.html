@@ -1,6 +1,6 @@
 <section class="ra-responsive-layout r-mt-70">
   <div class="swiper-wrapper-center">
-    <!-- animasi gambar swiper -->
+    <!-- main carousel -->
     <swiper-container
       class="mySwiper"
       slides-per-view="1"
@@ -11,16 +11,13 @@
       speed="800"
       centered-slides="true"
     >
-      <swiper-slide *ngFor="let slide of swiperSlides">
+      @for (slide of swiperSlides; track slide) {
+      <swiper-slide>
         <a [href]="slide.link" target="_blank" class="slide-link">
-          <div
-            class="slide-bg"
-            [style.backgroundImage]="'url(' + slide.img + ')'"
-            role="img"
-            aria-label="carousel slide"
-          ></div>
+          <div class="slide-bg" [style.backgroundImage]="'url(' + slide.img + ')'" role="img" aria-label="carousel slide"></div>
         </a>
       </swiper-slide>
+      }
     </swiper-container>
   </div>
 </section>
@@ -30,9 +27,9 @@
     <h2>Event</h2>
   </div>
   <div class="cards-grid">
+    @for (s of getGridSlides(); track $index; let i = $index) {
     <div
       class="card"
-      *ngFor="let s of getGridSlides(); let i = index"
       [class.highlight]="i < 3"
       (click)="goTo(s.index)"
       (keydown.enter)="goTo(s.index)"
@@ -49,7 +46,6 @@
         </div>
       </div>
     </div>
+    }
   </div>
 </section>
-
-

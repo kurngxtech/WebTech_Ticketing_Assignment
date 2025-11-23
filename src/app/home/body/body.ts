@@ -19,6 +19,7 @@ register();
 export class Body implements AfterViewInit {
   activeIndex = 0;
   slides: EventItem[] = [];
+  
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -85,5 +86,10 @@ export class Body implements AfterViewInit {
       if (idx >= 0) order.push(idx);
     }
     return order.map((i) => ({ index: i, data: this.slides[i] }));
+  }
+
+  // return display list: if search active show searchResults mapped to indices
+  getDisplaySlides(): any[] {
+    return this.getGridSlides();
   }
 }
