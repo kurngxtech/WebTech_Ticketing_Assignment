@@ -6,17 +6,19 @@ import { UserSignUp } from './login/sign-up-page-user/user-sign-up';
 import { Header } from "./header/header";
 import { Footer } from "./footer/footer";
 import { EoLoginPage } from "./login/eo-login-page/eo-login-page";
+import { Body } from "./home/body/body";
 
 @Component({
    selector: 'app-root',
    imports: [
       RouterOutlet,
-      UserSignUp
+      Header,
+      // Body,
+      // Footer,
+      // UserSignUp,
       //  UserLoginPage,
       // LoginPage,
       // EoLoginPage,
-      // Header,
-      // Footer
    ],
    templateUrl: './app.html',
    styleUrl: './app.css',
