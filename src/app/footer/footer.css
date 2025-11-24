@@ -73,3 +73,17 @@
   .copyright { text-align: center; }
   .nav-list { gap: 12px; }
 }
+
+
+
+
+
+
+/* Bagus Ver */
+.max-vh {
+   height: 50vh;
+}
+
+.cf-width {
+   width: 85%;
+}

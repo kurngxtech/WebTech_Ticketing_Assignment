@@ -4,6 +4,7 @@ import { filter } from 'rxjs/operators';
 import { Header } from "./header/header";
 import { Footer } from "./footer/footer";
 import { CommonModule } from '@angular/common';
+import { UserLoginPage } from "./login/sign-in-page-user/user-login-page";
 
 @Component({
    selector: 'app-root',

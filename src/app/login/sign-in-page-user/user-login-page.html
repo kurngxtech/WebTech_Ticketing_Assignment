@@ -2,7 +2,7 @@
    <div class="row vh-100">
       <div class="col-lg-8 d-none d-lg-block p-0">
          <img src="/login-image/orchestra-blue.jpeg" alt="bgLoginUser"
-            class="img-fluid h-100 w-100 object-fit-cover rounded-4">
+            class="img-fluid h-100 w-100 object-fit-cover rounded-end-4">
       </div>
       <!-- Form -->
       <div
@@ -13,15 +13,17 @@
                <p class="mb-5 text-white">Enter your credentials to access your account</p>
             </div>
 
-            <form action="">
+            <form class="needs-validation">
                <div class="mb-3">
                   <label for="username" class="form-label text-white">Username</label>
-                  <input type="text" id="username" class="form-control form-control-sm bg-dark border-dark" />
+                  <input type="text" id="username" class="form-control form-control-sm bg-dark border-dark text-white"
+                     required id="username" />
                </div>
 
                <div class="mb-2">
                   <label for="password" class="form-label text-white">Password</label>
-                  <input type="password" id="password" class="form-control form-control-sm bg-dark border-dark" />
+                  <input type="password" id="password"
+                     class="form-control form-control-sm bg-dark border-dark text-white" id="password" required />
                </div>
 
                <div class="form-check custom-checkbox" style="margin-bottom: 2rem;">
@@ -31,12 +33,12 @@
                </div>
 
                <div class="d-flex justify-content-center w-100 mb-3">
-                  <button class="btn bg-opacity-75 w-100" style="background-color: #feb706; color: black">
+                  <button class="btn bg-opacity-75 w-50" style="background-color: #feb706; color: black">
                      Sign In
                   </button>
                </div>
                <div class="d-flex justify-content-center w-100 text-white">
-                  <p (click)="goToSignUp()">Not have an account yet? <a class="text-white">Sign Up.</a></p>
+                  <p>Not have an account yet? <a class="text-white" (click)="goToSignUp()">Sign Up.</a></p>
                </div>
             </form>
          </div>

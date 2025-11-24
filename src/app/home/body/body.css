@@ -1,6 +1,12 @@
 /* Dark themed body + cards */
-.body-padding {
-   padding-top: 60.5px;
+.padding-body {
+   padding-top: 70px;
+}
+
+@media (max-width: 900px) {
+   .padding-body {
+      padding-top: 150px;
+   }
 }
 
 .swiper-wrapper-center {
