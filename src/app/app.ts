@@ -1,29 +1,29 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { LoginPage } from './login/sign-in-page-admin/login-page';
-import { UserLoginPage } from './login/sign-in-page-user/user-login-page';
-import { UserSignUp } from './login/sign-up-page-user/user-sign-up';
+import { Component } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { Header } from "./header/header";
 import { Footer } from "./footer/footer";
-import { EoLoginPage } from "./login/eo-login-page/eo-login-page";
-import { Body } from "./home/body/body";
+import { CommonModule } from '@angular/common';
 
 @Component({
    selector: 'app-root',
    imports: [
       RouterOutlet,
+      CommonModule,
       Header,
-      // Body,
-      // Footer,
-      // UserSignUp,
-      //  UserLoginPage,
-      // LoginPage,
-      // EoLoginPage,
+      Footer
    ],
    templateUrl: './app.html',
    styleUrl: './app.css',
 })
 export class App {
-   protected readonly title = signal('web-ass-ticket');
-   // protected readonly titleAdri = signal('Adri');
+   hideLayout = false;
+
+   constructor(private router: Router) {
+      this.router.events
+         .pipe(filter(event => event instanceof NavigationEnd))
+         .subscribe((event: NavigationEnd) => {
+            this.hideLayout = event.urlAfterRedirects.includes('/login') || event.urlAfterRedirects.includes('/sign-up');
+         });
+   }
 }

@@ -1,5 +1,5 @@
 .bg-login {
-   background-image: url('/login-page-orchestra-compressed.jpg');
+   background-image: url('/login-image/login-page-orchestra-compressed.jpg');
    background-size: cover;
    /* biar full */
    background-position: center;
@@ -22,3 +22,4 @@
 .backdrop-blur-3xl {
    backdrop-filter: blur(80px) !important;
 }
+

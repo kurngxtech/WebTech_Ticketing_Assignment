@@ -1,6 +1,7 @@
 // src/app/data-event-service/data-event.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import { EventItem, EVENTS, TicketCategory } from './data-event';
 
 @Injectable({
@@ -9,12 +10,28 @@ import { EventItem, EVENTS, TicketCategory } from './data-event';
 export class DataEventService {
   private data: EventItem[] = [...EVENTS];
   private subject = new BehaviorSubject<EventItem[]>([...this.data]);
+  private searchQuery = new BehaviorSubject<string>('');
+  /** Emits array of events filtered by current search query (case-insensitive by title) */
+  public searchResults$: Observable<EventItem[]> = this.searchQuery.pipe(
+    distinctUntilChanged(),
+    map(q => {
+      const term = (q || '').trim().toLowerCase();
+      if (!term) return [];
+      return this.data.filter(e => e.title.toLowerCase().includes(term));
+    })
+  );
+
+  public searchQuery$ = this.searchQuery.asObservable();
 
   constructor() {}
 
   /** Observable (optional subscribe) */
   getEvents$(): Observable<EventItem[]> {
     return this.subject.asObservable();
+  }
+
+  setSearchQuery(q: string) {
+    this.searchQuery.next(q || '');
   }
 
   getEvents(): EventItem[] {

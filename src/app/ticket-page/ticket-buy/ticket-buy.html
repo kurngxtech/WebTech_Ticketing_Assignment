@@ -1,41 +1,68 @@
-<section class="ticket-page" *ngIf="event">
-  <aside class="left">
-    <div class="frame">
-      <img [src]="event.img" [alt]="event.title" />
-    </div>
-  </aside>
-
-  <main class="right">
-    <h2 class="title">{{ event.title }}</h2>
-    <p class="desc">{{ event.description }}</p>
-
-    <div class="meta">
-      <div><strong>Date:</strong> {{ event.date }}</div>
-      <div><strong>Time:</strong> {{ event.time }}</div>
-      <div><strong>Location:</strong> {{ event.location }}</div>
-      <div><strong>Organizer:</strong> {{ event.organizer }}</div>
+@if (event) {
+<section class="ticket-page container-fluid px-4 py-4">
+  <div class="row h-100">
+    <!-- Left column: scaled image (50%) -->
+    <div class="col-lg-6 col-md-12">
+      <aside class="left">
+        <div class="frame">
+          <img [src]="event.img" [alt]="event.title" />
+        </div>
+      </aside>
     </div>
 
-    <div class="coupon">
-      <input name="coupon" [(ngModel)]="couponCode" placeholder="Enter coupon code (e.g. SAVE20)" aria-label="Coupon code" />
-      <button type="button" (click)="applyCoupon()">Apply</button>
-      <div class="coupon-msg" *ngIf="message">{{ message }}</div>
-    </div>
+    <!-- Right column: event details (50%) -->
+    <div class="col-lg-6 col-md-12">
+      <main class="right">
+        <h2 class="title">{{ event.title }}</h2>
 
-    <div class="tickets-list">
-      <h3>Available Tickets</h3>
-      <ng-container *ngIf="event.tickets.length; else noTickets">
+        <!-- Description fills the space -->
+        <p class="desc">{{ event.description }}</p>
+
+        <!-- Metadata at bottom of right pane -->
+        <div class="meta">
+          <div><strong>Date:</strong> {{ event.date }}</div>
+          <div><strong>Time:</strong> {{ event.time }}</div>
+          <div><strong>Location:</strong> {{ event.location }}</div>
+          <div><strong>Organizer:</strong> {{ event.organizer }}</div>
+        </div>
+
+        <!-- Coupon section at the bottom -->
+        <div class="coupon mt-auto">
+          <input
+            name="coupon"
+            [(ngModel)]="couponCode"
+            placeholder="Enter coupon code (e.g. SAVE20)"
+            aria-label="Coupon code"
+          />
+          <button type="button" (click)="applyCoupon()">Apply</button>
+          @if (message) {
+          <div class="coupon-msg">{{ message }}</div>
+          }
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Full width: ticket purchase section -->
+  <div class="row mt-4">
+    <div class="col-lg-6">
+      <div class="tickets-list">
+        <h3>Available Tickets</h3>
+        @if (event.tickets.length) {
         <ul>
-          <li *ngFor="let t of event.tickets">
+          @for (t of event.tickets; track t) {
+          <li>
             <div class="ticket-row">
               <div class="ticket-info">
                 <div class="type">{{ t.type }}</div>
                 <div class="price">
-                  <span *ngIf="appliedDiscount > 0" class="orig-price">{{ formattedPrice(t.price) }}</span>
+                  @if (appliedDiscount > 0) {
+                  <span class="orig-price">{{ formattedPrice(t.price) }}</span>
+                  }
                   <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
                 </div>
                 <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
-                  {{ getRemaining(t) === 0 ? 'SOLD OUT' : (getRemaining(t) + ' left') }}
+                  {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
                 </div>
               </div>
 
@@ -43,25 +70,32 @@
                 <div class="qty-wrap">
                   <input
                     type="number"
-                    name="qty-{{t.id}}"
+                    name="qty-{{ t.id }}"
                     [(ngModel)]="quantities[t.id]"
                     min="1"
                     [max]="getRemaining(t)"
                     step="1"
-                    aria-label="Quantity for {{t.type}}"
+                    aria-label="Quantity for {{ t.type }}"
                   />
                 </div>
-                <button type="button" [disabled]="getRemaining(t) === 0" [attr.aria-disabled]="getRemaining(t) === 0" (click)="purchase(t, quantities[t.id] || 1)">
+                <button
+                  type="button"
+                  [disabled]="getRemaining(t) === 0"
+                  [attr.aria-disabled]="getRemaining(t) === 0"
+                  (click)="purchase(t, quantities[t.id] || 1)"
+                >
                   Buy
                 </button>
               </div>
             </div>
           </li>
+          }
         </ul>
-      </ng-container>
-      <ng-template #noTickets>
+        } @else {
         <p>No ticket categories available for this event.</p>
-      </ng-template>
+        }
+      </div>
     </div>
-  </main>
+  </div>
 </section>
+}

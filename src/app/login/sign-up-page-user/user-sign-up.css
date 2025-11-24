@@ -1,5 +1,5 @@
 .bg-login {
-   background-image: url('/orchestra-blue-dark.jpeg');
+   background-image: url('/login-image/orchestra-blue-dark.jpeg');
    background-size: cover;
    background-position: center;
    background-repeat: no-repeat;
@@ -19,4 +19,9 @@
 
 .default-font {
    font-family: 'Outfit', 'Times New Roman', sans-serif;
+   color: var(--text);
+}
+
+p a:hover {
+   cursor: pointer;
 }

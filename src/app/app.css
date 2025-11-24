@@ -1,0 +1,31 @@
+html,
+body,
+app-root {
+   height: 100%;
+}
+
+.main {
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+   background: linear-gradient(180deg, var(--bg-900), var(--bg-800));
+   color: var(--text);
+}
+
+.content {
+   flex: 1 1 auto;
+   padding: 20px 0;
+}
+
+/* improve spacing for small screens */
+@media (max-width: 900px) {
+   .content {
+      padding: 12px 10px;
+   }
+}
+
+@media (max-width: 480px) {
+   .content {
+      padding: 10px 8px;
+   }
+}

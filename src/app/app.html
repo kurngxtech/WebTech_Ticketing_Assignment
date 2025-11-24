@@ -1,11 +1,11 @@
 <main>
-   <!-- <app-login-page></app-login-page> -->
-   <!-- <app-eo-login-page></app-eo-login-page> -->
-   <!-- <app-login-page></app-login-page> -->
-   <!-- <app-user-login-page></app-user-login-page> -->
-   <app-header></app-header>
-   <!-- <app-body></app-body> -->
-   <!-- <app-footer></app-footer> -->
-   <!-- <app-user-sign-up></app-user-sign-up> -->
+   <header *ngIf="!hideLayout">
+      <app-header></app-header>
+   </header>
+
+   <router-outlet />
+
+   <footer *ngIf="!hideLayout">
+      <app-footer></app-footer>
+   </footer>
 </main>
-<router-outlet />

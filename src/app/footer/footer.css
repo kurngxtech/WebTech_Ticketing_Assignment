@@ -1,21 +1,47 @@
-/* Minimalist footer styles */
+/* Footer styles matching dark glass theme */
 
 .custom-footer {
-  background: #fff;
   padding: 12px 0;
   font-family: 'Rubik', sans-serif;
-  border-top: 1px solid #eee;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-top: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px) saturate(120%);
 }
 
 .custom-footer .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 18px;
+}
+
+/* Full-width variant so footer nav can sit at the extreme right of the viewport */
+.custom-footer .container-fluid {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 18px;
+}
+
+/* Ensure the inner flex row stretches the full width so `ms-auto` can push the nav to the edge */
+.custom-footer .container-fluid > .d-flex {
+  width: 100%;
+}
+
+.copyright {
+  flex: 0 0 auto;
+}
+
+.footer-nav {
+  margin-left: auto; /* fallback to ensure extreme-right placement */
+  flex: 0 0 auto;
 }
 
 .copyright {
   font-size: 14px;
-  color: #666;
+  color: var(--muted);
 }
 
 .footer-nav {
@@ -25,7 +51,7 @@
 
 .nav-list {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -33,28 +59,17 @@
 
 .nav-link {
   text-decoration: none;
-  color: #666;
-  font-weight: 400;
+  color: rgba(254, 183, 6, 1);
+  font-weight: 500;
   font-size: 14px;
 }
 
 .nav-link:hover {
-  color: #000;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {
-  .d-flex {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .copyright {
-    text-align: center;
-  }
-
-  .nav-list {
-    gap: 16px;
-    justify-content: center;
-  }
+  .custom-footer .container { flex-direction: column; gap: 8px; align-items: center; }
+  .copyright { text-align: center; }
+  .nav-list { gap: 12px; }
 }
