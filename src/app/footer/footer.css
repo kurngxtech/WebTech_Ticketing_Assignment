@@ -1,97 +1,78 @@
-/* Footer styles matching dark glass theme */
-
-.custom-footer {
-  padding: 12px 0;
-  font-family: 'Rubik', sans-serif;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-top: 1px solid rgba(255,255,255,0.04);
-  backdrop-filter: blur(8px) saturate(120%);
-}
-
-.custom-footer .container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 18px;
-}
-
-/* Full-width variant so footer nav can sit at the extreme right of the viewport */
-.custom-footer .container-fluid {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0 18px;
-}
-
-/* Ensure the inner flex row stretches the full width so `ms-auto` can push the nav to the edge */
-.custom-footer .container-fluid > .d-flex {
-  width: 100%;
-}
-
-.copyright {
-  flex: 0 0 auto;
-}
-
-.footer-nav {
-  margin-left: auto; /* fallback to ensure extreme-right placement */
-  flex: 0 0 auto;
-}
-
-.copyright {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.footer-nav {
-  margin: 0;
-  padding: 0;
-}
-
-.nav-list {
-  display: flex;
-  gap: 16px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: rgba(254, 183, 6, 1);
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.nav-link:hover {
-  opacity: 0.8;
-}
-
-@media (max-width: 768px) {
-  .custom-footer .container { flex-direction: column; gap: 8px; align-items: center; }
-  .copyright { text-align: center; }
-  .nav-list { gap: 12px; }
-}
-
-
-
-
-
-
 /* Bagus Ver */
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
+}
+
+.title-underline {
+   border-bottom: solid #feb706;
+}
+
+h1 {
+   color: #feb706;
+}
+
 .max-vh {
-   height: 50vh;
+   height: 70vh;
 }
 
 .cf-width {
    width: 85%;
 }
 
+.w-content {
+   width: 70%;
+}
+
+.h-title-footer {
+   max-height: 15%;
+   padding: 40px 0;
+}
+
 .h-footer-content {
-   height: 90%;
+   height: 70%;
 }
 
 .h-footer-copyRight {
    height: 10%;
+}
+
+.border-footer {
+   border-top: solid #feb706;
+}
+
+.rm-underline {
+   text-decoration: none;
+}
+
+.footer-gradient {
+   position: relative;
+   overflow: hidden;
+}
+
+/* Spotlight radial gradient */
+.footer-gradient::before {
+   content: "";
+   position: absolute;
+   inset: 0;
+   pointer-events: none;
+
+   background: radial-gradient(ellipse 90% 80% at center,
+         rgba(255, 255, 255, 0.30) 0%,
+         /* Cahaya paling terang */
+         rgba(255, 255, 255, 0.18) 30%,
+         /* Sedang */
+         rgba(255, 255, 255, 0.06) 55%,
+         /* Redup */
+         rgba(0, 0, 0, 1) 100%
+         /* Hilang ke hitam */
+      );
+
+   opacity: 1;
+   z-index: 0;
+}
+
+/* Konten header tetap di atas spotlight */
+.footer-gradient>* {
+   position: relative;
+   z-index: 2;
 }

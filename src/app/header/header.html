@@ -12,7 +12,7 @@
       <!-- List -->
       <div class="col-8 p-0">
          <div class="h-100 pb-3 d-flex justify-content-center align-items-end">
-            <ul class="d-flex gap-3 list-group list-group-horizontal list-inline text-white">
+            <ul class="d-flex gap-3 list-group list-group-horizontal text-white">
                <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">HOME</span></a></li>
                <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">TICKETS</span></a></li>
                <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">FAQ</span></a></li>
@@ -31,13 +31,13 @@
                <i class="bi bi-search"></i>
             </button>
             @if (query.trim().length && suggestions.length) {
-            <ul class="search-suggestions">
-               @for (s of suggestions; track s) {
-               <li (click)="selectSuggestion(s)" tabindex="0">
-                  {{ s.title }}
-               </li>
-               }
-            </ul>
+               <ul class="search-suggestions">
+                  @for (s of suggestions; track s) {
+                  <li (click)="selectSuggestion(s)" tabindex="0">
+                     {{ s.title }}
+                  </li>
+                  }
+               </ul>
             }
          </div>
       </div>

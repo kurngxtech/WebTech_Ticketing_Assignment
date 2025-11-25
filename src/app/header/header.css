@@ -3,15 +3,30 @@ h3 {
    font-weight: bolder;
 }
 
-.web-icon-logo {
-   width: 50px;
-   height: 50px;
-   background: transparent !important;
-}
-
 .container-fluid {
    padding-right: 0 !important;
    padding-left: 0 !important;
+}
+
+.nav-link {
+   text-decoration: none;
+   position: relative;
+   font-weight: 500;
+   padding: 6px 8px;
+}
+
+.nav-link:hover .nav-text {
+   color: var(--gold);
+   opacity: 1;
+}
+
+/* Text default tetap putih terang */
+.nav-text {
+   --gold: rgba(254, 183, 6, 1);
+
+   color: #ffffff;
+   opacity: 1;
+   transition: color 350ms ease-in-out, opacity 350ms ease-in-out;
 }
 
 /* styling list navbar */
@@ -102,111 +117,7 @@ img {
    padding: 5px 20px;
 }
 
-
-/* Header styles adapted for dark glass theme */
-
-.custom-header {
-   padding: 10px 0;
-   position: sticky;
-   top: 0;
-   z-index: 80;
-   /* backdrop-filter: none;
-   -webkit-backdrop-filter: none; */
-   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-   border-bottom: 2px solid rgba(254, 183, 6, 1);
-}
-
-.custom-header .container {
-   max-width: 1400px;
-   margin: 0 auto;
-   padding: 0 18px;
-}
-
-/* header row holds brand / nav / search as three columns */
-.header-row {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   width: 100%;
-   gap: 64px;
-   /* increased gap between brand / nav / search */
-}
-
-.center-nav {
-   flex: 1 1 0;
-   display: flex;
-   justify-content: center;
-   min-width: 220px;
-}
-
-.center-nav .nav-list {
-   justify-content: center;
-}
-
-.brand {
-   font-size: 20px;
-   font-weight: 700;
-   color: rgba(254, 183, 6, 1);
-   letter-spacing: 0.2px;
-   flex: 0 0 auto;
-   /* keep brand size fixed */
-   margin-right: 8px;
-   margin-left: 12px;
-   /* small left offset so brand isn't flush to the edge */
-}
-
-.main-nav {
-   margin: 0;
-   padding: 0;
-   display: flex;
-   align-items: center;
-   gap: 20px;
-}
-
-.nav-list {
-   list-style: none;
-   display: flex;
-   gap: 18px;
-   margin: 0;
-   padding: 0;
-}
-
-.nav-link {
-   text-decoration: none;
-   position: relative;
-   font-weight: 500;
-   padding: 6px 8px;
-}
-
-/* Text default tetap putih terang */
-.nav-text {
-   --gold: rgba(254, 183, 6, 1);
-
-   color: #ffffff;
-   /* default tetap putih */
-   opacity: 1;
-   /* full visibility */
-   transition: color 350ms ease-in-out, opacity 350ms ease-in-out;
-}
-
-.nav-link:hover .nav-text {
-   color: var(--gold);
-   /* berubah ke emas */
-   opacity: 1;
-   /* tetap penuh, hanya warna yang fade */
-}
-
-
-
-.search-form {
-   position: relative;
-   width: 100%;
-   flex: 0 0 auto;
-   min-width: 265px;
-   /* increase min width for more visible search */
-   max-width: 50%;
-}
-
+/* adri */
 .search-suggestions {
    position: absolute;
    left: 0;
@@ -234,6 +145,17 @@ img {
 .search-suggestions li:focus {
    background: rgba(255, 255, 255, 0.03);
 }
+
+.search-form {
+   position: relative;
+   width: 100%;
+   flex: 0 0 auto;
+   min-width: 265px;
+   /* increase min width for more visible search */
+   max-width: 50%;
+}
+
+
 
 li a:hover {
    cursor: pointer;
@@ -270,65 +192,4 @@ li a:hover {
    color: var(--text);
    font-size: 16px;
    cursor: pointer;
-}
-
-/* responsive layout */
-@media (max-width: 900px) {
-   .custom-header .container {
-      padding: 0 12px;
-   }
-
-   .header-row {
-      flex-direction: column;
-      gap: 8px;
-      align-items: stretch;
-   }
-
-   .brand {
-      text-align: center;
-   }
-
-   .center-nav {
-      width: 100%;
-   }
-
-   .center-nav .nav-list {
-      justify-content: center;
-      gap: 12px;
-   }
-
-   .search-form {
-      width: 100%;
-      max-width: none;
-   }
-}
-
-@media (max-width: 480px) {
-   .brand {
-      font-size: 18px;
-   }
-
-   .search-input {
-      font-size: 14px;
-   }
-
-   .nav-list {
-      gap: 10px;
-   }
-
-   .custom-header .container {
-      padding: 0 12px;
-   }
-}
-
-/* touch target improvements */
-.search-btn {
-   padding: 8px;
-   min-width: 36px;
-   min-height: 36px;
-   border-radius: 8px;
-}
-
-.nav-link {
-   padding: 6px 6px;
 }
