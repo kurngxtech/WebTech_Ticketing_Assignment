@@ -1,47 +1,52 @@
-<nav class="custom-header position-fixed fixed-top bg-black">
-   <div class="container-fluid px-0">
-      <div class="row align-items-center header-row gx-3">
-         <div class="col-auto ms-4">
-            <div class="brand">
-               JOMOKERS TICKET
-            </div>
-         </div>
+<div class="default-font g-0 row container-fluid h-header-page bg-black underline-header">
+   <!-- Logo Web / Judul -->
+   <div class="col-3"></div>
 
-         <div class="col center-nav">
-            <nav class="main-nav">
-               <ul class="nav-list">
-                  <li><a href="#" class="nav-link rounded"><span class="nav-text">Home</span></a></li>
-                  <li><a href="/about" class="nav-link rounded"><span class="nav-text">About</span></a></li>
-                  <li><a href="/about" class="nav-link rounded"><span class="nav-text">FAQ</span></a></li>
-                  <li><a href="/about" class="nav-link rounded"><span class="nav-text">Contact Us</span></a></li>
-               </ul>
-            </nav>
-         </div>
+   <!-- list navbar, search bar, login -->
+   <div class="row col-9 p-0 g-0">
 
-         <div class="col-auto">
-            <div class="search-form" role="search">
-               <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
-                  placeholder="Search events..." aria-label="Search events" autocomplete="off" />
-               <button class="search-btn" type="button" (click)="onSearchInput()">
-                  <i class="bi bi-search"></i>
-               </button>
-               @if (query.trim().length && suggestions.length) {
-               <ul class="search-suggestions">
-                  @for (s of suggestions; track s) {
-                  <li (click)="selectSuggestion(s)" tabindex="0">
-                     {{ s.title }}
-                  </li>
-                  }
-               </ul>
-               }
-            </div>
-            <div>
-               <ul class="nav-list">
-                  <li (click)="goToLogin()"><a class="nav-link rounded"><span class="nav-text">Login</span></a></li>
-                  <li (click)="goToSignUp()"><a class="nav-link rounded"><span class="nav-text">Sign Up</span></a></li>
-               </ul>
-            </div>
+      <!-- List -->
+      <div class="col-8 p-0">
+         <div class="h-100 pb-2 d-flex justify-content-center align-items-end">
+            <ul class="d-flex gap-3 list-group list-group-horizontal list-inline text-white">
+               <li class="fw-bold px-4 py-2"><a>Home</a></li>
+               <li class="fw-bold px-4 py-2"><a>About</a></li>
+               <li class="fw-bold px-4 py-2"><a>FAQ</a></li>
+               <li class="fw-bold px-4 py-2"><a>Contact Us</a></li>
+            </ul>
          </div>
       </div>
+
+      <!-- Search Bar -->
+      <div class="col-3 p-2 d-flex align-items-end">
+         <form class="d-flex" role="search">
+            <input class="form-control search-bar" type="search" placeholder="Search..." aria-label="Search" />
+            <button class="search-icon">
+               <img src="/logos/search.svg" alt="search-btn">
+            </button>
+         </form>
+      </div>
+
+      <!-- Login/Sign up -->
+      <div class="col-1 p-0"></div>
    </div>
-</nav>
+</div>
+
+<!-- <div class="col-auto">
+   <div class="search-form" role="search">
+      <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
+         placeholder="Search events..." aria-label="Search events" autocomplete="off" />
+      <button class="search-btn" type="button" (click)="onSearchInput()">
+         <i class="bi bi-search"></i>
+      </button>
+      @if (query.trim().length && suggestions.length) {
+      <ul class="search-suggestions">
+         @for (s of suggestions; track s) {
+         <li (click)="selectSuggestion(s)" tabindex="0">
+            {{ s.title }}
+         </li>
+         }
+      </ul>
+      }
+   </div>
+</div> -->

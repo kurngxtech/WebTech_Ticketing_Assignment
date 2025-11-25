@@ -1,3 +1,81 @@
+.container-fluid {
+   padding-right: 0 !important;
+   padding-left: 0 !important;
+}
+
+/* styling list navbar */
+.underline-header {
+   border-bottom: solid 3px #feb706;
+}
+
+.h-header-page {
+   height: 7vh;
+}
+
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
+}
+
+ul li a {
+   font-size: 20px;
+}
+
+ul li a:hover {
+   cursor: pointer;
+}
+
+/* animasi hover list navbar header */
+ul li {
+   transition: all 0.25s ease;
+   border-radius: 10px;
+}
+
+ul li:hover {
+   background-color: #feb706;
+   color: black;
+   border-radius: 10px;
+   transform: translateY(-4px);
+}
+
+/* styling search bar */
+.search-bar {
+   max-height: 40px;
+   max-width: 350px;
+   background-color: #1e1e1e;
+   border-color: rgb(0, 0, 0);
+   color: white;
+   margin-right: 10px;
+   outline: none;
+   box-shadow: none;
+}
+
+.search-bar:focus {
+   border-color: #feb706;
+   outline: none;
+   box-shadow: none;
+
+}
+
+input::placeholder {
+   color: grey;
+}
+
+.search-icon {
+   background: transparent;
+   border: none;
+   padding: 5px;
+   cursor: pointer;
+}
+
+.search-icon img {
+   width: 32px;
+}
+
+img {
+   filter: brightness(0) saturate(100%) invert(78%) sepia(74%) saturate(2200%) hue-rotate(-2deg) brightness(104%) contrast(96%);
+}
+
+
 /* Header styles adapted for dark glass theme */
 
 .custom-header {
