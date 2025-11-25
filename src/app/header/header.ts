@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DataEventService } from '../data-event-service/data-event.spec';
+import { DataEventService } from '../data-event-service/data-event.service';
 import { EventItem } from '../data-event-service/data-event';
 
 @Component({
