@@ -132,6 +132,22 @@ li a:hover {
    cursor: pointer;
 }
 
+/* User navigation on the right */
+.user-nav {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   flex-wrap: wrap;
+   justify-content: flex-end;
+}
+
+.user-name {
+   color: rgba(254, 183, 6, 1);
+   font-weight: 600;
+   font-size: 0.95rem;
+   white-space: nowrap;
+}
+
 .search-input {
    width: 100%;
    padding: 8px 40px 8px 12px;
@@ -165,6 +181,16 @@ li a:hover {
 }
 
 /* responsive layout */
+@media (max-width: 1024px) {
+   .header-row {
+      gap: 32px;
+   }
+   
+   .search-form {
+      width: 200px;
+   }
+}
+
 @media (max-width: 900px) {
    .custom-header .container {
       padding: 0 12px;
@@ -178,38 +204,94 @@ li a:hover {
 
    .brand {
       text-align: center;
+      font-size: 16px;
    }
 
    .center-nav {
       width: 100%;
+      flex: 1;
    }
 
    .center-nav .nav-list {
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
    }
 
    .search-form {
       width: 100%;
       max-width: none;
    }
+   
+   .user-nav {
+      justify-content: center;
+      width: 100%;
+      gap: 8px;
+   }
+   
+   .user-name {
+      font-size: 0.85rem;
+   }
+}
+
+@media (max-width: 600px) {
+   .brand {
+      font-size: 14px;
+      margin-right: 4px;
+      margin-left: 8px;
+   }
+
+   .search-input {
+      font-size: 12px;
+      padding: 6px 32px 6px 10px;
+   }
+
+   .nav-list {
+      gap: 6px;
+   }
+   
+   .nav-link {
+      padding: 4px 4px;
+   }
+   
+   .nav-text {
+      font-size: 0.85rem;
+   }
+
+   .custom-header .container {
+      padding: 0 8px;
+   }
+   
+   .center-nav .nav-list {
+      gap: 4px;
+   }
 }
 
 @media (max-width: 480px) {
    .brand {
-      font-size: 18px;
+      font-size: 12px;
+      margin-left: 4px;
    }
 
    .search-input {
-      font-size: 14px;
+      font-size: 11px;
+      padding: 5px 28px 5px 8px;
    }
 
    .nav-list {
-      gap: 10px;
+      gap: 4px;
    }
 
    .custom-header .container {
-      padding: 0 12px;
+      padding: 0 6px;
+   }
+   
+   .user-name {
+      font-size: 0.75rem;
+   }
+   
+   .search-form {
+      width: calc(100% - 80px);
    }
 }
 

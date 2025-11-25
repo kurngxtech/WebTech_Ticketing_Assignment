@@ -1,0 +1,1 @@
+footer, ticketing, dashboard, eo, admin, qr generating layout

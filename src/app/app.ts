@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { Header } from "./header/header";
-import { Footer } from "./footer/footer";
+import { Header } from "./layout/header/header";
+import { Footer } from "./layout/footer/footer";
 import { CommonModule } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, inject } from '@angular/core';
 
 @Component({
    selector: 'app-root',
@@ -18,6 +20,7 @@ import { CommonModule } from '@angular/common';
 })
 export class App {
    hideLayout = false;
+   platformId = inject(PLATFORM_ID);
 
    constructor(private router: Router) {
       this.router.events
@@ -25,5 +28,11 @@ export class App {
          .subscribe((event: NavigationEnd) => {
             this.hideLayout = event.urlAfterRedirects.includes('/login') || event.urlAfterRedirects.includes('/sign-up');
          });
+   }
+
+   onActivate() {
+      if (isPlatformBrowser(this.platformId)) {
+         window.scrollTo(0, 0);
+      }
    }
 }

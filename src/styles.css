@@ -4,6 +4,8 @@
 :root {
    --bg-900: #080808;
    --bg-800: #0f0f0f;
+   --header-height: 72px;
+   --footer-height: 56px;
    --surface: rgba(255, 255, 255, 0.04);
    --glass-bg: rgba(255, 255, 255, 0.06);
    --glass-highlight: rgba(255, 255, 255, 0.12);
@@ -18,6 +20,7 @@ html,
 body {
    height: 100%;
    background: linear-gradient(180deg, var(--bg-900) 0%, var(--bg-800) 100%);
+   /* ensure site content clears the fixed header; footer is now relative */
    color: var(--text);
    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
    -webkit-font-smoothing: antialiased;
@@ -60,4 +63,29 @@ body {
    max-width: 1400px;
    margin: 0 auto;
    padding: 0 18px;
+}
+
+/* Improve visibility of Bootstrap alerts on dark theme */
+.alert {
+   background: #ffffff;
+   color: #0f172a;
+   border-radius: 8px;
+   padding: 10px 14px;
+   border: 1px solid rgba(15,23,42,0.08);
+}
+
+.alert.alert-danger {
+   border-left: 4px solid rgba(239,68,68,0.95);
+}
+
+.alert.alert-success {
+   border-left: 4px solid rgba(16,185,129,0.95);
+}
+
+/* Ensure alerts and top messages sit above content but below fixed header visuals */
+.alert,
+.auth-required-message,
+.message-box {
+   position: relative;
+   z-index: 30;
 }

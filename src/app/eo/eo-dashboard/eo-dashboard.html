@@ -1,0 +1,114 @@
+<div class="eo-dashboard">
+  <div class="dashboard-header">
+    <h1>Event Organizer Dashboard</h1>
+    @if (currentUser) {
+    <p class="welcome-msg">Welcome, {{ currentUser.fullName }}</p>
+    }
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Events</p>
+        <p class="stat-value">{{ stats.totalEvents }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Active Events</p>
+        <p class="stat-value">{{ stats.activeEvents }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Revenue</p>
+        <p class="stat-value">{{ formatPrice(stats.totalRevenue) }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🎫</div>
+      <div class="stat-content">
+        <p class="stat-label">Tickets Sold</p>
+        <p class="stat-value">{{ stats.totalTicketsSold }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <a routerLink="/eo/create-event" class="btn btn-primary">
+      <span class="btn-icon">+</span> Create New Event
+    </a>
+    <a routerLink="/analytics" class="btn btn-secondary">
+      <span class="btn-icon">📈</span> View Analytics
+    </a>
+  </div>
+
+  <!-- Events Table -->
+  <div class="events-section">
+    <h2>Your Events</h2>
+    
+    @if (isLoading) {
+    <div class="loading">
+      <p>Loading events...</p>
+    </div>
+    }
+
+    @if (!isLoading && eoEvents.length === 0) {
+    <div class="no-events">
+      <p>No events created yet. <a routerLink="/eo/create-event">Create your first event!</a></p>
+    </div>
+    }
+
+    @if (!isLoading && eoEvents.length > 0) {
+    <div class="table-responsive">
+      <table class="events-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Tickets Sold</th>
+            <th>Revenue</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of eoEvents; track event.id) {
+          <tr>
+            <td>{{ event.title }}</td>
+            <td>{{ event.date }}</td>
+            <td>{{ event.location }}</td>
+            <td>
+              <span class="badge" [ngClass]="getStatusBadgeClass(event.status)">
+                {{ event.status }}
+              </span>
+            </td>
+            <td>{{ getTotalTicketsSold(event) }}</td>
+            <td>{{ formatPrice(getTotalRevenue(event)) }}</td>
+            <td class="action-buttons-cell">
+              <button class="btn-icon-small" (click)="editEvent(event)" title="Edit">
+                ✏️
+              </button>
+              <button class="btn-icon-small" (click)="viewAnalytics(event)" title="Analytics">
+                📊
+              </button>
+              <button class="btn-icon-small btn-danger" (click)="deleteEvent(event)" title="Delete">
+                🗑️
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+</div>

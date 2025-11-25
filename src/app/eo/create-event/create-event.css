@@ -1,0 +1,417 @@
+.create-event-container {
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.event-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.btn-back {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #5568d3;
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  gap: 10px;
+}
+
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.stepper-item.active {
+  opacity: 1;
+}
+
+.stepper-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  border: 2px solid #667eea;
+  transition: all 0.3s ease;
+}
+
+.stepper-item.active .stepper-number {
+  background: #764ba2;
+  border-color: #764ba2;
+  transform: scale(1.1);
+}
+
+.stepper-item p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.stepper-item.active p {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: #667eea;
+  opacity: 0.3;
+}
+
+/* Form Sections */
+.form-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.form-section h2 {
+  color: #fff;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.form-section h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #ccc;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.form-control::placeholder {
+  color: #999;
+}
+
+.form-control option {
+  background: #222;
+  color: #fff;
+}
+
+.form-control textarea {
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.error {
+  display: block;
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.info-text {
+  color: #ccc;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+/* Image Preview */
+.image-preview {
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #764ba2;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #653a8a;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+}
+
+.btn-outline:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+/* Lists */
+.ticket-list,
+.promo-list {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+}
+
+.ticket-list h3,
+.promo-list h3 {
+  margin-top: 0;
+}
+
+.ticket-item,
+.promo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.ticket-info,
+.promo-info {
+  flex: 1;
+}
+
+.ticket-info p,
+.promo-info p {
+  margin: 5px 0;
+  color: #ccc;
+}
+
+.ticket-info p:first-child,
+.promo-info p:first-child {
+  color: #fff;
+}
+
+.btn-icon-small {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.btn-icon-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.btn-icon-small.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.price {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Seating Grid */
+.seating-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.seating-item {
+  background: rgba(102, 126, 234, 0.2);
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.seating-item h3 {
+  margin: 0 0 10px 0;
+}
+
+.seating-item p {
+  margin: 5px 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+/* Review Section */
+.review-section {
+  background: rgba(102, 126, 234, 0.1);
+  border-left: 4px solid #667eea;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+.review-section h3 {
+  margin-top: 0;
+}
+
+.review-item {
+  padding: 8px 0;
+  color: #ccc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-item strong {
+  color: #667eea;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .create-event-container {
+    padding: 20px;
+  }
+
+  .event-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .event-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stepper {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .stepper-item p {
+    display: none;
+  }
+
+  .stepper-line {
+    display: none;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

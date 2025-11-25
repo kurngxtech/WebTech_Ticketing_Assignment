@@ -1,0 +1,87 @@
+<div class="my-bookings-page">
+   <div class="container-fluid">
+      <h1 class="page-title">My Bookings</h1>
+
+      <div class="filter-section">
+         <button 
+            class="filter-btn"
+            [class.active]="filterStatus === 'all'"
+            (click)="setFilter('all')">
+            All Bookings
+         </button>
+         <button 
+            class="filter-btn"
+            [class.active]="filterStatus === 'confirmed'"
+            (click)="setFilter('confirmed')">
+            Confirmed
+         </button>
+         <button 
+            class="filter-btn"
+            [class.active]="filterStatus === 'pending'"
+            (click)="setFilter('pending')">
+            Pending
+         </button>
+         <button 
+            class="filter-btn"
+            [class.active]="filterStatus === 'cancelled'"
+            (click)="setFilter('cancelled')">
+            Cancelled
+         </button>
+      </div>
+
+      @if (isLoading) {
+         <div class="loading">Loading your bookings...</div>
+      } @else if (filteredBookings.length === 0) {
+         <div class="no-bookings">
+            <p>No bookings found</p>
+         </div>
+      } @else {
+         <div class="bookings-list">
+            @for (booking of filteredBookings; track booking.id) {
+               <div class="booking-card">
+                  <div class="booking-header">
+                     <h3>{{ booking.eventTitle }}</h3>
+                     <span class="status-badge" [class]="getStatusBadgeClass(booking.status)">
+                        {{ booking.status | uppercase }}
+                     </span>
+                  </div>
+
+                  <div class="booking-details">
+                     <div class="detail-row">
+                        <span class="label">Event Date:</span>
+                        <span class="value">{{ booking.eventDate | date: 'MMM dd, yyyy' }}</span>
+                     </div>
+                     <div class="detail-row">
+                        <span class="label">Ticket Type:</span>
+                        <span class="value">{{ booking.ticketType }}</span>
+                     </div>
+                     <div class="detail-row">
+                        <span class="label">Quantity:</span>
+                        <span class="value">{{ booking.quantity }} ticket(s)</span>
+                     </div>
+                     <div class="detail-row">
+                        <span class="label">Booking Date:</span>
+                        <span class="value">{{ booking.bookingDate | date: 'MMM dd, yyyy' }}</span>
+                     </div>
+                     <div class="detail-row price">
+                        <span class="label">Total Price:</span>
+                        <span class="value">${{ booking.totalPrice }}</span>
+                     </div>
+                  </div>
+
+                  <div class="booking-actions">
+                     <button class="btn btn-primary" (click)="downloadTicket(booking.id)">
+                        📥 Download Ticket
+                     </button>
+                     @if (booking.status === 'confirmed' || booking.status === 'pending') {
+                        <button class="btn btn-danger" (click)="cancelBooking(booking.id)">
+                           ❌ Cancel Booking
+                        </button>
+                     }
+                  </div>
+               </div>
+            }
+         </div>
+      }
+   </div>
+</div>
