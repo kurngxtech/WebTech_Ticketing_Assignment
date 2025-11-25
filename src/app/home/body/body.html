@@ -14,7 +14,12 @@
       @for (slide of swiperSlides; track slide) {
       <swiper-slide>
         <a [href]="slide.link" target="_blank" class="slide-link">
-          <div class="slide-bg" [style.backgroundImage]="'url(' + slide.img + ')'" role="img" aria-label="carousel slide"></div>
+          <div
+            class="slide-bg"
+            [style.backgroundImage]="'url(' + slide.img + ')'"
+            role="img"
+            aria-label="carousel slide"
+          ></div>
         </a>
       </swiper-slide>
       }
