@@ -6,33 +6,41 @@ import { DataEventService } from '../data-event-service/data-event.spec';
 import { EventItem } from '../data-event-service/data-event';
 
 @Component({
-  standalone: true,
-  selector: 'app-header',
-  imports: [CommonModule, FormsModule],
-  templateUrl: './header.html',
-  styleUrls: ['./header.css'],
+   standalone: true,
+   selector: 'app-header',
+   imports: [CommonModule, FormsModule],
+   templateUrl: './header.html',
+   styleUrls: ['./header.css'],
 })
 export class Header {
-  query = '';
-  suggestions: EventItem[] = [];
+   query = '';
+   suggestions: EventItem[] = [];
 
-  constructor(private dataSrv: DataEventService, private router: Router) {}
+   constructor(private dataSrv: DataEventService, private router: Router) { }
 
-  ngOnInit(): void {
-    this.dataSrv.searchResults$.subscribe((list) => {
-      this.suggestions = list.slice(0, 6);
-    });
-  }
+   goToLogin() {
+      this.router.navigate(['/login']);
+   }
 
-  onSearchInput() {
-    this.dataSrv.setSearchQuery(this.query);
-  }
+   goToSignUp() {
+      this.router.navigate(['/sign-up']);
+   }
 
-  selectSuggestion(ev: EventItem) {
-    // navigate to ticket detail
-    this.query = ev.title;
-    this.dataSrv.setSearchQuery(this.query);
-    this.suggestions = [];
-    this.router.navigate(['/ticket', ev.id]);
-  }
+   ngOnInit(): void {
+      this.dataSrv.searchResults$.subscribe((list) => {
+         this.suggestions = list.slice(0, 6);
+      });
+   }
+
+   onSearchInput() {
+      this.dataSrv.setSearchQuery(this.query);
+   }
+
+   selectSuggestion(ev: EventItem) {
+      // navigate to ticket detail
+      this.query = ev.title;
+      this.dataSrv.setSearchQuery(this.query);
+      this.suggestions = [];
+      this.router.navigate(['/ticket', ev.id]);
+   }
 }

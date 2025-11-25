@@ -1,0 +1,26 @@
+.bg-login {
+   background-image: url('/login-image/login-page-orchestra-compressed.jpg');
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+}
+
+.backdrop-blur-xl {
+   backdrop-filter: blur(25px) !important;
+}
+
+.backdrop-blur-2xl {
+   backdrop-filter: blur(40px) !important;
+}
+
+.backdrop-blur-3xl {
+   backdrop-filter: blur(80px) !important;
+}
+
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
+}
+
+p a:hover {
+   cursor: pointer;
+}

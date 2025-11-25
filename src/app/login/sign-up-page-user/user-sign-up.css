@@ -1,0 +1,27 @@
+.bg-login {
+   background-image: url('/login-image/orchestra-blue-dark.jpeg');
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+}
+
+.backdrop-blur-xl {
+   backdrop-filter: blur(25px) !important;
+}
+
+.backdrop-blur-2xl {
+   backdrop-filter: blur(40px) !important;
+}
+
+.backdrop-blur-3xl {
+   backdrop-filter: blur(80px) !important;
+}
+
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
+   color: var(--text);
+}
+
+p a:hover {
+   cursor: pointer;
+}

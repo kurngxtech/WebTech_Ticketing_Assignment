@@ -1,241 +1,256 @@
 /* Dark themed body + cards */
+.body-padding {
+   padding-top: 60.5px;
+}
 
 .swiper-wrapper-center {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 18px 0 28px;
+   display: flex;
+   justify-content: center;
+   width: 100%;
+   padding: 18px 0 28px;
 }
 
 .mySwiper {
-  width: 88%;
-  max-width: 1000px;
-  aspect-ratio: 16/9;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  background-color: transparent;
+   width: 88%;
+   max-width: 1000px;
+   aspect-ratio: 16/9;
+   height: auto;
+   display: block;
+   margin: 0 auto;
+   background-color: transparent;
 }
 
 swiper-container {
-  width: 100%;
-  height: 100%;
+   width: 100%;
+   height: 100%;
 }
 
 .swiper-slide {
-  width: 100% !important;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+   width: 100% !important;
+   height: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
 }
 
 .swiper-slide img {
-  width: auto;
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  margin: 0 auto;
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
+   width: auto;
+   max-width: 100%;
+   max-height: 100%;
+   height: auto;
+   display: block;
+   object-fit: cover;
+   margin: 0 auto;
+   border-radius: 10px;
+   box-shadow: var(--card-shadow);
 }
 
 .swiper-slide a {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
 }
 
 .slide-link {
-  display: block;
-  width: 100%;
-  height: 100%;
+   display: block;
+   width: 100%;
+   height: 100%;
 }
 
 .slide-bg {
-  width: 100%;
-  height: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
+   width: 100%;
+   height: 100%;
+   background-position: center;
+   background-repeat: no-repeat;
+   background-size: cover;
+   border-radius: 10px;
+   box-shadow: var(--card-shadow);
 }
 
 .slide-link:focus {
-  outline: 3px solid rgba(255, 255, 255, 0.04);
-  outline-offset: 4px;
+   outline: 3px solid rgba(255, 255, 255, 0.04);
+   outline-offset: 4px;
 }
 
 @media (max-width: 600px) {
-  .mySwiper {
-    width: 94%;
-    aspect-ratio: 4/3;
-  }
+   .mySwiper {
+      width: 94%;
+      aspect-ratio: 4/3;
+   }
 }
 
 /* Cards grid */
 .cards-section {
-  width: 100%;
-  padding: 36px 6% 80px;
+   width: 100%;
+   padding: 36px 6% 80px;
 }
 
 .cards-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  align-items: start;
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 16px;
+   align-items: start;
 }
 
 .card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+   background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+   border-radius: 10px;
+   overflow: hidden;
+   cursor: pointer;
+   border: 1px solid rgba(255, 255, 255, 0.04);
+   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+   transform: translateY(-4px);
+   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
 }
 
 .card-media {
-  /* Use a 4:3 aspect ratio so cards are consistently sized */
-  aspect-ratio: 16/9;
-  width: 100%;
-  height: auto;
-  transition: transform 0.3s ease;
-  position: relative;
-  overflow: hidden;
+   /* Use a 4:3 aspect ratio so cards are consistently sized */
+   aspect-ratio: 16/9;
+   width: 100%;
+   height: auto;
+   transition: transform 0.3s ease;
+   position: relative;
+   overflow: hidden;
 }
 
 .card-image {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover; /* ensures image fills the aspect box */
-  transition: transform 0.25s ease, filter 0.25s ease;
+   width: 100%;
+   height: 100%;
+   display: block;
+   object-fit: cover;
+   /* ensures image fills the aspect box */
+   transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* center vertically */
-  align-items: center; /* center horizontally */
-  text-align: center;
-  padding: 12px 16px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 220ms ease, transform 220ms ease, background 220ms ease;
-  pointer-events: none;
+   position: absolute;
+   inset: 0;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   /* center vertically */
+   align-items: center;
+   /* center horizontally */
+   text-align: center;
+   padding: 12px 16px;
+   background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+   opacity: 0;
+   transform: translateY(6px);
+   transition: opacity 220ms ease, transform 220ms ease, background 220ms ease;
+   pointer-events: none;
 }
 
 .overlay .card-title {
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
+   color: var(--text);
+   font-size: 16px;
+   font-weight: 700;
+   margin: 0 0 6px 0;
 }
+
 .overlay .card-date,
 .overlay .card-location {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 0;
+   color: var(--muted);
+   font-size: 13px;
+   margin: 0;
 }
 
 .card-body {
-  padding: 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+   padding: 12px 12px;
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
 }
+
 .card-title {
-  margin: 0;
-  font-size: 15px;
-  color: var(--text);
+   margin: 0;
+   font-size: 15px;
+   color: var(--text);
 }
+
 .card-date,
 .card-location {
-  color: var(--muted);
-  font-size: 13px;
+   color: var(--muted);
+   font-size: 13px;
 }
 
 .card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 10px 12px;
+   border-top: 1px solid rgba(255, 255, 255, 0.02);
 }
+
 .card-start {
-  font-size: 12px;
-  color: var(--muted);
+   font-size: 12px;
+   color: var(--muted);
 }
+
 .card-price {
-  font-weight: 700;
-  color: var(--text);
+   font-weight: 700;
+   color: var(--text);
 }
+
 .card-action {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
+   margin-top: 8px;
+   padding: 8px 12px;
+   background: transparent;
+   color: var(--text);
+   border: 1px solid rgba(255, 255, 255, 0.06);
+   border-radius: 8px;
 }
 
 /* Hover behavior: blur image, reveal overlay details */
 .card:hover .card-image {
-  filter: blur(4px) brightness(0.6);
-  transform: scale(1.02);
+   filter: blur(4px) brightness(0.6);
+   transform: scale(1.02);
 }
 
 .card:hover .overlay {
-  opacity: 1;
-  transform: translateY(0);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.7));
-  pointer-events: auto;
+   opacity: 1;
+   transform: translateY(0);
+   background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.7));
+   pointer-events: auto;
 }
 
 .overlay .card-title,
 .overlay .card-date,
 .overlay .card-location,
 .overlay .card-price {
-  opacity: 0;
-  transition: opacity 180ms ease 120ms;
+   opacity: 0;
+   transition: opacity 180ms ease 120ms;
 }
 
 .card:hover .overlay .card-title,
 .card:hover .overlay .card-date,
 .card:hover .overlay .card-location,
 .card:hover .overlay .card-price {
-  opacity: 1;
+   opacity: 1;
 }
 
 @media (max-width: 1200px) {
-  .cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+   .cards-grid {
+      grid-template-columns: repeat(3, 1fr);
+   }
 }
+
 @media (max-width: 900px) {
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+   .cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+   }
 }
+
 @media (max-width: 600px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .cards-section {
-    padding: 20px 4% 60px;
-  }
+   .cards-grid {
+      grid-template-columns: 1fr;
+   }
+
+   .cards-section {
+      padding: 20px 4% 60px;
+   }
 }
