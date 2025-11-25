@@ -1,3 +1,14 @@
+h3 {
+   color: #feb706;
+   font-weight: bolder;
+}
+
+.web-icon-logo {
+   width: 50px;
+   height: 50px;
+   background: transparent !important;
+}
+
 .container-fluid {
    padding-right: 0 !important;
    padding-left: 0 !important;
@@ -6,47 +17,58 @@
 /* styling list navbar */
 .underline-header {
    border-bottom: solid 3px #feb706;
+   position: relative;
+   overflow: hidden;
+}
+
+/* Spotlight radial gradient putih */
+.underline-header::before {
+   content: "";
+   position: absolute;
+   inset: 0;
+   pointer-events: none;
+
+   background: radial-gradient(ellipse 200% 80% at center,
+         rgba(255, 255, 255, 0.15) 0%,
+         /* Cahaya paling terang */
+         rgba(255, 255, 255, 0.08) 30%,
+         /* Sedang */
+         rgba(255, 255, 255, 0.03) 55%,
+         /* Redup */
+         rgba(0, 0, 0, 1) 100%
+         /* Hilang ke hitam */
+      );
+
+   opacity: 1;
+   z-index: 0;
+}
+
+/* Konten header tetap di atas spotlight */
+.underline-header>* {
+   position: relative;
+   z-index: 2;
 }
 
 .h-header-page {
-   height: 7vh;
+   height: 10vh;
 }
 
 .default-font {
    font-family: 'Outfit', 'Times New Roman', sans-serif;
 }
 
-ul li a {
-   font-size: 20px;
+ul li a span {
+   font-size: 23px;
 }
 
 ul li a:hover {
    cursor: pointer;
 }
 
-/* animasi hover list navbar header */
-ul li {
-   transition: all 0.25s ease;
-   border-radius: 10px;
-}
-
-ul li:hover {
-   background-color: #feb706;
-   color: black;
-   border-radius: 10px;
-   transform: translateY(-4px);
-}
-
 /* styling search bar */
-.search-bar {
-   max-height: 40px;
-   max-width: 350px;
-   background-color: #1e1e1e;
-   border-color: rgb(0, 0, 0);
-   color: white;
-   margin-right: 10px;
-   outline: none;
-   box-shadow: none;
+
+.p-sb {
+   padding-bottom: 8%;
 }
 
 .search-bar:focus {
@@ -73,6 +95,11 @@ input::placeholder {
 
 img {
    filter: brightness(0) saturate(100%) invert(78%) sepia(74%) saturate(2200%) hue-rotate(-2deg) brightness(104%) contrast(96%);
+}
+
+/* styling button login/sign up */
+.button size {
+   padding: 5px 20px;
 }
 
 
@@ -149,33 +176,35 @@ img {
    position: relative;
    font-weight: 500;
    padding: 6px 8px;
-   overflow: hidden;
 }
 
-/* Text-only left->right color reveal using background-clip on the text */
+/* Text default tetap putih terang */
 .nav-text {
    --gold: rgba(254, 183, 6, 1);
-   display: inline-block;
-   background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 50%, var(--text) 50%, var(--text) 100%);
-   background-size: 200% 100%;
-   background-position: 100% 0;
-   -webkit-background-clip: text;
-   background-clip: text;
-   -webkit-text-fill-color: transparent;
-   transition: background-position 420ms ease, color 300ms ease;
+
+   color: #ffffff;
+   /* default tetap putih */
+   opacity: 1;
+   /* full visibility */
+   transition: color 350ms ease-in-out, opacity 350ms ease-in-out;
 }
 
 .nav-link:hover .nav-text {
-   background-position: 0 0;
+   color: var(--gold);
+   /* berubah ke emas */
+   opacity: 1;
+   /* tetap penuh, hanya warna yang fade */
 }
+
+
 
 .search-form {
    position: relative;
-   width: 260px;
+   width: 100%;
    flex: 0 0 auto;
-   min-width: 200px;
+   min-width: 265px;
    /* increase min width for more visible search */
-   max-width: 32%;
+   max-width: 50%;
 }
 
 .search-suggestions {
@@ -212,12 +241,13 @@ li a:hover {
 
 .search-input {
    width: 100%;
-   padding: 8px 40px 8px 12px;
+   padding: 8px 20px 8px 8px;
    border: 1px solid rgba(255, 255, 255, 0.06);
    border-radius: 10px;
    font-size: 14px;
-   background: rgba(255, 255, 255, 0.02);
+   background: #121212;
    color: var(--text);
+   margin-right: 10px;
 }
 
 .search-input::placeholder {
