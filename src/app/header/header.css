@@ -72,7 +72,7 @@ h3 {
 }
 
 .h-header-page {
-   min-height: 10vh;
+   min-height: 1vh;
    height: auto;
 }
 
@@ -126,8 +126,8 @@ img {
 
 
 /* styling button login/sign up */
-.button size {
-   padding: 5px 20px;
+.button-size {
+   padding: 5px 25px;
 }
 
 .buttonAccount {
@@ -215,7 +215,7 @@ li a:hover {
 /* Responsive */
 @media (max-width: 2560px) {
    .h-header-page {
-      min-height: 130px;
+      min-height: 90px;
    }
 
    .p-wrap-search {
@@ -223,14 +223,13 @@ li a:hover {
       align-items: center;
       justify-content: center;
       padding-top: 1rem;
-      max-width: 18rem;
    }
 
    .buttonAccount {
       display: flex;
       align-items: center;
       justify-content: end;
-      padding: 0 0.6rem 0 0;
+      padding: 0 1rem 0 0;
    }
 }
 
@@ -268,13 +267,14 @@ li a:hover {
       align-items: center;
       justify-content: center;
    }
+   
 
 }
 
 @media (max-width: 767px) {
    .p-wrap-search {
-      align-items: end;
-      padding-bottom: 0;
+      align-items: center;
+      padding: 0.5rem 0 0 0;
    }
 
    .title-wrap {
@@ -282,5 +282,9 @@ li a:hover {
       justify-content: center;
       align-items: end;
       padding: 0 0 0.5rem 1rem;
+   }
+
+   .buttonAccount {
+      padding: 0.5rem 0 0 0;
    }
 }

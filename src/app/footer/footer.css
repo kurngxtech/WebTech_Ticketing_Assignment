@@ -15,18 +15,18 @@ h1 {
    height: 80vh;
 }
 
-.cf-width {
-   width: 85%;
-}
-
 .w-content {
-   width: 70%;
+   width: 80%;
 }
 
 .h-title-footer {
    max-height: 15%;
    padding: 40px 0;
 }
+
+/* .border-side {
+   border-right: dashed rgba(110, 110, 110, 50) ;
+} */
 
 .h-footer-content {
    height: 70%;
@@ -36,7 +36,7 @@ h1 {
    height: 7rem;
    color: white;
    width: 65%;
-   border-top: dashed 2px rgb(115, 115, 115);
+   border-top: solid 2px rgb(115, 115, 115);
 }
 
 .border-footer {
