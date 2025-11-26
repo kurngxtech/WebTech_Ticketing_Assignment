@@ -191,6 +191,21 @@ export class TicketBuy implements OnInit {
 
     if (itemsToProcess.length === 0) return;
 
+    // If cart has items, create bookings for each cart item
+    if (this.cart.length > 0) {
+      for (const cartItem of this.cart) {
+        const result = this.dataSrv.buyTicket(this.eventId, cartItem.ticket.id, cartItem.qty, this.currentUserId);
+        if (result.success && result.booking) {
+          result.booking.discountApplied = this.appliedDiscount;
+          result.booking.totalPrice = this.ticketPriceAfterDiscount(cartItem.ticket) * cartItem.qty;
+          // Use the first booking for QR display
+          if (!this.currentBooking) {
+            this.currentBooking = result.booking;
+          }
+        }
+      }
+    }
+
     // Generate QR for the first item or use cart
     const firstItem = itemsToProcess[0];
     const qrData = `${this.event.id}|${firstItem.ticket.section || 'GENERAL'}|${this.event.date}`;
@@ -216,7 +231,8 @@ export class TicketBuy implements OnInit {
     
     this.showPaymentModal = false;
     this.showQRCodeDisplay = true;
-    this.showContinueShopping = true;
+    // After successful purchase, show button to view bookings (not continue shopping)
+    this.showContinueShopping = false;
     this.message = '✓ Payment successful! Your QR code is ready';
   }
 

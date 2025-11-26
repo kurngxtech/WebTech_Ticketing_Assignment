@@ -2,19 +2,36 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { EventItem, EVENTS, TicketCategory, Booking, WaitlistEntry, PromotionalCode, EventAnalytics } from './data-event';
+import { EventItem, TicketCategory, Booking, WaitlistEntry, PromotionalCode, EventAnalytics } from './data-event';
+import { environment } from '../../environments/environment';
+
+// Try to load dev mock events when running in dev with useMocks=true
+function loadDevEvents(): EventItem[] {
+  if (!environment || !environment.useMocks) return [];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // tslint:disable-next-line:no-var-requires
+    // @ts-ignore
+    const mock = require('../mock/mock-events');
+    return (mock && mock.MOCK_EVENTS) ? mock.MOCK_EVENTS : [];
+  } catch (e) {
+    return [];
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataEventService {
-  private data: EventItem[] = [...EVENTS];
+  private data: EventItem[] = [...(loadDevEvents().length ? loadDevEvents() : [])];
   private subject = new BehaviorSubject<EventItem[]>([...this.data]);
   private searchQuery = new BehaviorSubject<string>('');
   private bookings: Booking[] = [];
   private waitlist: WaitlistEntry[] = [];
   private nextBookingId = 1;
   private nextWaitlistId = 1;
+  private STORAGE_BOOKINGS_KEY = 'demo_bookings_v1';
+  private STORAGE_WAITLIST_KEY = 'demo_waitlist_v1';
 
   public searchResults$: Observable<EventItem[]> = this.searchQuery.pipe(
     distinctUntilChanged(),
@@ -27,7 +44,54 @@ export class DataEventService {
 
   public searchQuery$ = this.searchQuery.asObservable();
 
-  constructor() {}
+  constructor() { this.initialize(); }
+
+  // Load saved demo state on construction
+  ngOnInit?(): void {
+    // noop for compatibility
+  }
+
+  // initialize after creation
+  private initialize() {
+    this.loadState();
+  }
+
+  // Persist bookings and waitlist to localStorage so demo state survives reloads
+  private saveState() {
+    try {
+      localStorage.setItem(this.STORAGE_BOOKINGS_KEY, JSON.stringify(this.bookings));
+      localStorage.setItem(this.STORAGE_WAITLIST_KEY, JSON.stringify(this.waitlist));
+    } catch (e) {
+      // ignore storage errors in restricted environments
+    }
+  }
+
+  private loadState() {
+    try {
+      const rawBookings = localStorage.getItem(this.STORAGE_BOOKINGS_KEY);
+      if (rawBookings) {
+        this.bookings = JSON.parse(rawBookings) as Booking[];
+        // infer nextBookingId
+        const maxId = this.bookings.reduce((max, b) => {
+          const m = Number(b.id?.toString().replace(/^booking_/, '') || 0);
+          return isNaN(m) ? max : Math.max(max, m);
+        }, 0);
+        this.nextBookingId = maxId + 1;
+      }
+
+      const rawWait = localStorage.getItem(this.STORAGE_WAITLIST_KEY);
+      if (rawWait) {
+        this.waitlist = JSON.parse(rawWait) as WaitlistEntry[];
+        const maxW = this.waitlist.reduce((max, w) => {
+          const m = Number(w.id?.toString().replace(/^waitlist_/, '') || 0);
+          return isNaN(m) ? max : Math.max(max, m);
+        }, 0);
+        this.nextWaitlistId = maxW + 1;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
 
   // ========== EVENT MANAGEMENT ==========
 
@@ -144,11 +208,12 @@ export class DataEventService {
     };
 
     this.bookings.push(booking);
+    this.saveState();
     this.subject.next([...this.data]);
-    
-    return { 
-      success: true, 
-      message: 'Purchase successful', 
+
+    return {
+      success: true,
+      message: 'Purchase successful',
       remaining: t.total - t.sold,
       booking
     };
@@ -172,6 +237,7 @@ export class DataEventService {
     };
 
     this.waitlist.push(entry);
+    this.saveState();
     return { success: true, message: 'Added to waitlist', entryId: entry.id };
   }
 
@@ -237,7 +303,7 @@ export class DataEventService {
     if (ticket) {
       ticket.sold = Math.max(0, ticket.sold - booking.quantity);
     }
-
+    this.saveState();
     this.subject.next([...this.data]);
     return { success: true, message: 'Booking cancelled successfully' };
   }

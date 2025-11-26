@@ -30,32 +30,31 @@ export class UserLoginPage {
 
       this.isLoading = true;
       this.errorMessage = '';
+         // Use async AuthService helper that simulates network latency in dev
+         this.authService.loginAsync(this.username, this.password, 500).subscribe(result => {
+            if (result.success && result.user) {
+               // Store remember me preference (only if localStorage is available)
+               if (this.rememberMe && typeof localStorage !== 'undefined') {
+                  localStorage.setItem('rememberedUsername', this.username);
+               }
 
-      // Simulate API delay
-      setTimeout(() => {
-         const result = this.authService.login(this.username, this.password);
-
-         if (result.success && result.user) {
-            // Store remember me preference
-            if (this.rememberMe) {
-               localStorage.setItem('rememberedUsername', this.username);
+               // Redirect based on user role
+               const role = result.user.role;
+               if (role === 'admin') {
+                  this.router.navigate(['/admin']);
+               } else if (role === 'eo') {
+                  this.router.navigate(['/eo']);
+               } else if (role === 'user') {
+                  this.router.navigate(['/']);
+               }
+            } else {
+               this.errorMessage = result.message || 'Login failed. Please try again.';
             }
-
-            // Redirect based on user role
-            const role = result.user.role;
-            if (role === 'admin') {
-               this.router.navigate(['/admin']);
-            } else if (role === 'eo') {
-               this.router.navigate(['/eo']);
-            } else if (role === 'user') {
-               this.router.navigate(['/']);
-            }
-         } else {
-            this.errorMessage = result.message || 'Login failed. Please try again.';
-         }
-
-         this.isLoading = false;
-      }, 500);
+            this.isLoading = false;
+         }, err => {
+            this.errorMessage = 'Login failed. Please try again.';
+            this.isLoading = false;
+         });
    }
 
    goToSignUp() {
@@ -63,11 +62,13 @@ export class UserLoginPage {
    }
 
    ngOnInit() {
-      // Auto-fill remembered username
-      const remembered = localStorage.getItem('rememberedUsername');
-      if (remembered) {
-         this.username = remembered;
-         this.rememberMe = true;
+      // Auto-fill remembered username (only if localStorage is available)
+      if (typeof localStorage !== 'undefined') {
+         const remembered = localStorage.getItem('rememberedUsername');
+         if (remembered) {
+            this.username = remembered;
+            this.rememberMe = true;
+         }
       }
    }
 }

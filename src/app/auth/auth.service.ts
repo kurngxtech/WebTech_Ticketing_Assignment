@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { User, AuthState, UserRole } from './auth.types';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,55 +15,38 @@ export class AuthService {
 
   public authState$: Observable<AuthState> = this.authState.asObservable();
 
-  // Mock users database
-  private mockUsers: User[] = [
-    {
-      id: 'user1',
-      username: 'john_user',
-      email: 'john@example.com',
-      password: 'password123',
-      role: 'user',
-      fullName: 'John Attendee',
-      phone: '08123456789',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'eo1',
-      username: 'jane_eo',
-      email: 'jane@events.com',
-      password: 'eopass123',
-      role: 'eo',
-      fullName: 'Jane Event Organizer',
-      phone: '08198765432',
-      organizationName: 'Creative Events Inc',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'eo2',
-      username: 'bob_eo',
-      email: 'bob@events.com',
-      password: 'eopass456',
-      role: 'eo',
-      fullName: 'Bob Event Manager',
-      phone: '08156789012',
-      organizationName: 'Concert Productions Ltd',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'admin1',
-      username: 'admin',
-      email: 'admin@auditorium.com',
-      password: 'adminpass123',
-      role: 'admin',
-      fullName: 'Admin User',
-      phone: '08100000000',
-      createdAt: new Date().toISOString(),
-    },
-  ];
+  // Mock users database (moved to dev-only file when environment.useMocks === true)
+  private mockUsers: User[] = [];
+
+  // Try to load dev mock users if configured
+  private static loadDevMocks(): User[] {
+    if (!environment || !environment.useMocks) return [];
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // tslint:disable-next-line:no-var-requires
+      // @ts-ignore
+      const mock = require('../mock/mock-users');
+      return (mock && mock.MOCK_USERS) ? mock.MOCK_USERS : [];
+    } catch (e) {
+      return [];
+    }
+  }
 
   constructor() {}
 
+  // Initialize mock users after construction to avoid require at module-eval time in some build setups
+  ngOnInit?(): void {
+    // noop - placeholder if needed
+  }
+
+  private ensureMockLoaded() {
+    if (this.mockUsers.length === 0 && environment.useMocks) {
+      this.mockUsers = AuthService.loadDevMocks();
+    }
+  }
+
   login(username: string, password: string): { success: boolean; message: string; user?: User } {
+    this.ensureMockLoaded();
     const user = this.mockUsers.find(
       u => (u.username === username || u.email === username) && u.password === password
     );
@@ -78,6 +63,13 @@ export class AuthService {
 
     this.authState.next(authData);
     return { success: true, message: 'Login successful', user };
+  }
+
+  // Async helpers that simulate network latency when using dev mocks. Use these from components
+  // if you want Observable-based flows instead of synchronous returns.
+  loginAsync(username: string, password: string, ms = 300) {
+    const result = this.login(username, password);
+    return of(result).pipe(delay(ms));
   }
 
   registerEventOrganizer(data: {
@@ -116,6 +108,11 @@ export class AuthService {
     return { success: true, message: 'Event organizer registered successfully', user: newUser };
   }
 
+  registerEventOrganizerAsync(data: { fullName: string; email: string; phone: string; organizationName: string }, ms = 300) {
+    const result = this.registerEventOrganizer(data);
+    return of(result).pipe(delay(ms));
+  }
+
   registerUser(data: {
     fullName: string;
     email: string;
@@ -141,6 +138,11 @@ export class AuthService {
 
     this.mockUsers.push(newUser);
     return { success: true, message: 'User registered successfully', user: newUser };
+  }
+
+  registerUserAsync(data: { fullName: string; email: string; phone: string; password: string }, ms = 300) {
+    const result = this.registerUser(data);
+    return of(result).pipe(delay(ms));
   }
 
   logout(): void {
@@ -174,5 +176,10 @@ export class AuthService {
 
     user.password = newPassword;
     return { success: true, message: 'Password changed successfully' };
+  }
+
+  changePasswordAsync(userId: string, oldPassword: string, newPassword: string, ms = 300) {
+    const result = this.changePassword(userId, oldPassword, newPassword);
+    return of(result).pipe(delay(ms));
   }
 }
