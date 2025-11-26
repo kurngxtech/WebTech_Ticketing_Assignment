@@ -12,7 +12,7 @@ h1 {
 }
 
 .max-vh {
-   height: 70vh;
+   height: 80vh;
 }
 
 .cf-width {
@@ -32,8 +32,11 @@ h1 {
    height: 70%;
 }
 
-.h-footer-copyRight {
-   height: 10%;
+.footer-custom {
+   height: 7rem;
+   color: white;
+   width: 65%;
+   border-top: dashed 2px rgb(115, 115, 115);
 }
 
 .border-footer {

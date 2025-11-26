@@ -73,7 +73,7 @@ h3 {
 }
 
 ul li a span {
-   font-size: 23px;
+   font-size: 20px;
 }
 
 ul li a:hover {
@@ -150,9 +150,9 @@ img {
    position: relative;
    width: 100%;
    flex: 0 0 auto;
-   min-width: 265px;
+   min-width: 205px;
    /* increase min width for more visible search */
-   max-width: 50%;
+   max-width: 0%;
 }
 
 
