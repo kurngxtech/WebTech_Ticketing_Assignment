@@ -20,6 +20,13 @@ h3 {
    opacity: 1;
 }
 
+.title-wrap {
+   display: flex;
+   align-items: center;
+   justify-content: start;
+   padding-left: 3rem;
+}
+
 /* Text default tetap putih terang */
 .nav-text {
    --gold: rgba(254, 183, 6, 1);
@@ -33,7 +40,7 @@ h3 {
 .underline-header {
    border-bottom: solid 3px #feb706;
    position: relative;
-   overflow: hidden;
+   overflow: visible;
 }
 
 /* Spotlight radial gradient putih */
@@ -65,7 +72,8 @@ h3 {
 }
 
 .h-header-page {
-   height: 10vh;
+   min-height: 10vh;
+   height: auto;
 }
 
 .default-font {
@@ -73,7 +81,7 @@ h3 {
 }
 
 ul li a span {
-   font-size: 20px;
+   font-size: 1.2em;
 }
 
 ul li a:hover {
@@ -83,7 +91,7 @@ ul li a:hover {
 /* styling search bar */
 
 .p-sb {
-   padding-bottom: 8%;
+   padding-bottom: 5%;
 }
 
 .search-bar:focus {
@@ -112,9 +120,21 @@ img {
    filter: brightness(0) saturate(100%) invert(78%) sepia(74%) saturate(2200%) hue-rotate(-2deg) brightness(104%) contrast(96%);
 }
 
+.p-search-button {
+   padding-bottom: 1rem;
+}
+
+
 /* styling button login/sign up */
 .button size {
    padding: 5px 20px;
+}
+
+.buttonAccount {
+   display: flex;
+   justify-content: end;
+   align-items: center;
+   padding-right: 0.2%;
 }
 
 /* adri */
@@ -155,8 +175,6 @@ img {
    max-width: 0%;
 }
 
-
-
 li a:hover {
    cursor: pointer;
 }
@@ -192,4 +210,77 @@ li a:hover {
    color: var(--text);
    font-size: 16px;
    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 2560px) {
+   .h-header-page {
+      min-height: 130px;
+   }
+
+   .p-wrap-search {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 1rem;
+      max-width: 18rem;
+   }
+
+   .buttonAccount {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      padding: 0 0.6rem 0 0;
+   }
+}
+
+
+@media (max-width: 1399px) {
+   .h-header-page {
+      padding-bottom: 1.5rem;
+      padding-top: 1.5rem;
+      min-height: 120px;
+   }
+
+   .title-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0;
+   }
+
+   .buttonAccount {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0 0 0;
+   }
+
+   .p-sb {
+      padding: 0;
+   }
+
+   .p-search-button {
+      padding-top: 1rem;
+   }
+
+   .p-wrap-search {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+   }
+
+}
+
+@media (max-width: 767px) {
+   .p-wrap-search {
+      align-items: end;
+      padding-bottom: 0;
+   }
+
+   .title-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      padding: 0 0 0.5rem 1rem;
+   }
 }

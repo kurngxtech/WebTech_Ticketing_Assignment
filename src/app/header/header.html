@@ -1,57 +1,54 @@
 <div class="default-font g-0 row container-fluid h-header-page bg-black underline-header">
    <!-- Logo Web / Judul -->
-   <div class="col-3 d-flex align-items-center justify-content-start">
-      <div class="ps-5 pt-3">
+   <div class="col-sm-4 col-md-12 col-xxl-3 title-wrap">
+      <div class="title">
          <h3>CONCERT TICKET</h3>
       </div>
    </div>
 
    <!-- list navbar, search bar, login -->
-   <div class="row col-9 p-0 g-0">
-
-      <!-- List -->
-      <div class="col-8 p-0">
-         <div class="h-100 gap-3 pb-3 d-flex justify-content-center align-items-end">
-            <ul class="d-flex list-group list-group-horizontal text-white">
-               <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">HOME</span></a></li>
-               <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">TICKETS</span></a></li>
-               <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">FAQ</span></a></li>
-               <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">CONTACT US</span></a></li>
-               <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">ABOUT</span></a></li>
-            </ul>
-         </div>
+   <!-- List -->
+   <div class="col-12 col-xxl-6 p-0 g-0 d-none d-md-block">
+      <div class="h-100 gap-3 d-flex justify-content-center align-items-center">
+         <ul class="d-flex list-group list-group-horizontal text-white">
+            <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">HOME</span></a></li>
+            <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">TICKETS</span></a></li>
+            <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">FAQ</span></a></li>
+            <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">CONTACT US</span></a></li>
+            <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">ABOUT</span></a></li>
+         </ul>
       </div>
+   </div>
 
-      <!-- Search Bar -->
-      <div class="col-2 d-flex align-items-end justify-content-start">
-         <div class="search-form p-sb" role="search">
-            <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
-               placeholder="Search events..." aria-label="Search events" autocomplete="off" />
-            <button class="search-btn pb-3" type="button" (click)="onSearchInput()">
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-                  viewBox="0 0 16 16">
-                  <path
-                     d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-               </svg>
-            </button>
-            @if (query.trim().length && suggestions.length) {
-            <ul class="search-suggestions">
-               @for (s of suggestions; track s) {
-               <li (click)="selectSuggestion(s)" tabindex="0">
-                  {{ s.title }}
-               </li>
-               }
-            </ul>
+   <!-- Search Bar -->
+   <div class="col-sm-4 col-md-12 col-xxl-2 p-wrap-search">
+      <div class="search-form p-sb" role="search">
+         <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
+            placeholder="Search events..." aria-label="Search events" autocomplete="off" />
+         <button class="search-btn p-search-button" type="button" (click)="onSearchInput()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+               viewBox="0 0 16 16">
+               <path
+                  d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+            </svg>
+         </button>
+         @if (query.trim().length && suggestions.length) {
+         <ul class="search-suggestions">
+            @for (s of suggestions; track s) {
+            <li (click)="selectSuggestion(s)" tabindex="0">
+               {{ s.title }}
+            </li>
             }
-         </div>
+         </ul>
+         }
       </div>
+   </div>
 
-      <!-- Login/Sign up -->
-      <div class="col-2 p-0 d-flex align-items-end justify-content-end">
-         <div class=" pe-3 p-sb">
-            <button type="button" class="btn btn-warning button-size me-2">Login</button>
-            <button type="button" class="btn btn-outline-warning button-size">Sign up</button>
-         </div>
+   <!-- Login/Sign up -->
+   <div class="col-sm-4 col-md-12 col-xxl-1 g-0 buttonAccount">
+      <div class="">
+         <button type="button" class="btn btn-warning button-size me-2">Login</button>
+         <button type="button" class="btn btn-outline-warning button-size">Sign up</button>
       </div>
    </div>
 </div>
