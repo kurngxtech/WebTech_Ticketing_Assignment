@@ -10,7 +10,7 @@ import { User } from '../../auth/auth.types';
 @Component({
    standalone: true,
    selector: 'app-header',
-   imports: [CommonModule, FormsModule, RouterLink],
+   imports: [CommonModule, FormsModule],
    templateUrl: './header.html',
    styleUrls: ['./header.css'],
 })
@@ -24,7 +24,7 @@ export class Header implements OnInit {
       private dataSrv: DataEventService,
       private authService: AuthService,
       private router: Router
-   ) {}
+   ) { }
 
    ngOnInit(): void {
       this.dataSrv.searchResults$.subscribe((list) => {

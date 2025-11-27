@@ -179,22 +179,6 @@ li a:hover {
    cursor: pointer;
 }
 
-/* User navigation on the right */
-.user-nav {
-   display: flex;
-   align-items: center;
-   gap: 12px;
-   flex-wrap: wrap;
-   justify-content: flex-end;
-}
-
-.user-name {
-   color: rgba(254, 183, 6, 1);
-   font-weight: 600;
-   font-size: 0.95rem;
-   white-space: nowrap;
-}
-
 .search-input {
    width: 100%;
    padding: 8px 20px 8px 8px;
@@ -228,42 +212,17 @@ li a:hover {
    cursor: pointer;
 }
 
-/* responsive layout */
-@media (max-width: 1024px) {
-   .header-row {
-      gap: 32px;
-   }
-   
-   .search-form {
-      width: 200px;
-   }
-}
-
-@media (max-width: 900px) {
-   .custom-header .container {
-      padding: 0 12px;
+/* Responsive */
+@media (max-width: 2560px) {
+   .h-header-page {
+      min-height: 90px;
    }
 
-   .header-row {
-      flex-direction: column;
-      gap: 8px;
-      align-items: stretch;
-   }
-
-   .brand {
-      text-align: center;
-      font-size: 16px;
-   }
-
-   .center-nav {
-      width: 100%;
-      flex: 1;
-   }
-
-   .center-nav .nav-list {
+   .p-wrap-search {
+      display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      padding-top: 1rem;
    }
 
    .buttonAccount {
@@ -272,76 +231,31 @@ li a:hover {
       justify-content: end;
       padding: 0 1rem 0 0;
    }
-   
-   .user-nav {
+}
+
+
+@media (max-width: 1399px) {
+   .h-header-page {
+      padding-bottom: 1.5rem;
+      padding-top: 1.5rem;
+      min-height: 120px;
+   }
+
+   .title-wrap {
+      display: flex;
       justify-content: center;
-      width: 100%;
-      gap: 8px;
-   }
-   
-   .user-name {
-      font-size: 0.85rem;
-   }
-}
-
-@media (max-width: 600px) {
-   .brand {
-      font-size: 14px;
-      margin-right: 4px;
-      margin-left: 8px;
+      padding: 0;
    }
 
-   .search-input {
-      font-size: 12px;
-      padding: 6px 32px 6px 10px;
+   .buttonAccount {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0 0 0;
    }
 
-   .nav-list {
-      gap: 6px;
-   }
-   
-   .nav-link {
-      padding: 4px 4px;
-   }
-   
-   .nav-text {
-      font-size: 0.85rem;
-   }
-
-   .custom-header .container {
-      padding: 0 8px;
-   }
-   
-   .center-nav .nav-list {
-      gap: 4px;
-   }
-}
-
-@media (max-width: 480px) {
-   .brand {
-      font-size: 12px;
-      margin-left: 4px;
-   }
-
-   .search-input {
-      font-size: 11px;
-      padding: 5px 28px 5px 8px;
-   }
-
-   .nav-list {
-      gap: 4px;
-   }
-
-   .custom-header .container {
-      padding: 0 6px;
-   }
-   
-   .user-name {
-      font-size: 0.75rem;
-   }
-   
-   .search-form {
-      width: calc(100% - 80px);
+   .p-sb {
+      padding: 0;
    }
 
    .p-search-button {
@@ -353,7 +267,7 @@ li a:hover {
       align-items: center;
       justify-content: center;
    }
-   
+
 
 }
 
