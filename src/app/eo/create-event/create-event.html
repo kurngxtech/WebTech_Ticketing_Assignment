@@ -1,0 +1,261 @@
+<div class="create-event-container">
+  <div class="event-header">
+    <h1>{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h1>
+    <a routerLink="/eo" class="btn-back">← Back to Dashboard</a>
+  </div>
+
+  <!-- Progress Stepper -->
+  <div class="stepper">
+    <div class="stepper-item" [class.active]="currentStep === 'basic'" (click)="goToStep('basic')">
+      <div class="stepper-number">1</div>
+      <p>Basic Info</p>
+    </div>
+    <div class="stepper-line"></div>
+    <div class="stepper-item" [class.active]="currentStep === 'tickets'" (click)="goToStep('tickets')">
+      <div class="stepper-number">2</div>
+      <p>Tickets</p>
+    </div>
+    <div class="stepper-line"></div>
+    <div class="stepper-item" [class.active]="currentStep === 'seating'" (click)="goToStep('seating')">
+      <div class="stepper-number">3</div>
+      <p>Seating</p>
+    </div>
+    <div class="stepper-line"></div>
+    <div class="stepper-item" [class.active]="currentStep === 'promo'" (click)="goToStep('promo')">
+      <div class="stepper-number">4</div>
+      <p>Promo</p>
+    </div>
+    <div class="stepper-line"></div>
+    <div class="stepper-item" [class.active]="currentStep === 'review'" (click)="goToStep('review')">
+      <div class="stepper-number">5</div>
+      <p>Review</p>
+    </div>
+  </div>
+
+  <!-- Step 1: Basic Information -->
+  <div *ngIf="currentStep === 'basic'" class="form-section">
+    <h2>Event Basic Information</h2>
+    <form [formGroup]="basicForm">
+      <div class="form-group">
+        <label>Event Title *</label>
+        <input type="text" class="form-control" formControlName="title" placeholder="Enter event title">
+        <small class="error" *ngIf="basicForm.get('title')?.invalid && basicForm.get('title')?.touched">
+          Title is required (min 3 characters)
+        </small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" class="form-control" formControlName="date">
+          <small class="error" *ngIf="basicForm.get('date')?.invalid && basicForm.get('date')?.touched">
+            Date is required
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Time *</label>
+          <input type="time" class="form-control" formControlName="time">
+          <small class="error" *ngIf="basicForm.get('time')?.invalid && basicForm.get('time')?.touched">
+            Time is required
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea class="form-control" formControlName="description" placeholder="Enter event description" rows="4"></textarea>
+        <small class="error" *ngIf="basicForm.get('description')?.invalid && basicForm.get('description')?.touched">
+          Description is required
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Location *</label>
+        <input type="text" class="form-control" formControlName="location" placeholder="Enter event location">
+        <small class="error" *ngIf="basicForm.get('location')?.invalid && basicForm.get('location')?.touched">
+          Location is required
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Event Image URL *</label>
+        <input type="url" class="form-control" formControlName="img" placeholder="https://example.com/image.jpg">
+        <small class="error" *ngIf="basicForm.get('img')?.invalid && basicForm.get('img')?.touched">
+          Image URL is required
+        </small>
+        <div class="image-preview" *ngIf="basicForm.get('img')?.value">
+          <img [src]="basicForm.get('img')?.value" alt="Preview" onerror="this.src='https://via.placeholder.com/200'">
+        </div>
+      </div>
+    </form>
+
+    <div class="button-group">
+      <button class="btn btn-primary" (click)="goToStep('tickets')" [disabled]="!basicForm.valid">
+        Next: Tickets →
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Ticket Setup -->
+  <div *ngIf="currentStep === 'tickets'" class="form-section">
+    <h2>Define Ticket Categories</h2>
+    
+    <form [formGroup]="ticketForm" class="ticket-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ticket Type *</label>
+          <input type="text" class="form-control" formControlName="ticketType" placeholder="e.g., VIP, Regular">
+        </div>
+        <div class="form-group">
+          <label>Price (IDR) *</label>
+          <input type="number" class="form-control" formControlName="price" placeholder="e.g., 350000">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Seats *</label>
+          <input type="number" class="form-control" formControlName="quantity" placeholder="e.g., 100">
+        </div>
+        <div class="form-group">
+          <label>Seating Section *</label>
+          <select class="form-control" formControlName="section">
+            <option *ngFor="let sec of sections" [value]="sec">{{ sec }}</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary" (click)="addTicketCategory()">
+        + Add Ticket Category
+      </button>
+    </form>
+
+    <!-- Ticket Categories List -->
+    <div class="ticket-list" *ngIf="ticketCategories.length > 0">
+      <h3>Added Ticket Categories:</h3>
+      <div class="ticket-item" *ngFor="let ticket of ticketCategories; let i = index">
+        <div class="ticket-info">
+          <p><strong>{{ ticket.type }}</strong></p>
+          <p>{{ formatPrice(ticket.price) }} × {{ ticket.total }} seats ({{ ticket.section }})</p>
+        </div>
+        <button class="btn-icon-small btn-danger" (click)="removeTicketCategory(i)">🗑️</button>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-outline" (click)="goToStep('basic')">← Back</button>
+      <button class="btn btn-primary" (click)="goToStep('seating')" [disabled]="ticketCategories.length === 0">
+        Next: Seating →
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 3: Seating Layout -->
+  <div *ngIf="currentStep === 'seating'" class="form-section">
+    <h2>Seating Layout Configuration</h2>
+    <p class="info-text">Tickets have been assigned to seating sections based on their configuration.</p>
+
+    <div class="seating-grid">
+      <div class="seating-item" *ngFor="let ticket of ticketCategories">
+        <h3>{{ ticket.section }}</h3>
+        <p>{{ ticket.type }}</p>
+        <p>{{ ticket.total }} seats</p>
+        <p class="price">{{ formatPrice(ticket.price) }}</p>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-outline" (click)="goToStep('tickets')">← Back</button>
+      <button class="btn btn-primary" (click)="goToStep('promo')">
+        Next: Promotions →
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 4: Promotional Codes -->
+  <div *ngIf="currentStep === 'promo'" class="form-section">
+    <h2>Add Promotional Codes (Optional)</h2>
+    
+    <form [formGroup]="promoForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Promo Code</label>
+          <input type="text" class="form-control" formControlName="code" placeholder="e.g., SAVE20">
+        </div>
+        <div class="form-group">
+          <label>Discount (%)</label>
+          <input type="number" class="form-control" formControlName="discount" placeholder="e.g., 20" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label>Expiry Date</label>
+          <input type="date" class="form-control" formControlName="expiryDate">
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary" (click)="addPromotionalCode()">
+        + Add Promotional Code
+      </button>
+    </form>
+
+    <!-- Promo Codes List -->
+    <div class="promo-list" *ngIf="promotionalCodes.length > 0">
+      <h3>Added Promotional Codes:</h3>
+      <div class="promo-item" *ngFor="let promo of promotionalCodes; let i = index">
+        <div class="promo-info">
+          <p><strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off</p>
+          <p>Expires: {{ promo.expiryDate }}</p>
+        </div>
+        <button class="btn-icon-small btn-danger" (click)="removePromo(i)">🗑️</button>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-outline" (click)="goToStep('seating')">← Back</button>
+      <button class="btn btn-primary" (click)="goToStep('review')">
+        Next: Review →
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 5: Review & Confirm -->
+  <div *ngIf="currentStep === 'review'" class="form-section">
+    <h2>Review Your Event</h2>
+
+    <div class="review-section">
+      <h3>Event Details</h3>
+      <div class="review-item">
+        <strong>Title:</strong> {{ basicForm.value.title }}
+      </div>
+      <div class="review-item">
+        <strong>Date & Time:</strong> {{ basicForm.value.date }} at {{ basicForm.value.time }}
+      </div>
+      <div class="review-item">
+        <strong>Location:</strong> {{ basicForm.value.location }}
+      </div>
+      <div class="review-item">
+        <strong>Description:</strong> {{ basicForm.value.description }}
+      </div>
+    </div>
+
+    <div class="review-section">
+      <h3>Ticket Categories ({{ ticketCategories.length }})</h3>
+      <div class="review-item" *ngFor="let ticket of ticketCategories">
+        <strong>{{ ticket.type }}</strong> ({{ ticket.section }}) - {{ formatPrice(ticket.price) }} × {{ ticket.total }} seats
+      </div>
+    </div>
+
+    <div class="review-section" *ngIf="promotionalCodes.length > 0">
+      <h3>Promotional Codes ({{ promotionalCodes.length }})</h3>
+      <div class="review-item" *ngFor="let promo of promotionalCodes">
+        <strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off (expires {{ promo.expiryDate }})
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-outline" (click)="goToStep('promo')">← Back</button>
+      <button class="btn btn-success" (click)="saveEvent()">
+        {{ isEditMode ? '✓ Update Event' : '✓ Create Event' }}
+      </button>
+    </div>
+  </div>
+</div>

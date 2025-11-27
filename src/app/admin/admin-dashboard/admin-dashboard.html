@@ -1,0 +1,74 @@
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    @if (currentUser) {
+    <p class="welcome-msg">Welcome, {{ currentUser.fullName }}</p>
+    }
+  </div>
+
+  <!-- Auditorium Statistics -->
+  @if (auditoriumStats) {
+  <div class="stats-section">
+    <h2>Auditorium Statistics</h2>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <p class="stat-label">Total Events</p>
+          <p class="stat-value">{{ auditoriumStats.totalEvents }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🎫</div>
+        <div class="stat-content">
+          <p class="stat-label">Total Bookings</p>
+          <p class="stat-value">{{ auditoriumStats.totalBookings }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <p class="stat-label">Total Revenue</p>
+          <p class="stat-value">{{ formatPrice(auditoriumStats.totalRevenue) }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🪑</div>
+        <div class="stat-content">
+          <p class="stat-label">Occupancy Rate</p>
+          <p class="stat-value">{{ auditoriumStats.occupancyRate | number: '1.1-1' }}%</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Admin Actions -->
+  <div class="actions-section">
+    <h2>Admin Tools</h2>
+    <div class="action-buttons">
+      <a routerLink="/analytics" class="btn btn-primary">
+        <span class="btn-icon">📈</span> View Detailed Analytics
+      </a>
+      <button class="btn btn-secondary" (click)="loadStats()">
+        <span class="btn-icon">🔄</span> Refresh Statistics
+      </button>
+    </div>
+  </div>
+
+  <!-- Information Box -->
+  <div class="info-box">
+    <h3>System Overview</h3>
+    <ul>
+      <li>Monitor auditorium utilization and performance metrics</li>
+      <li>Track event organizers and their events</li>
+      <li>View comprehensive analytics and revenue reports</li>
+      <li>Manage user accounts and event organizer registrations</li>
+      <li>Monitor ticket sales and occupancy rates</li>
+    </ul>
+  </div>
+</div>

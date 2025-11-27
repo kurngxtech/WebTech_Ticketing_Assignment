@@ -17,6 +17,22 @@ app-root {
    padding: 20px 0;
 }
 
+/* Page transition animation */
+.router-container {
+   animation: fadeInUp 0.3s ease-in;
+}
+
+@keyframes fadeInUp {
+   from {
+      opacity: 0;
+      transform: translateY(10px);
+   }
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}
+
 /* improve spacing for small screens */
 @media (max-width: 900px) {
    .content {

@@ -1,0 +1,181 @@
+<div class="analytics-container">
+  <div class="analytics-header">
+    <h1>Analytics & Reports</h1>
+    @if (isAdmin) {
+    <p class="role-badge">📊 Admin View - Auditorium Analytics</p>
+    }
+    @if (isEO) {
+    <p class="role-badge">📈 Event Organizer Analytics</p>
+    }
+  </div>
+
+  <!-- Auditorium Stats (Admin Only) -->
+  @if (isAdmin && auditoriumStats) {
+  <div class="auditorium-stats">
+    <h2>Auditorium Overview</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <p class="stat-label">Total Events</p>
+        <p class="stat-value">{{ auditoriumStats.totalEvents }}</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎫</div>
+        <p class="stat-label">Total Bookings</p>
+        <p class="stat-value">{{ auditoriumStats.totalBookings }}</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <p class="stat-label">Total Revenue</p>
+        <p class="stat-value">{{ formatPrice(auditoriumStats.totalRevenue) }}</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🪑</div>
+        <p class="stat-label">Occupancy Rate</p>
+        <p class="stat-value">{{ auditoriumStats.occupancyRate | number: '1.1-1' }}%</p>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Event Selection -->
+  <div class="event-selector">
+    <label>Select Event for Detailed Analytics:</label>
+    <select [(ngModel)]="selectedEventId" (change)="onEventSelect()" class="form-control">
+      <option [ngValue]="null">Choose an event...</option>
+      @for (evt of events; track evt.id) {
+      <option [ngValue]="evt.id">
+        {{ evt.title }} ({{ evt.date }})
+      </option>
+      }
+    </select>
+  </div>
+
+  <!-- Event Analytics -->
+  @if (currentEvent && analytics) {
+  <div class="event-analytics">
+    <h2>{{ currentEvent.title }} - Detailed Analytics</h2>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="stat-card">
+        <p class="stat-label">Total Revenue</p>
+        <p class="stat-value">{{ formatPrice(analytics.totalRevenue) }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Tickets Sold</p>
+        <p class="stat-value">{{ analytics.totalTicketsSold }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Seats Occupied</p>
+        <p class="stat-value">{{ analytics.totalSeatsOccupied }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Occupancy Rate</p>
+        <p class="stat-value">{{ getOccupancyPercentage() }}%</p>
+      </div>
+    </div>
+
+    <!-- Ticket Breakdown -->
+    <div class="analytics-section">
+      <h3>Ticket Sales Breakdown</h3>
+      <div class="ticket-breakdown">
+        @for (ticket of currentEvent.tickets; track ticket.id) {
+        <div class="ticket-row">
+          <div class="ticket-info">
+            <p class="ticket-name">{{ ticket.type }}</p>
+            <p class="ticket-price">{{ formatPrice(ticket.price) }}</p>
+          </div>
+          <div class="ticket-stats">
+            <div class="stat">
+              <span class="label">Sold:</span>
+              <span class="value">{{ ticket.sold }} / {{ ticket.total }}</span>
+            </div>
+            <div class="stat">
+              <span class="label">Revenue:</span>
+              <span class="value">{{ formatPrice(ticket.sold * ticket.price) }}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress" [style.width.%]="(ticket.sold / ticket.total) * 100"></div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Booking Timeline -->
+    <div class="analytics-section">
+      <h3>Booking Timeline</h3>
+      <div class="period-selector">
+        <button 
+          class="btn-period" 
+          [class.active]="selectedPeriod === 'daily'"
+          (click)="selectedPeriod = 'daily'">
+          Daily
+        </button>
+        <button 
+          class="btn-period" 
+          [class.active]="selectedPeriod === 'weekly'"
+          (click)="selectedPeriod = 'weekly'">
+          Weekly
+        </button>
+        <button 
+          class="btn-period" 
+          [class.active]="selectedPeriod === 'monthly'"
+          (click)="selectedPeriod = 'monthly'">
+          Monthly
+        </button>
+      </div>
+
+      <div class="timeline">
+        @for (booking of getBookingsByPeriod(); track booking.id) {
+        <div class="timeline-item">
+          <div class="date">{{ booking.date }}</div>
+          <div class="data">
+            <p>{{ booking.count }} bookings</p>
+            <p class="revenue">{{ formatPrice(booking.revenue) }}</p>
+          </div>
+          <div class="bar" [style.width.%]="(booking.revenue / (analytics.totalRevenue || 1)) * 100"></div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Top Performer -->
+    @if (getTopTicketType()) {
+    <div class="analytics-section">
+      <h3>Top Performing Ticket Type</h3>
+      <div class="top-performer">
+        <p><strong>{{ getTopTicketType()?.type }}</strong></p>
+        <p>{{ getTopTicketType()?.sold }} sold</p>
+        <p>{{ formatPrice(getTopTicketType()?.revenue || 0) }} revenue</p>
+      </div>
+    </div>
+    }
+
+    <!-- Export Options -->
+    <div class="export-section">
+      <button class="btn btn-primary" (click)="downloadReport()">
+        📥 Download Report (TXT)
+      </button>
+      <button class="btn btn-secondary" (click)="print()">
+        🖨️ Print Report
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- Empty State -->
+  @if (events.length === 0) {
+  <div class="empty-state">
+    <p>No events found. Create an event to view analytics.</p>
+  </div>
+  }
+
+  @if (events.length > 0 && !currentEvent) {
+  <div class="empty-state">
+    <p>Select an event from the dropdown to view detailed analytics.</p>
+  </div>
+  }
+</div>

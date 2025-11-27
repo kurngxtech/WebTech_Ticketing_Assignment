@@ -3,7 +3,9 @@
       <app-header></app-header>
    </header>
 
-   <router-outlet />
+   <div class="router-container">
+      <router-outlet (activate)="onActivate()" />
+   </div>
 
    <footer *ngIf="!hideLayout">
       <app-footer></app-footer>

@@ -2,20 +2,20 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, AfterViewInit } from '@a
 import { CommonModule } from '@angular/common';
 import { register } from 'swiper/element/bundle';
 import { Router } from '@angular/router';
-import { DataEventService } from '../../data-event-service/data-event.spec';
-import { EventItem } from '../../data-event-service/data-event';
+import { DataEventService } from '../data-event-service/data-event.service';
+import { EventItem } from '../data-event-service/data-event';
 
 register();
 
 @Component({
-   selector: 'app-body',
+   selector: 'app-home',
    standalone: true,
    imports: [CommonModule],
    schemas: [CUSTOM_ELEMENTS_SCHEMA],
-   templateUrl: './body.html',
-   styleUrls: ['./body.css'],
+   templateUrl: './home.html',
+   styleUrls: ['./home.css'],
 })
-export class Body implements AfterViewInit {
+export class Home implements AfterViewInit {
    activeIndex = 0;
    slides: EventItem[] = [];
 

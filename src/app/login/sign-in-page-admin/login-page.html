@@ -7,16 +7,19 @@
       <form>
          <div class="mb-3">
             <label class="form-label text-white">Username</label>
-            <input type="text" class="form-control form-control-sm bg-dark border-dark text-white" />
+            <input #username type="text" class="form-control form-control-sm bg-dark border-dark text-white" />
          </div>
 
          <div class="mb-4">
             <label class="form-label text-white">Password</label>
-            <input type="password" class="form-control form-control-sm bg-dark border-dark text-white" />
+            <input #password type="password" class="form-control form-control-sm bg-dark border-dark text-white" />
          </div>
 
-         <button class="btn w-100" style="background-color: #feb706; color: black">
-            Login
+         <div *ngIf="errorMessage" class="mb-2 text-danger">{{ errorMessage }}</div>
+
+         <button (click)="login(username.value, password.value)" [disabled]="isLoading" class="btn w-100" style="background-color: #feb706; color: black">
+            <span *ngIf="!isLoading">Login</span>
+            <span *ngIf="isLoading">Signing in...</span>
          </button>
       </form>
    </div>

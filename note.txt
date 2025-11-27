@@ -1,0 +1,4 @@
+footer, ticketing, dashboard, eo, admin, qr generating layout
+
+
+26 nov > my booking page works
