@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
+import { PdfGeneratorService } from '../../services/pdf-generator.service';
 import { Booking, EventItem, WaitlistEntry } from '../../data-event-service/data-event';
 import * as QRCode from 'qrcode';
 
@@ -40,7 +41,8 @@ export class MyBookings implements OnInit {
 
    constructor(
       public dataEventService: DataEventService,
-      private authService: AuthService
+      private authService: AuthService,
+      private pdfGeneratorService: PdfGeneratorService
    ) {}
 
    selectedTicketType: string = '';
@@ -208,7 +210,40 @@ export class MyBookings implements OnInit {
 
    downloadTicket(bookingId: string) {
       console.log('Downloading ticket for booking:', bookingId);
-      // Implement download logic - generate PDF
+      const bookingObj = this.dataEventService.getBookingById(bookingId);
+      if (!bookingObj) {
+         console.error('Booking not found');
+         return;
+      }
+
+      const event = this.dataEventService.getEventById(bookingObj.eventId);
+      if (!event) {
+         console.error('Event not found');
+         return;
+      }
+
+      const ticketCategory = event.tickets.find(t => t.id === bookingObj.ticketCategoryId);
+      if (!ticketCategory) {
+         console.error('Ticket category not found');
+         return;
+      }
+
+      const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+      const qrCodeData = bookingObj.qrCode || `${bookingObj.id}|${ticketCategory.section || 'GENERAL'}|${event.date}`;
+
+      // Generate PDF
+      this.pdfGeneratorService.generateTicketPDF(
+         bookingObj.id,
+         qrCodeData,
+         event.title,
+         ticketCategory.type,
+         bookingObj.quantity,
+         bookingObj.totalPrice,
+         event.date,
+         userName
+      ).catch(error => {
+         console.error('Error generating PDF:', error);
+      });
    }
 
    cancelBooking(bookingId: string) {

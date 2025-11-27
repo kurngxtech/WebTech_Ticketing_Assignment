@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
+import { PdfGeneratorService } from '../../services/pdf-generator.service';
 import { EventItem, TicketCategory, Booking } from '../../data-event-service/data-event';
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
@@ -47,6 +48,7 @@ export class TicketBuy implements OnInit {
     private route: ActivatedRoute,
     private dataSrv: DataEventService,
     private authService: AuthService,
+    private pdfGeneratorService: PdfGeneratorService,
     private router: Router
   ) {}
 
@@ -83,6 +85,20 @@ export class TicketBuy implements OnInit {
     this.message = this.appliedDiscount > 0 
       ? `Coupon applied: ${this.appliedDiscount}% discount` 
       : 'Invalid coupon code';
+  }
+
+  incrementQuantity(ticketId: string, maxRemaining: number): void {
+    const currentQty = this.quantities[ticketId] || 1;
+    if (currentQty < maxRemaining) {
+      this.quantities[ticketId] = currentQty + 1;
+    }
+  }
+
+  decrementQuantity(ticketId: string): void {
+    const currentQty = this.quantities[ticketId] || 1;
+    if (currentQty > 1) {
+      this.quantities[ticketId] = currentQty - 1;
+    }
   }
 
   getRemaining(t: TicketCategory): number {
@@ -285,6 +301,31 @@ export class TicketBuy implements OnInit {
     link.href = this.qrCodeDataUrl;
     link.download = `qr_${this.currentBooking?.id}.png`;
     link.click();
+  }
+
+  /**
+   * Download complete ticket as PDF
+   */
+  downloadTicketPDF(): void {
+    if (!this.currentBooking || !this.event) return;
+
+    const ticketCategory = this.event.tickets.find(t => t.id === this.currentBooking!.ticketCategoryId);
+    if (!ticketCategory) return;
+
+    const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+    
+    this.pdfGeneratorService.generateTicketPDF(
+      this.currentBooking.id,
+      this.qrCodeData,
+      this.event.title,
+      ticketCategory.type,
+      this.currentBooking.quantity,
+      this.currentBooking.totalPrice,
+      this.event.date,
+      userName
+    ).catch(error => {
+      console.error('Error generating PDF:', error);
+    });
   }
 
   backToHome(): void {

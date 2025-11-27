@@ -44,6 +44,7 @@
    color: rgba(254, 183, 6, 1);
    letter-spacing: 0.2px;
    flex: 0 0 auto;
+   cursor: pointer;
    /* keep brand size fixed */
    margin-right: 8px;
    margin-left: 12px;
@@ -74,17 +75,17 @@
    overflow: hidden;
 }
 
-/* Text-only left->right color reveal using background-clip on the text */
+/* Text color reveal animation: white to gold, left to right */
 .nav-text {
    --gold: rgba(254, 183, 6, 1);
    display: inline-block;
-   background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 50%, var(--text) 50%, var(--text) 100%);
+   background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 50%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 100%);
    background-size: 200% 100%;
    background-position: 100% 0;
    -webkit-background-clip: text;
    background-clip: text;
    -webkit-text-fill-color: transparent;
-   transition: background-position 420ms ease, color 300ms ease;
+   transition: background-position 420ms ease;
 }
 
 .nav-link:hover .nav-text {
@@ -155,7 +156,7 @@ li a:hover {
    border-radius: 10px;
    font-size: 14px;
    background: rgba(255, 255, 255, 0.02);
-   color: var(--text);
+   color: var(--primary-yellow);
 }
 
 .search-input::placeholder {

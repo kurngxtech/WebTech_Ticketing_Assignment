@@ -83,6 +83,15 @@
               <div class="ticket-actions">
                 @if (getRemaining(t) > 0) {
                 <div class="qty-wrap">
+                  <button
+                    type="button"
+                    class="qty-spinner-btn qty-spinner-btn-minus"
+                    (click)="decrementQuantity(t.id)"
+                    title="Decrease quantity"
+                    [disabled]="(quantities[t.id] || 1) <= 1"
+                  >
+                    −
+                  </button>
                   <input
                     type="number"
                     name="qty-{{ t.id }}"
@@ -92,6 +101,15 @@
                     step="1"
                     aria-label="Quantity for {{ t.type }}"
                   />
+                  <button
+                    type="button"
+                    class="qty-spinner-btn qty-spinner-btn-plus"
+                    (click)="incrementQuantity(t.id, getRemaining(t))"
+                    title="Increase quantity"
+                    [disabled]="(quantities[t.id] || 1) >= getRemaining(t)"
+                  >
+                    +
+                  </button>
                 </div>
                 <button
                   type="button"
@@ -160,7 +178,7 @@
               </div>
             }
             <div class="summary-row total">
-              <span>Total:</span>
+              <span>Total:  </span>
               <span>{{ formattedPrice(totalCartPrice * (1 - appliedDiscount / 100)) }}</span>
             </div>
           </div>
@@ -305,8 +323,14 @@
     </div>
 
     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeQRCodeDisplay()">
+        Close
+      </button>
       <button type="button" class="btn btn-secondary" (click)="downloadQRCode()">
-        📥 Download QR Code
+        📥 Download QR Image
+      </button>
+      <button type="button" class="btn btn-primary" (click)="downloadTicketPDF()">
+        📄 Download PDF
       </button>
       @if (showContinueShopping) {
         <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">

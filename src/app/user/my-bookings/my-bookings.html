@@ -125,11 +125,17 @@
                         <div class="qr-section">
                            @if (bookingQrDataUrls.get(booking.id)) {
                               <div class="qr-code-container">
-                                 <img [src]="bookingQrDataUrls.get(booking.id)" alt="QR Code" class="qr-code" />
+                                 <img 
+                                    [src]="bookingQrDataUrls.get(booking.id)" 
+                                    alt="QR Code" 
+                                    class="qr-code"
+                                    (click)="downloadTicket(booking.id); $event.stopPropagation()"
+                                    title="Click to download as PDF"
+                                 />
                               </div>
                            } @else {
                               <div class="qr-placeholder">
-                                 <p>No QR</p>
+                                 <p>Generating QR...</p>
                               </div>
                            }
                         </div>
