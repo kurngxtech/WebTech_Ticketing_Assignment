@@ -629,7 +629,7 @@
 /* Shopping Cart Styles */
 .tickets-grid {
    display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
    gap: 20px;
    margin-bottom: 20px;
 }
@@ -1195,5 +1195,45 @@
 
    .ticket-card .price {
       font-size: 0.95rem;
+   }
+}
+
+/* Pastikan row untuk tickets & cart konsisten */
+.ticket-page .row {
+   margin-left: 0;
+   margin-right: 0;
+}
+
+/* Shopping cart positioning fix */
+.shopping-cart-section {
+   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+   border: 1px solid rgba(254, 183, 6, 0.15);
+   border-radius: 12px;
+   padding: 20px;
+   position: sticky;
+   top: 100px;
+   max-height: calc(100vh - 140px);
+   overflow-y: auto;
+   margin-left: 0;
+   /* Pastikan tidak ada margin aneh */
+}
+
+/* Tickets list alignment */
+.tickets-list {
+   padding-right: 15px;
+   /* Beri spacing antara tickets dan cart */
+}
+
+/* Mobile responsive fix */
+@media (max-width: 768px) {
+   .tickets-list {
+      padding-right: 0;
+      margin-bottom: 20px;
+   }
+
+   .shopping-cart-section {
+      position: relative;
+      top: 0;
+      max-height: none;
    }
 }

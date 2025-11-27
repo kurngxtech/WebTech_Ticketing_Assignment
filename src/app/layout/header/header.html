@@ -57,7 +57,7 @@
 
                @if (isAuthenticated && currentUser) {
                <div class="dropdown">
-                  <button class="btn btn-link dropdown-toggle p-0 text-decoration-none text-white"
+                  <button class="btn btn-link btn-dark dropdown-toggle p-0 text-decoration-none text-white"
                      data-bs-toggle="dropdown">
                      <div class="d-flex align-items-center">
                         <div class="profile-avatar">
@@ -72,7 +72,7 @@
                      </div>
                   </button>
 
-                  <ul class="dropdown-menu dropdown-menu-end">
+                  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                      @if (currentUser.role === 'user') {
                      <li>
                         <a class="dropdown-item" routerLink="/my-bookings">

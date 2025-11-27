@@ -12,7 +12,10 @@ h1 {
 }
 
 .max-vh {
-   height: 80vh;
+   height: auto;
+   /* Ganti dari 80vh */
+   min-height: 60vh;
+   /* Beri minimum height */
 }
 
 .w-content {
@@ -50,32 +53,35 @@ h1 {
 .footer-gradient {
    position: relative;
    overflow: hidden;
+   isolation: isolate;
+   /* Tambahkan ini */
 }
 
-/* Spotlight radial gradient */
 .footer-gradient::before {
    content: "";
    position: absolute;
    inset: 0;
    pointer-events: none;
-
-   background: radial-gradient(ellipse 90% 80% at center,
-         rgba(255, 255, 255, 0.30) 0%,
-         /* Cahaya paling terang */
-         rgba(255, 255, 255, 0.18) 30%,
-         /* Sedang */
-         rgba(255, 255, 255, 0.06) 55%,
-         /* Redup */
-         rgba(0, 0, 0, 1) 100%
-         /* Hilang ke hitam */
-      );
-
-   opacity: 1;
-   z-index: 0;
+   background: radial-gradient(ellipse 90% 60% at center,
+         /* Perkecil area gradient */
+         rgba(255, 255, 255, 0.25) 0%,
+         rgba(255, 255, 255, 0.15) 25%,
+         rgba(255, 255, 255, 0.05) 45%,
+         rgba(0, 0, 0, 0.8) 80%,
+         /* Lebih cepat fade ke hitam */
+         rgba(0, 0, 0, 1) 100%);
+   opacity: 0.8;
+   /* Kurangi opacity */
+   z-index: -1;
+   /* Pastikan di belakang konten */
 }
 
 /* Konten header tetap di atas spotlight */
 .footer-gradient>* {
    position: relative;
    z-index: 2;
+}
+
+.footer-container {
+   clear: both;
 }

@@ -53,48 +53,48 @@
       </div>
 
       <!-- Full width: ticket purchase section with cart -->
-      <div class="row mt-4">
+      <div class="row mt-4 mb-5">
          <!-- Left: Available Tickets -->
-         <div class="col-lg-6">
+         <div class="col-lg-12">
             <div class="tickets-list">
                <h3>Available Tickets</h3>
                @if (event.tickets.length) {
                <ul class="tickets-grid">
                   @for (t of event.tickets; track t.id) {
-                  <li class="ticket-card">
-                     <div class="ticket-row">
-                        <div class="ticket-info">
-                           <div class="type">{{ t.type }}</div>
-                           <div class="section-info">{{ t.section }}</div>
-                           <div class="price">
-                              @if (appliedDiscount > 0) {
-                              <span class="orig-price">{{ formattedPrice(t.price) }}</span>
-                              }
-                              <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
+                     <li class="ticket-card">
+                        <div class="ticket-row">
+                           <div class="ticket-info">
+                              <div class="type">{{ t.type }}</div>
+                              <div class="section-info">{{ t.section }}</div>
+                              <div class="price">
+                                 @if (appliedDiscount > 0) {
+                                 <span class="orig-price">{{ formattedPrice(t.price) }}</span>
+                                 }
+                                 <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
+                              </div>
+                              <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
+                                 {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
+                              </div>
                            </div>
-                           <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
-                              {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
-                           </div>
-                        </div>
 
-                        <div class="ticket-actions">
-                           @if (getRemaining(t) > 0) {
-                           <div class="qty-wrap">
-                              <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
-                                 [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
+                           <div class="ticket-actions">
+                              @if (getRemaining(t) > 0) {
+                              <div class="qty-wrap">
+                                 <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
+                                    [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
+                              </div>
+                              <button type="button" (click)="addToCart(t)" class="btn-add-cart"
+                                 title="Add to cart to buy multiple categories">
+                                 🛒 Add to Cart
+                              </button>
+                              } @else {
+                              <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
+                                 Join Waitlist
+                              </button>
+                              }
                            </div>
-                           <button type="button" (click)="addToCart(t)" class="btn-add-cart"
-                              title="Add to cart to buy multiple categories">
-                              🛒 Add to Cart
-                           </button>
-                           } @else {
-                           <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
-                              Join Waitlist
-                           </button>
-                           }
                         </div>
-                     </div>
-                  </li>
+                     </li>
                   }
                </ul>
                }
@@ -105,7 +105,7 @@
       <!-- Right: Shopping Cart -->
       <div class="col-lg-6">
          <div class="shopping-cart-section">
-            <h3>🛒 Shopping Cart</h3>
+            <h3 class="text-white">🛒 Shopping Cart</h3>
             @if (cart.length > 0) {
             <div class="cart-items">
                @for (item of cart; track item.ticket.id) {
