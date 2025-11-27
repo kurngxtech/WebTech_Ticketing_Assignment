@@ -1,87 +1,81 @@
-/* Footer styles - Black background */
-
-.custom-footer {
-  padding: 12px 0;
-  font-family: 'Rubik', sans-serif;
-  background: #000000;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  position: relative;
-  z-index: 10;
-  height: var(--footer-height);
-  margin-top: auto;
+/* Bagus Ver */
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
 }
 
-.custom-footer .container-fluid {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0 18px;
+.title-underline {
+   border-bottom: solid #feb706;
 }
 
-.custom-footer .container-fluid > .d-flex {
-  width: 100%;
+h1 {
+   color: #feb706;
 }
 
-.copyright {
-  flex: 0 0 auto;
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
+.max-vh {
+   height: 80vh;
 }
 
-.footer-nav {
-  margin-left: auto;
-  flex: 0 0 auto;
-  margin: 0;
-  padding: 0;
+.w-content {
+   width: 80%;
 }
 
-.nav-link {
-  text-decoration: none;
-  color: rgba(254, 183, 6, 1);
-  font-weight: 500;
-  font-size: 13px;
-  transition: opacity 0.2s ease;
+.h-title-footer {
+   max-height: 15%;
+   padding: 40px 0;
 }
 
-.nav-link:hover {
-  opacity: 0.8;
+/* .border-side {
+   border-right: dashed rgba(110, 110, 110, 50) ;
+} */
+
+.h-footer-content {
+   height: 70%;
 }
 
-@media (max-width: 768px) {
-  .custom-footer .container-fluid {
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    padding: 0 12px;
-  }
-  
-  .custom-footer .container-fluid > .d-flex {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .copyright {
-    text-align: center;
-    font-size: 12px;
-  }
-  
-  .footer-nav {
-    margin-left: 0;
-  }
-  
-  .nav-link {
-    font-size: 12px;
-    padding: 0 8px;
-  }
+.footer-custom {
+   height: 7rem;
+   color: white;
+   width: 65%;
+   border-top: solid 2px rgb(115, 115, 115);
 }
 
-@media (max-width: 480px) {
-  .custom-footer {
-    padding: 8px 0;
-  }
-  
-  .copyright, .nav-link {
-    font-size: 11px;
-  }
+.border-footer {
+   border-top: solid #feb706;
+}
+
+.rm-underline {
+   text-decoration: none;
+}
+
+.footer-gradient {
+   position: relative;
+   overflow: hidden;
+}
+
+/* Spotlight radial gradient */
+.footer-gradient::before {
+   content: "";
+   position: absolute;
+   inset: 0;
+   pointer-events: none;
+
+   background: radial-gradient(ellipse 90% 80% at center,
+         rgba(255, 255, 255, 0.30) 0%,
+         /* Cahaya paling terang */
+         rgba(255, 255, 255, 0.18) 30%,
+         /* Sedang */
+         rgba(255, 255, 255, 0.06) 55%,
+         /* Redup */
+         rgba(0, 0, 0, 1) 100%
+         /* Hilang ke hitam */
+      );
+
+   opacity: 1;
+   z-index: 0;
+}
+
+/* Konten header tetap di atas spotlight */
+.footer-gradient>* {
+   position: relative;
+   z-index: 2;
 }
