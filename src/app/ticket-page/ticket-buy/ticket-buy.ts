@@ -98,7 +98,7 @@ export class TicketBuy implements OnInit {
   purchase(ticket: TicketCategory, qty = 1): void {
     // Check if user is authenticated
     if (!this.isAuthenticated) {
-      this.message = '🔐 Please login or sign up to purchase tickets';
+      this.message = '🔐 Please login to purchase tickets';
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 2000);
@@ -223,9 +223,9 @@ export class TicketBuy implements OnInit {
         dark: '#000000',
         light: '#ffffff'
       }
-    }).then(url => {
+    }).then((url: string) => {
       this.qrCodeDataUrl = url;
-    }).catch(err => {
+    }).catch((err: Error) => {
       console.error('Error generating QR code:', err);
     });
     
@@ -326,7 +326,7 @@ export class TicketBuy implements OnInit {
   joinWaitlist(ticket: TicketCategory): void {
     // Check if user is authenticated
     if (!this.isAuthenticated) {
-      this.message = '🔐 Please login or sign up to join waitlist';
+      this.message = '🔐 Please login to join waitlist';
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 2000);

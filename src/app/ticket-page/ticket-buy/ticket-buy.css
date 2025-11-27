@@ -149,7 +149,6 @@
 .button-group { display:flex; gap:12px; justify-content:center; }
 
 .btn-login { background:#111827; color:#fff; padding:8px 18px; border-radius:8px; border:none; }
-.btn-signup { background:#fff; color:#111827; padding:8px 18px; border-radius:8px; border:2px solid #111827; }
 
 .tickets-list h3 {
   color: #fff;
@@ -1091,7 +1090,7 @@
     flex-direction: column;
   }
   
-  .btn-login, .btn-signup {
+  .btn-login {
     width: 100%;
     padding: 10px 12px;
   }

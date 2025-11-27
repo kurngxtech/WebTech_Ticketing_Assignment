@@ -119,7 +119,7 @@ export class MyBookings implements OnInit {
 
       // Generate QR image for display if booking has qrCode
       if (bookingObj.qrCode) {
-         QRCode.toDataURL(bookingObj.qrCode, { width: 300 }).then(url => {
+         QRCode.toDataURL(bookingObj.qrCode, { width: 300 }).then((url: string) => {
             this.selectedQrDataUrl = url;
          }).catch(() => this.selectedQrDataUrl = '');
       } else {

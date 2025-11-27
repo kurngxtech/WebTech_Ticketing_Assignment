@@ -41,10 +41,6 @@ export class Header implements OnInit {
       this.router.navigate(['/login']);
    }
 
-   goToSignUp(): void {
-      this.router.navigate(['/sign-up']);
-   }
-
    goToDashboard(): void {
       if (this.currentUser?.role === 'eo') {
          this.router.navigate(['/eo']);

@@ -57,8 +57,8 @@ export class UserLoginPage {
          });
    }
 
-   goToSignUp() {
-      this.router.navigate(['/sign-up']);
+   goToHome() {
+      this.router.navigate(['/']);
    }
 
    ngOnInit() {
