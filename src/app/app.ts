@@ -4,12 +4,8 @@ import { filter } from 'rxjs/operators';
 import { Header } from "./layout/header/header";
 import { Footer } from "./layout/footer/footer";
 import { CommonModule } from '@angular/common';
-<<<<<<< HEAD
-import { UserLoginPage } from "./login/sign-in-page-user/user-login-page";
-=======
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, inject } from '@angular/core';
->>>>>>> origin/adri/pages/home
 
 @Component({
    selector: 'app-root',

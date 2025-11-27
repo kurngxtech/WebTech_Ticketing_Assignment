@@ -1,100 +1,104 @@
 @if (!isAuthenticated) {
-<section class="ticket-page container-fluid px-4 py-4">
-   <div class="auth-required-message">
-      <div class="message-box">
-         <h2>🔐 Login Required</h2>
-         <p>You need to login or sign up to purchase tickets</p>
-         <div class="button-group">
-            <button type="button" class="btn btn-login" routerLink="/login">Login</button>
-            <button type="button" class="btn btn-signup" routerLink="/sign-up">Sign Up</button>
+   <section class="ticket-page container-fluid px-4 py-4">
+      <div class="auth-required-message">
+         <div class="message-box">
+            <h2>🔐 Login Required</h2>
+            <p>You need to login or sign up to purchase tickets</p>
+            <div class="button-group">
+               <button type="button" class="btn btn-login" routerLink="/login">Login</button>
+               <button type="button" class="btn btn-signup" routerLink="/sign-up">Sign Up</button>
+            </div>
          </div>
       </div>
-   </div>
-</section>
+   </section>
 } @else if (event) {
-<section class="ticket-page container-fluid px-4 py-4">
-   <div class="row h-100">
-      <!-- Left column: scaled image (50%) -->
-      <div class="col-lg-6 col-md-12">
-         <aside class="left">
-            <div class="frame">
-               <img [src]="event.img" [alt]="event.title" />
-            </div>
-         </aside>
+   <section class="ticket-page container-fluid px-4 py-4">
+      <div class="row h-100">
+         <!-- Left column: scaled image (50%) -->
+         <div class="col-lg-6 col-md-12">
+            <aside class="left">
+               <div class="frame">
+                  <img [src]="event.img" [alt]="event.title" />
+               </div>
+            </aside>
+         </div>
+
+         <!-- Right column: event details (50%) -->
+         <div class="col-lg-6 col-md-12">
+            <main class="right">
+               <h2 class="title">{{ event.title }}</h2>
+
+               <!-- Description fills the space -->
+               <p class="desc">{{ event.description }}</p>
+
+               <!-- Metadata at bottom of right pane -->
+               <div class="meta">
+                  <div><strong>Date:</strong> {{ event.date }}</div>
+                  <div><strong>Time:</strong> {{ event.time }}</div>
+                  <div><strong>Location:</strong> {{ event.location }}</div>
+                  <div><strong>Organizer:</strong> {{ event.organizer }}</div>
+               </div>
+
+               <!-- Coupon section at the bottom -->
+               <div class="coupon mt-auto">
+                  <input name="coupon" [(ngModel)]="couponCode" placeholder="Enter coupon code (e.g SAVE20)"
+                     aria-label="Coupon code" />
+                  <button type="button" (click)="applyCoupon()">Apply</button>
+                  @if (message) {
+                  <div class="coupon-msg" [class.success]="message.includes('✓')">{{ message }}</div>
+                  }
+               </div>
+            </main>
+         </div>
       </div>
 
-      <!-- Right column: event details (50%) -->
-      <div class="col-lg-6 col-md-12">
-         <main class="right">
-            <h2 class="title">{{ event.title }}</h2>
+      <!-- Full width: ticket purchase section with cart -->
+      <div class="row mt-4">
+         <!-- Left: Available Tickets -->
+         <div class="col-lg-6">
+            <div class="tickets-list">
+               <h3>Available Tickets</h3>
+               @if (event.tickets.length) {
+               <ul class="tickets-grid">
+                  @for (t of event.tickets; track t.id) {
+                  <li class="ticket-card">
+                     <div class="ticket-row">
+                        <div class="ticket-info">
+                           <div class="type">{{ t.type }}</div>
+                           <div class="section-info">{{ t.section }}</div>
+                           <div class="price">
+                              @if (appliedDiscount > 0) {
+                              <span class="orig-price">{{ formattedPrice(t.price) }}</span>
+                              }
+                              <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
+                           </div>
+                           <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
+                              {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
+                           </div>
+                        </div>
 
-            <!-- Description fills the space -->
-            <p class="desc">{{ event.description }}</p>
-
-            <!-- Metadata at bottom of right pane -->
-            <div class="meta">
-               <div><strong>Date:</strong> {{ event.date }}</div>
-               <div><strong>Time:</strong> {{ event.time }}</div>
-               <div><strong>Location:</strong> {{ event.location }}</div>
-               <div><strong>Organizer:</strong> {{ event.organizer }}</div>
-            </div>
-
-            <!-- Coupon section at the bottom -->
-            <div class="coupon mt-auto">
-               <input name="coupon" [(ngModel)]="couponCode" placeholder="Enter coupon code (e.g SAVE20)"
-                  aria-label="Coupon code" />
-               <button type="button" (click)="applyCoupon()">Apply</button>
-               @if (message) {
-               <div class="coupon-msg" [class.success]="message.includes('✓')">{{ message }}</div>
+                        <div class="ticket-actions">
+                           @if (getRemaining(t) > 0) {
+                           <div class="qty-wrap">
+                              <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
+                                 [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
+                           </div>
+                           <button type="button" (click)="addToCart(t)" class="btn-add-cart"
+                              title="Add to cart to buy multiple categories">
+                              🛒 Add to Cart
+                           </button>
+                           } @else {
+                           <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
+                              Join Waitlist
+                           </button>
+                           }
+                        </div>
+                     </div>
+                  </li>
+                  }
+               </ul>
                }
             </div>
-         </main>
-      </div>
-   </div>
-
-   <!-- Full width: ticket purchase section with cart -->
-   <div class="row mt-4">
-      <!-- Left: Available Tickets -->
-      <div class="col-lg-6">
-         <div class="tickets-list">
-            <h3>Available Tickets</h3>
-            @if (event.tickets.length) {
-            <ul class="tickets-grid">
-               @for (t of event.tickets; track t.id) {
-               <li class="ticket-card">
-                  <div class="ticket-row">
-                     <div class="ticket-info">
-                        <div class="type">{{ t.type }}</div>
-                        <div class="section-info">{{ t.section }}</div>
-                        <div class="price">
-                           @if (appliedDiscount > 0) {
-                           <span class="orig-price">{{ formattedPrice(t.price) }}</span>
-                           }
-                           <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
-                        </div>
-                        <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
-                           {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
-                        </div>
-                     </div>
-
-                     <div class="ticket-actions">
-                        @if (getRemaining(t) > 0) {
-                        <div class="qty-wrap">
-                           <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
-                              [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
-                        </div>
-                        <button type="button" (click)="addToCart(t)" class="btn-add-cart"
-                           title="Add to cart to buy multiple categories">
-                           🛒 Add to Cart
-                        </button>
-                        } @else {
-                        <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
-                           Join Waitlist
-                        </button>
-                        }
-                     </div>
-                  </div>
-                  </aside>
          </div>
       </div>
 
@@ -149,142 +153,141 @@
             }
          </div>
       </div>
-   </div>
-</section>
+   </section>
 }
 
 <!-- Payment Modal -->
 @if (showPaymentModal) {
-<div class="modal-overlay">
-   <div class="modal-content payment-modal">
-      <div class="modal-header">
-         <h2>Complete Payment</h2>
-         <button class="close-btn" (click)="cancelBooking()">×</button>
-      </div>
+   <div class="modal-overlay">
+      <div class="modal-content payment-modal">
+         <div class="modal-header">
+            <h2>Complete Payment</h2>
+            <button class="close-btn" (click)="cancelBooking()">×</button>
+         </div>
 
-      <div class="modal-body">
-         <!-- Order Summary -->
-         <div class="order-summary">
-            <h3>Order Summary</h3>
-            @if (event) {
-            <div class="summary-item">
-               <span>Event:</span>
-               <strong>{{ event.title }}</strong>
-            </div>
-            }
-            @if (cart.length > 0) {
-            <div class="cart-items-summary">
-               @for (item of cart; track item.ticket.id) {
+         <div class="modal-body">
+            <!-- Order Summary -->
+            <div class="order-summary">
+               <h3>Order Summary</h3>
+               @if (event) {
                <div class="summary-item">
-                  <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
-                  <strong>{{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}</strong>
+                  <span>Event:</span>
+                  <strong>{{ event.title }}</strong>
                </div>
                }
-            </div>
-            } @else if (currentBooking) {
-            <div class="summary-item">
-               <span>Booking ID:</span>
-               <strong>{{ currentBooking.id }}</strong>
-            </div>
-            <div class="summary-item">
-               <span>Price per Ticket:</span>
-               <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
-            </div>
-            <div class="summary-item">
-               <span>Quantity:</span>
-               <strong>{{ currentBooking.quantity }}</strong>
-            </div>
-            }
-            @if (appliedDiscount > 0) {
-            <div class="summary-item discount">
-               <span>Discount ({{ appliedDiscount }}%):</span>
-               <strong>-{{ formattedPrice((totalCartPrice > 0 ? totalCartPrice : (currentBooking?.totalPrice || 0)) *
-                  appliedDiscount / 100) }}</strong>
-            </div>
-            }
-            <div class="summary-item total">
-               <span>Total Amount:</span>
-               <strong>{{ formattedPrice(totalCartPrice > 0 ? totalCartPrice * (1 - appliedDiscount / 100) :
-                  (currentBooking?.totalPrice || 0)) }}</strong>
-            </div>
-         </div>
-
-         <!-- Payment Method Selection -->
-         <div class="payment-methods">
-            <h3>Select Payment Method</h3>
-            <div class="methods-grid">
-               @for (method of paymentMethods; track method.id) {
-               <button type="button" class="method-btn" [class.active]="paymentMethod === method.id"
-                  (click)="paymentMethod = method.id">
-                  {{ method.name }}
-               </button>
+               @if (cart.length > 0) {
+               <div class="cart-items-summary">
+                  @for (item of cart; track item.ticket.id) {
+                  <div class="summary-item">
+                     <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
+                     <strong>{{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}</strong>
+                  </div>
+                  }
+               </div>
+               } @else if (currentBooking) {
+               <div class="summary-item">
+                  <span>Booking ID:</span>
+                  <strong>{{ currentBooking.id }}</strong>
+               </div>
+               <div class="summary-item">
+                  <span>Price per Ticket:</span>
+                  <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
+               </div>
+               <div class="summary-item">
+                  <span>Quantity:</span>
+                  <strong>{{ currentBooking.quantity }}</strong>
+               </div>
                }
+               @if (appliedDiscount > 0) {
+               <div class="summary-item discount">
+                  <span>Discount ({{ appliedDiscount }}%):</span>
+                  <strong>-{{ formattedPrice((totalCartPrice > 0 ? totalCartPrice : (currentBooking?.totalPrice || 0)) *
+                     appliedDiscount / 100) }}</strong>
+               </div>
+               }
+               <div class="summary-item total">
+                  <span>Total Amount:</span>
+                  <strong>{{ formattedPrice(totalCartPrice > 0 ? totalCartPrice * (1 - appliedDiscount / 100) :
+                     (currentBooking?.totalPrice || 0)) }}</strong>
+               </div>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="payment-methods">
+               <h3>Select Payment Method</h3>
+               <div class="methods-grid">
+                  @for (method of paymentMethods; track method.id) {
+                  <button type="button" class="method-btn" [class.active]="paymentMethod === method.id"
+                     (click)="paymentMethod = method.id">
+                     {{ method.name }}
+                  </button>
+                  }
+               </div>
             </div>
          </div>
-      </div>
 
-      <div class="modal-footer">
-         <button type="button" class="btn btn-secondary" (click)="cancelBooking()">
-            Cancel
-         </button>
-         <button type="button" class="btn btn-primary" (click)="processPayment()" [disabled]="!paymentMethod">
-            Complete Payment
-         </button>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cancelBooking()">
+               Cancel
+            </button>
+            <button type="button" class="btn btn-primary" (click)="processPayment()" [disabled]="!paymentMethod">
+               Complete Payment
+            </button>
+         </div>
       </div>
    </div>
-</div>
 }
 
 <!-- QR Code Display Modal -->
 @if (showQRCodeDisplay) {
-<div class="modal-overlay">
-   <div class="modal-content qr-display-modal">
-      <div class="modal-header">
-         <h2>✓ Your Booking Confirmed!</h2>
-         <button class="close-btn" (click)="closeQRCodeDisplay()">×</button>
-      </div>
-
-      <div class="modal-body">
-         <div class="confirmation-message">
-            <p>Your booking has been confirmed. Please save or screenshot the QR code below for check-in.</p>
+   <div class="modal-overlay">
+      <div class="modal-content qr-display-modal">
+         <div class="modal-header">
+            <h2>✓ Your Booking Confirmed!</h2>
+            <button class="close-btn" (click)="closeQRCodeDisplay()">×</button>
          </div>
 
-         <!-- QR Code Display -->
-         <div class="qr-display-container">
-            <div class="qr-code-visual">
-               <img [src]="qrCodeDataUrl" alt="QR Code for check-in" />
+         <div class="modal-body">
+            <div class="confirmation-message">
+               <p>Your booking has been confirmed. Please save or screenshot the QR code below for check-in.</p>
             </div>
-            <div class="booking-details">
-               @if (currentBooking) {
-               <p><strong>Booking ID:</strong> {{ currentBooking.id }}</p>
-               <p><strong>Tickets:</strong> {{ currentBooking.quantity }}</p>
-               }
-               @if (event) {
-               <p><strong>Event:</strong> {{ event.title }}</p>
-               }
-               <p><strong>QR Data:</strong> {{ qrCodeData }}</p>
+
+            <!-- QR Code Display -->
+            <div class="qr-display-container">
+               <div class="qr-code-visual">
+                  <img [src]="qrCodeDataUrl" alt="QR Code for check-in" />
+               </div>
+               <div class="booking-details">
+                  @if (currentBooking) {
+                  <p><strong>Booking ID:</strong> {{ currentBooking.id }}</p>
+                  <p><strong>Tickets:</strong> {{ currentBooking.quantity }}</p>
+                  }
+                  @if (event) {
+                  <p><strong>Event:</strong> {{ event.title }}</p>
+                  }
+                  <p><strong>QR Data:</strong> {{ qrCodeData }}</p>
+               </div>
+            </div>
+
+            <div class="confirmation-note">
+               <p>A confirmation email with the QR code has been sent to your registered email address.</p>
             </div>
          </div>
 
-         <div class="confirmation-note">
-            <p>A confirmation email with the QR code has been sent to your registered email address.</p>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="downloadQRCode()">
+               📥 Download QR Code
+            </button>
+            @if (showContinueShopping) {
+            <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
+               Continue Shopping
+            </button>
+            } @else {
+            <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
+               View My Bookings
+            </button>
+            }
          </div>
-      </div>
-
-      <div class="modal-footer">
-         <button type="button" class="btn btn-secondary" (click)="downloadQRCode()">
-            📥 Download QR Code
-         </button>
-         @if (showContinueShopping) {
-         <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
-            Continue Shopping
-         </button>
-         } @else {
-         <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
-            View My Bookings
-         </button>
-         }
       </div>
    </div>
-</div>
 }
