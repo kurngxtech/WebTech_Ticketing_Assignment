@@ -18,7 +18,8 @@
                   <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">TICKETS</span></a></li>
                   <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">FAQ</span></a></li>
                   <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">CONTACT US</span></a></li>
-                  <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">ABOUT</span></a></li>
+                  <li class="fw-bold px-4 py-2 nav-link"><a (click)="goToAbout()"><span
+                           class="nav-text">ABOUT</span></a></li>
                </ul>
             </div>
          </div>
@@ -74,8 +75,8 @@
 
                   <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                      @if (currentUser.role === 'user') {
-                     <li>
-                        <a class="dropdown-item" routerLink="/my-bookings">
+                     <li (click)="goToMyBookings()">
+                        <a class="dropdown-item">
                            📋 My Bookings
                         </a>
                      </li>

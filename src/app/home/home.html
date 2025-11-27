@@ -16,25 +16,27 @@
       </div>
    </section>
 
-   <section class="cards-section">
-      <div class="cards-header">
-         <h2 class="text-white">Event</h2>
-      </div>
-      <div class="cards-grid">
-         @for (s of getGridSlides(); track $index; let i = $index) {
-         <div class="card" [class.highlight]="i < 3" (click)="goTo(s.index)" (keydown.enter)="goTo(s.index)"
-            role="button" tabindex="0">
-            <div class="card-media" aria-hidden="true">
-               <img [src]="s.data.img" class="card-image" alt="event" />
-               <div class="overlay">
-                  <h4 class="card-title">{{ s.data.title }}</h4>
-                  <p class="card-date">{{ s.data.date }}</p>
-                  <p class="card-location">{{ s.data.description }}</p>
-                  <div class="card-price">{{ s.data.price }}</div>
+   <div class="w-100 d-flex justify-content-center">
+      <section class="cards-section w-75">
+         <div class="cards-header">
+            <h2 class="text-white">Event</h2>
+         </div>
+         <div class="cards-grid">
+            @for (s of getGridSlides(); track $index; let i = $index) {
+            <div class="card" [class.highlight]="i < 3" (click)="goTo(s.index)" (keydown.enter)="goTo(s.index)"
+               role="button" tabindex="0">
+               <div class="card-media" aria-hidden="true">
+                  <img [src]="s.data.img" class="card-image" alt="event" />
+                  <div class="overlay">
+                     <h4 class="card-title">{{ s.data.title }}</h4>
+                     <p class="card-date">{{ s.data.date }}</p>
+                     <p class="card-location">{{ s.data.description }}</p>
+                     <div class="card-price">{{ s.data.price }}</div>
+                  </div>
                </div>
             </div>
+            }
          </div>
-         }
-      </div>
-   </section>
+      </section>
+   </div>
 </div>

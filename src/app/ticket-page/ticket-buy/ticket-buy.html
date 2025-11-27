@@ -1,4 +1,5 @@
-@if (!isAuthenticated) {
+<div class="default-bg-color">
+   @if (!isAuthenticated) {
    <section class="ticket-page container-fluid px-4 py-4">
       <div class="auth-required-message">
          <div class="message-box">
@@ -11,9 +12,9 @@
          </div>
       </div>
    </section>
-} @else if (event) {
-   <section class="ticket-page container-fluid px-4 py-4">
-      <div class="row h-100">
+   } @else if (event) {
+   <section class="ticket-page container-fluid px-4 py-4 w-75">
+      <div class=" row h-100">
          <!-- Left column: scaled image (50%) -->
          <div class="col-lg-6 col-md-12">
             <aside class="left">
@@ -61,40 +62,40 @@
                @if (event.tickets.length) {
                <ul class="tickets-grid">
                   @for (t of event.tickets; track t.id) {
-                     <li class="ticket-card">
-                        <div class="ticket-row">
-                           <div class="ticket-info">
-                              <div class="type">{{ t.type }}</div>
-                              <div class="section-info">{{ t.section }}</div>
-                              <div class="price">
-                                 @if (appliedDiscount > 0) {
-                                 <span class="orig-price">{{ formattedPrice(t.price) }}</span>
-                                 }
-                                 <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
-                              </div>
-                              <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
-                                 {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
-                              </div>
-                           </div>
-
-                           <div class="ticket-actions">
-                              @if (getRemaining(t) > 0) {
-                              <div class="qty-wrap">
-                                 <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
-                                    [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
-                              </div>
-                              <button type="button" (click)="addToCart(t)" class="btn-add-cart"
-                                 title="Add to cart to buy multiple categories">
-                                 🛒 Add to Cart
-                              </button>
-                              } @else {
-                              <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
-                                 Join Waitlist
-                              </button>
+                  <li class="ticket-card">
+                     <div class="ticket-row">
+                        <div class="ticket-info">
+                           <div class="type">{{ t.type }}</div>
+                           <div class="section-info">{{ t.section }}</div>
+                           <div class="price">
+                              @if (appliedDiscount > 0) {
+                              <span class="orig-price">{{ formattedPrice(t.price) }}</span>
                               }
+                              <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
+                           </div>
+                           <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
+                              {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
                            </div>
                         </div>
-                     </li>
+
+                        <div class="ticket-actions">
+                           @if (getRemaining(t) > 0) {
+                           <div class="qty-wrap">
+                              <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
+                                 [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
+                           </div>
+                           <button type="button" (click)="addToCart(t)" class="btn-add-cart"
+                              title="Add to cart to buy multiple categories">
+                              🛒 Add to Cart
+                           </button>
+                           } @else {
+                           <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
+                              Join Waitlist
+                           </button>
+                           }
+                        </div>
+                     </div>
+                  </li>
                   }
                </ul>
                }
@@ -103,7 +104,7 @@
       </div>
 
       <!-- Right: Shopping Cart -->
-      <div class="col-lg-6">
+      <div class="col-lg-6 text-white">
          <div class="shopping-cart-section">
             <h3 class="text-white">🛒 Shopping Cart</h3>
             @if (cart.length > 0) {
@@ -154,10 +155,10 @@
          </div>
       </div>
    </section>
-}
+   }
 
-<!-- Payment Modal -->
-@if (showPaymentModal) {
+   <!-- Payment Modal -->
+   @if (showPaymentModal) {
    <div class="modal-overlay">
       <div class="modal-content payment-modal">
          <div class="modal-header">
@@ -236,10 +237,10 @@
          </div>
       </div>
    </div>
-}
+   }
 
-<!-- QR Code Display Modal -->
-@if (showQRCodeDisplay) {
+   <!-- QR Code Display Modal -->
+   @if (showQRCodeDisplay) {
    <div class="modal-overlay">
       <div class="modal-content qr-display-modal">
          <div class="modal-header">
@@ -290,4 +291,5 @@
          </div>
       </div>
    </div>
-}
+   }
+</div>
