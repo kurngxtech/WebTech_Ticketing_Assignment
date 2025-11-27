@@ -27,10 +27,6 @@ h1 {
    padding: 40px 0;
 }
 
-/* .border-side {
-   border-right: dashed rgba(110, 110, 110, 50) ;
-} */
-
 .h-footer-content {
    height: 70%;
 }
@@ -54,7 +50,6 @@ h1 {
    position: relative;
    overflow: hidden;
    isolation: isolate;
-   /* Tambahkan ini */
 }
 
 .footer-gradient::before {
@@ -62,14 +57,13 @@ h1 {
    position: absolute;
    inset: 0;
    pointer-events: none;
-   background: radial-gradient(ellipse 90% 60% at center,
-         /* Perkecil area gradient */
+   background: radial-gradient(ellipse 110% 90% at center,
          rgba(255, 255, 255, 0.25) 0%,
          rgba(255, 255, 255, 0.15) 25%,
          rgba(255, 255, 255, 0.05) 45%,
          rgba(0, 0, 0, 0.8) 80%,
-         /* Lebih cepat fade ke hitam */
-         rgba(0, 0, 0, 1) 100%);
+         rgba(0, 0, 0, 1) 100%
+         );
    opacity: 0.8;
    /* Kurangi opacity */
    z-index: -1;

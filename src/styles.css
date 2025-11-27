@@ -89,3 +89,7 @@ body {
    position: relative;
    z-index: 30;
 }
+
+.default-bg-color {
+   background-color: #080808;
+}
