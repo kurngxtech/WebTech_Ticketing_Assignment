@@ -137,6 +137,19 @@ img {
    padding-right: 0.2%;
 }
 
+.profile-avatar {
+   width: 32px;
+   height: 32px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 0.875rem;
+}
+
+.buttonAccount .dropdown-toggle::after {
+   margin-left: 0.5rem;
+}
+
 /* adri */
 .search-suggestions {
    position: absolute;

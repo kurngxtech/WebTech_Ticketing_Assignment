@@ -36,6 +36,9 @@ export class Header implements OnInit {
          this.isAuthenticated = state.isAuthenticated;
       });
    }
+   goToHome(): void {
+      this.router.navigate(['/']);
+   }
 
    goToLogin(): void {
       this.router.navigate(['/login']);
