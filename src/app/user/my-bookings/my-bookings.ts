@@ -27,7 +27,7 @@ interface BookingDisplay {
 export class MyBookings implements OnInit {
    bookings: BookingDisplay[] = [];
    filteredBookings: BookingDisplay[] = [];
-   filterStatus: 'all' | 'confirmed' | 'pending' | 'cancelled' = 'all';
+   filterStatus: 'all' | 'confirmed' | 'pending' | 'cancelled' | 'waitlist' = 'all';
    isLoading = true;
    currentUserId: string | null = null;
    selectedBookingId: string | null = null;
@@ -35,6 +35,8 @@ export class MyBookings implements OnInit {
    selectedEvent: EventItem | null = null;
    selectedQrDataUrl: string = '';
    waitlistEntries: WaitlistEntry[] = [];
+   isSortMenuOpen = false;
+   bookingQrDataUrls: Map<string, string> = new Map();
 
    constructor(
       public dataEventService: DataEventService,
@@ -80,6 +82,16 @@ export class MyBookings implements OnInit {
             bookingDate: booking.bookingDate,
             status: booking.status as 'confirmed' | 'pending' | 'cancelled'
          };
+      });
+
+      // Generate QR codes untuk semua bookings
+      userBookings.forEach(booking => {
+         const bookingObj = this.dataEventService.getBookingById(booking.id);
+         if (bookingObj?.qrCode) {
+            QRCode.toDataURL(bookingObj.qrCode, { width: 200 }).then((url: string) => {
+               this.bookingQrDataUrls.set(booking.id, url);
+            }).catch(() => {});
+         }
       });
 
       this.isLoading = false;
@@ -128,16 +140,57 @@ export class MyBookings implements OnInit {
    }
 
    applyFilter() {
-      if (this.filterStatus === 'all') {
-         this.filteredBookings = this.bookings;
-      } else {
-         this.filteredBookings = this.bookings.filter(b => b.status === this.filterStatus);
+      switch(this.filterStatus) {
+         case 'confirmed':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'confirmed');
+            break;
+         case 'pending':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'pending');
+            break;
+         case 'cancelled':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'cancelled');
+            break;
+         case 'waitlist':
+            // Waitlist filter handled separately
+            this.filteredBookings = [];
+            break;
+         default:
+            this.filteredBookings = this.bookings;
       }
    }
 
-   setFilter(status: 'all' | 'confirmed' | 'pending' | 'cancelled') {
+   setFilter(status: 'all' | 'confirmed' | 'pending' | 'cancelled' | 'waitlist') {
       this.filterStatus = status;
       this.applyFilter();
+      this.isSortMenuOpen = false;
+   }
+
+   toggleSortMenu() {
+      this.isSortMenuOpen = !this.isSortMenuOpen;
+   }
+
+   closeSortMenu() {
+      this.isSortMenuOpen = false;
+   }
+
+   getTotalBookings(): number {
+      return this.bookings.length;
+   }
+
+   getConfirmedCount(): number {
+      return this.bookings.filter(b => b.status === 'confirmed').length;
+   }
+
+   getPendingCount(): number {
+      return this.bookings.filter(b => b.status === 'pending').length;
+   }
+
+   getCancelledCount(): number {
+      return this.bookings.filter(b => b.status === 'cancelled').length;
+   }
+
+   getWaitlistCount(): number {
+      return this.waitlistEntries.length;
    }
 
    getStatusBadgeClass(status: string): string {
@@ -155,7 +208,7 @@ export class MyBookings implements OnInit {
 
    downloadTicket(bookingId: string) {
       console.log('Downloading ticket for booking:', bookingId);
-      // Implement download logic
+      // Implement download logic - generate PDF
    }
 
    cancelBooking(bookingId: string) {
