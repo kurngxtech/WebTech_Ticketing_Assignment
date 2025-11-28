@@ -24,24 +24,9 @@
             </div>
          </div>
 
-         <div class="col center-nav">
-            <nav class="main-nav">
-               <ul class="nav-list">
-                  <li><a routerLink="/" class="nav-link rounded"><span class="nav-text">Home</span></a></li>
-                  <li><a routerLink="/about" class="nav-link rounded"><span class="nav-text">About</span></a></li>
-                  
-                  <!-- Unauthenticated User Navigation -->
-                  @if (!isAuthenticated) {
-                     <li><a class="nav-link rounded" (click)="goToLogin()" style="cursor: pointer;">
-                        <span class="nav-text">Login</span>
-                     </a></li>
-                  }
-               </ul>
-            </nav>
-         </div>
-
-         <div class="col-auto">
-            <div class="search-form" role="search">
+         <!-- Search Bar -->
+         <div class="col-sm-4 col-md-12 col-xxl-2 p-wrap-search">
+            <div class="search-form p-sb" role="search">
                <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
                   placeholder="Search events..." aria-label="Search events" autocomplete="off" />
                <button class="search-btn p-search-button" type="button" (click)="onSearchInput()">
