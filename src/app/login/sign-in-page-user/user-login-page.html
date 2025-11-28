@@ -48,12 +48,12 @@
 
                <div class="form-check custom-checkbox" style="margin-bottom: 2rem;">
                   <input 
-                     class="form-check-input me-2" 
+                     class="form-check-input p-0 me-2" 
                      type="checkbox" 
                      id="remember"
                      [(ngModel)]="rememberMe"
                      name="rememberMe"
-                     [disabled]="isLoading" />
+                     [disabled]="isLoading"/>
                   <label class="form-check-label text-white m-auto fw-light fst-italic" for="remember">Remember
                      me</label>
                </div>
@@ -66,9 +66,6 @@
                      [disabled]="isLoading">
                      {{ isLoading ? 'Signing In...' : 'Sign In' }}
                   </button>
-               </div>
-               <div class="d-flex justify-content-center w-100 text-white">
-                  <p (click)="goToSignUp()" style="cursor: pointer;">Not have an account yet? <a class="text-white">Sign Up.</a></p>
                </div>
             </form>
 

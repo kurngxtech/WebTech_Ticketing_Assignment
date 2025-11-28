@@ -1,13 +1,17 @@
 <main>
-   <header *ngIf="!hideLayout">
-      <app-header></app-header>
-   </header>
+   @if (!hideLayout) {
+      <header>
+         <app-header></app-header>
+      </header>
+   }
 
    <div class="router-container">
       <router-outlet (activate)="onActivate()" />
    </div>
 
-   <footer *ngIf="!hideLayout">
-      <app-footer></app-footer>
-   </footer>
+   @if (!hideLayout) {
+      <footer>
+         <app-footer></app-footer>
+      </footer>
+   }
 </main>

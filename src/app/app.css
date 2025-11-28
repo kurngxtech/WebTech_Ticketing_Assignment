@@ -8,13 +8,13 @@ app-root {
    min-height: 100vh;
    display: flex;
    flex-direction: column;
-   background: linear-gradient(180deg, var(--bg-900), var(--bg-800));
-   color: var(--text);
+   background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 50%, var(--light-black) 100%);
+   color: var(--text-white);
 }
 
 .content {
    flex: 1 1 auto;
-   padding: 20px 0;
+   padding: var(--spacing-lg) var(--spacing-md);
 }
 
 /* Page transition animation */
@@ -33,15 +33,22 @@ app-root {
    }
 }
 
-/* improve spacing for small screens */
-@media (max-width: 900px) {
+/* Responsive tablet and smaller */
+@media (max-width: 1024px) {
    .content {
-      padding: 12px 10px;
+      padding: var(--spacing-md);
+   }
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+   .content {
+      padding: var(--spacing-md);
    }
 }
 
 @media (max-width: 480px) {
    .content {
-      padding: 10px 8px;
+      padding: var(--spacing-sm);
    }
 }

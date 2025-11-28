@@ -26,7 +26,7 @@ export class App {
       this.router.events
          .pipe(filter(event => event instanceof NavigationEnd))
          .subscribe((event: NavigationEnd) => {
-            this.hideLayout = event.urlAfterRedirects.includes('/login') || event.urlAfterRedirects.includes('/sign-up');
+            this.hideLayout = event.urlAfterRedirects.includes('/login');
          });
    }
 

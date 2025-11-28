@@ -8,11 +8,81 @@ h3 {
    padding-left: 0 !important;
 }
 
+.custom-header .container {
+   max-width: 1400px;
+   margin: 0 auto;
+   padding: 0 18px;
+}
+
+/* header row holds brand / nav / search as three columns */
+.header-row {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   width: 100%;
+   gap: 64px;
+   /* increased gap between brand / nav / search */
+}
+
+.center-nav {
+   flex: 1 1 0;
+   display: flex;
+   justify-content: center;
+   min-width: 220px;
+}
+
+.center-nav .nav-list {
+   justify-content: center;
+}
+
+.brand {
+   font-size: 20px;
+   font-weight: 700;
+   color: rgba(254, 183, 6, 1);
+   letter-spacing: 0.2px;
+   flex: 0 0 auto;
+   cursor: pointer;
+   /* keep brand size fixed */
+   margin-right: 8px;
+   margin-left: 12px;
+   /* small left offset so brand isn't flush to the edge */
+}
+
+.main-nav {
+   margin: 0;
+   padding: 0;
+   display: flex;
+   align-items: center;
+   gap: 20px;
+}
+
+.nav-list {
+   list-style: none;
+   display: flex;
+   gap: 18px;
+   margin: 0;
+   padding: 0;
+}
+
 .nav-link {
    text-decoration: none;
    position: relative;
    font-weight: 500;
    padding: 6px 8px;
+   overflow: hidden;
+}
+
+
+.nav-text {
+   --gold: #feb706; 
+   display: inline-block;
+   color: #ffffff; 
+   background: none;
+   -webkit-background-clip: unset;
+   background-clip: unset;
+   -webkit-text-fill-color: initial;
+   transition: color 420ms ease; 
+   
 }
 
 .nav-link:hover .nav-text {
@@ -198,9 +268,8 @@ li a:hover {
    border: 1px solid rgba(255, 255, 255, 0.06);
    border-radius: 10px;
    font-size: 14px;
-   background: #121212;
-   color: var(--text);
-   margin-right: 10px;
+   background: rgba(255, 255, 255, 0.02);
+   color: var(--primary-yellow);
 }
 
 .search-input::placeholder {

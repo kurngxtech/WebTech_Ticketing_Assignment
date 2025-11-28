@@ -1,6 +1,13 @@
 /* Bagus Ver */
-.default-font {
-   font-family: 'Outfit', 'Times New Roman', sans-serif;
+.custom-footer {
+   padding: 12px 0;
+   font-family: 'Rubik', sans-serif;
+   background: var(--primary-black);
+   border-top: 1px solid rgba(254, 183, 6, 0.15);
+   position: relative;
+   z-index: 10;
+   height: var(--footer-height);
+   margin-top: auto;
 }
 
 .title-underline {
@@ -9,6 +16,7 @@
 
 h1 {
    color: #feb706;
+   font-size: 1.5rem;
 }
 
 .max-vh {
@@ -18,17 +26,31 @@ h1 {
    /* Beri minimum height */
 }
 
-.w-content {
-   width: 80%;
+.copyright {
+   flex: 0 0 auto;
+   font-size: 13px;
+   color: rgba(255, 255, 255, 0.7);
 }
 
-.h-title-footer {
-   max-height: 15%;
-   padding: 40px 0;
+.w-content {
+   width:65%;
 }
 
 .h-footer-content {
    height: 70%;
+}
+
+.nav-link {
+   text-decoration: none;
+   color: var(--primary-yellow);
+   font-weight: 500;
+   font-size: 13px;
+   transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+   color: #e6a600;
+   text-shadow: 0 0 8px rgba(254, 183, 6, 0.3);
 }
 
 .footer-custom {
@@ -62,8 +84,7 @@ h1 {
          rgba(255, 255, 255, 0.15) 25%,
          rgba(255, 255, 255, 0.05) 45%,
          rgba(0, 0, 0, 0.8) 80%,
-         rgba(0, 0, 0, 1) 100%
-         );
+         rgba(0, 0, 0, 1) 100%);
    opacity: 0.8;
    /* Kurangi opacity */
    z-index: -1;
@@ -78,4 +99,12 @@ h1 {
 
 .footer-container {
    clear: both;
+}
+
+.info-font {
+   font-size: 0.9em;
+}
+
+p {
+   margin: 0;
 }

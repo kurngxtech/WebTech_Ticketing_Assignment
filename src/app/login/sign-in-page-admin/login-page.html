@@ -15,11 +15,17 @@
             <input #password type="password" class="form-control form-control-sm bg-dark border-dark text-white" />
          </div>
 
-         <div *ngIf="errorMessage" class="mb-2 text-danger">{{ errorMessage }}</div>
+         @if (errorMessage) {
+            <div class="mb-2 text-danger">{{ errorMessage }}</div>
+         }
 
          <button (click)="login(username.value, password.value)" [disabled]="isLoading" class="btn w-100" style="background-color: #feb706; color: black">
-            <span *ngIf="!isLoading">Login</span>
-            <span *ngIf="isLoading">Signing in...</span>
+            @if (!isLoading) {
+               <span>Login</span>
+            }
+            @if (isLoading) {
+               <span>Signing in...</span>
+            }
          </button>
       </form>
    </div>

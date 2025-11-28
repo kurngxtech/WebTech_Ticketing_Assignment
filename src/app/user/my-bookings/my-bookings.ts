@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
+import { PdfGeneratorService } from '../../services/pdf-generator.service';
 import { Booking, EventItem, WaitlistEntry } from '../../data-event-service/data-event';
 import * as QRCode from 'qrcode';
 
@@ -27,7 +28,7 @@ interface BookingDisplay {
 export class MyBookings implements OnInit {
    bookings: BookingDisplay[] = [];
    filteredBookings: BookingDisplay[] = [];
-   filterStatus: 'all' | 'confirmed' | 'pending' | 'cancelled' = 'all';
+   filterStatus: 'all' | 'confirmed' | 'pending' | 'cancelled' | 'waitlist' = 'all';
    isLoading = true;
    currentUserId: string | null = null;
    selectedBookingId: string | null = null;
@@ -35,11 +36,14 @@ export class MyBookings implements OnInit {
    selectedEvent: EventItem | null = null;
    selectedQrDataUrl: string = '';
    waitlistEntries: WaitlistEntry[] = [];
+   isSortMenuOpen = false;
+   bookingQrDataUrls: Map<string, string> = new Map();
 
    constructor(
       public dataEventService: DataEventService,
-      private authService: AuthService
-   ) { }
+      private authService: AuthService,
+      private pdfGeneratorService: PdfGeneratorService
+   ) {}
 
    selectedTicketType: string = '';
    canCancelSelectedBooking = false;
@@ -82,6 +86,16 @@ export class MyBookings implements OnInit {
          };
       });
 
+      // Generate QR codes untuk semua bookings
+      userBookings.forEach(booking => {
+         const bookingObj = this.dataEventService.getBookingById(booking.id);
+         if (bookingObj?.qrCode) {
+            QRCode.toDataURL(bookingObj.qrCode, { width: 200 }).then((url: string) => {
+               this.bookingQrDataUrls.set(booking.id, url);
+            }).catch(() => {});
+         }
+      });
+
       this.isLoading = false;
       this.applyFilter();
    }
@@ -119,7 +133,7 @@ export class MyBookings implements OnInit {
 
       // Generate QR image for display if booking has qrCode
       if (bookingObj.qrCode) {
-         QRCode.toDataURL(bookingObj.qrCode, { width: 300 }).then(url => {
+         QRCode.toDataURL(bookingObj.qrCode, { width: 300 }).then((url: string) => {
             this.selectedQrDataUrl = url;
          }).catch(() => this.selectedQrDataUrl = '');
       } else {
@@ -128,16 +142,57 @@ export class MyBookings implements OnInit {
    }
 
    applyFilter() {
-      if (this.filterStatus === 'all') {
-         this.filteredBookings = this.bookings;
-      } else {
-         this.filteredBookings = this.bookings.filter(b => b.status === this.filterStatus);
+      switch(this.filterStatus) {
+         case 'confirmed':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'confirmed');
+            break;
+         case 'pending':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'pending');
+            break;
+         case 'cancelled':
+            this.filteredBookings = this.bookings.filter(b => b.status === 'cancelled');
+            break;
+         case 'waitlist':
+            // Waitlist filter handled separately
+            this.filteredBookings = [];
+            break;
+         default:
+            this.filteredBookings = this.bookings;
       }
    }
 
-   setFilter(status: 'all' | 'confirmed' | 'pending' | 'cancelled') {
+   setFilter(status: 'all' | 'confirmed' | 'pending' | 'cancelled' | 'waitlist') {
       this.filterStatus = status;
       this.applyFilter();
+      this.isSortMenuOpen = false;
+   }
+
+   toggleSortMenu() {
+      this.isSortMenuOpen = !this.isSortMenuOpen;
+   }
+
+   closeSortMenu() {
+      this.isSortMenuOpen = false;
+   }
+
+   getTotalBookings(): number {
+      return this.bookings.length;
+   }
+
+   getConfirmedCount(): number {
+      return this.bookings.filter(b => b.status === 'confirmed').length;
+   }
+
+   getPendingCount(): number {
+      return this.bookings.filter(b => b.status === 'pending').length;
+   }
+
+   getCancelledCount(): number {
+      return this.bookings.filter(b => b.status === 'cancelled').length;
+   }
+
+   getWaitlistCount(): number {
+      return this.waitlistEntries.length;
    }
 
    getStatusBadgeClass(status: string): string {
@@ -155,7 +210,40 @@ export class MyBookings implements OnInit {
 
    downloadTicket(bookingId: string) {
       console.log('Downloading ticket for booking:', bookingId);
-      // Implement download logic
+      const bookingObj = this.dataEventService.getBookingById(bookingId);
+      if (!bookingObj) {
+         console.error('Booking not found');
+         return;
+      }
+
+      const event = this.dataEventService.getEventById(bookingObj.eventId);
+      if (!event) {
+         console.error('Event not found');
+         return;
+      }
+
+      const ticketCategory = event.tickets.find(t => t.id === bookingObj.ticketCategoryId);
+      if (!ticketCategory) {
+         console.error('Ticket category not found');
+         return;
+      }
+
+      const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+      const qrCodeData = bookingObj.qrCode || `${bookingObj.id}|${ticketCategory.section || 'GENERAL'}|${event.date}`;
+
+      // Generate PDF
+      this.pdfGeneratorService.generateTicketPDF(
+         bookingObj.id,
+         qrCodeData,
+         event.title,
+         ticketCategory.type,
+         bookingObj.quantity,
+         bookingObj.totalPrice,
+         event.date,
+         userName
+      ).catch(error => {
+         console.error('Error generating PDF:', error);
+      });
    }
 
    cancelBooking(bookingId: string) {
