@@ -72,17 +72,17 @@ h3 {
    overflow: hidden;
 }
 
-/* Text color reveal animation: white to gold, left to right */
+
 .nav-text {
-   --gold: rgba(254, 183, 6, 1);
+   --gold: #feb706; 
    display: inline-block;
-   background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 50%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 100%);
-   background-size: 200% 100%;
-   background-position: 100% 0;
-   -webkit-background-clip: text;
-   background-clip: text;
-   -webkit-text-fill-color: transparent;
-   transition: background-position 420ms ease;
+   color: #ffffff; 
+   background: none;
+   -webkit-background-clip: unset;
+   background-clip: unset;
+   -webkit-text-fill-color: initial;
+   transition: color 420ms ease; 
+   
 }
 
 .nav-link:hover .nav-text {

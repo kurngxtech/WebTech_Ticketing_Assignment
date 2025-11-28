@@ -1,9 +1,4 @@
 /* Bagus Ver */
-.default-font {
-   font-family: 'Outfit', 'Times New Roman', sans-serif;
-   /* Footer styles - Black background */
-}
-
 .custom-footer {
    padding: 12px 0;
    font-family: 'Rubik', sans-serif;
@@ -21,6 +16,7 @@
 
 h1 {
    color: #feb706;
+   font-size: 1.5rem;
 }
 
 .max-vh {
@@ -37,12 +33,7 @@ h1 {
 }
 
 .w-content {
-   width: 80%;
-}
-
-.h-title-footer {
-   max-height: 15%;
-   padding: 40px 0;
+   width:65%;
 }
 
 .h-footer-content {
@@ -108,4 +99,12 @@ h1 {
 
 .footer-container {
    clear: both;
+}
+
+.info-font {
+   font-size: 0.9em;
+}
+
+p {
+   margin: 0;
 }
