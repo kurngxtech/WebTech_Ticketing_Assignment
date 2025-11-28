@@ -270,4 +270,9 @@ export class EODashboard implements OnInit {
   getMaxChartValue(): number {
     return Math.max(...this.chartData.map(d => d.value), 1);
   }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }

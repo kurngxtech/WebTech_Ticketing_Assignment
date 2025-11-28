@@ -1,11 +1,21 @@
 <div class="eo-dashboard">
-  <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <h1>Event Organizer Dashboard</h1>
-      @if (currentUser) {
-      <p class="header-subtitle">Welcome back, {{ currentUser.fullName }}</p>
-      }
+  <!-- Dashboard Top Bar with Profile and Logout -->
+  <div class="dashboard-top-bar">
+    <div class="top-bar-content">
+      <h1 class="dashboard-title">Event Organizer Dashboard</h1>
+      
+      <div class="profile-section">
+        @if (currentUser) {
+        <div class="profile-info">
+          <span class="profile-name">{{ currentUser.fullName }}</span>
+          <span class="profile-role">{{ currentUser.role | uppercase }}</span>
+        </div>
+        
+        <button class="logout-btn" (click)="logout()" title="Logout">
+          <span class="logout-icon">🚪</span>
+        </button>
+        }
+      </div>
     </div>
   </div>
 

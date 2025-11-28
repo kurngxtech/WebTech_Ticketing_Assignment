@@ -26,7 +26,9 @@ export class App {
       this.router.events
          .pipe(filter(event => event instanceof NavigationEnd))
          .subscribe((event: NavigationEnd) => {
-            this.hideLayout = event.urlAfterRedirects.includes('/login');
+            const url = event.urlAfterRedirects;
+            // Hide layout for login, eo dashboard, admin dashboard, and analytics report routes
+            this.hideLayout = url.includes('/login') || url.startsWith('/eo') || url.startsWith('/admin') || url.includes('/analytics');
          });
    }
 

@@ -23,7 +23,6 @@ export class CreateEvent implements OnInit {
 
   basicForm!: FormGroup;
   ticketForm!: FormGroup;
-  seatingForm!: FormGroup;
   promoForm!: FormGroup;
 
   ticketCategories: TicketCategory[] = [];
@@ -67,10 +66,6 @@ export class CreateEvent implements OnInit {
       section: ['GENERAL', Validators.required],
     });
 
-    this.seatingForm = this.fb.group({
-      section: ['GENERAL', Validators.required],
-    });
-
     this.promoForm = this.fb.group({
       code: ['', Validators.required],
       discount: ['', [Validators.required, Validators.min(1), Validators.max(100)]],
@@ -111,22 +106,29 @@ export class CreateEvent implements OnInit {
   }
 
   goToStep(step: 'basic' | 'tickets' | 'seating' | 'promo' | 'review'): void {
-    if (step === 'basic') {
-      this.currentStep = step;
-    } else if (step === 'tickets' && this.basicForm.valid) {
-      this.currentStep = step;
-    } else if (step === 'seating' && this.ticketCategories.length > 0) {
-      this.currentStep = step;
-    } else if (step === 'promo' && this.ticketCategories.length > 0) {
-      this.currentStep = step;
-    } else if (step === 'review' && this.ticketCategories.length > 0) {
-      this.currentStep = step;
+    // Validate current step before moving to next
+    switch(step) {
+      case 'basic':
+        this.currentStep = step;
+        break;
+      case 'tickets':
+        if (this.basicForm.valid) {
+          this.currentStep = step;
+        }
+        break;
+      case 'seating':
+      case 'promo':
+      case 'review':
+        if (this.ticketCategories.length > 0) {
+          this.currentStep = step;
+        }
+        break;
     }
   }
 
   addTicketCategory(): void {
     if (!this.ticketForm.valid) {
-      alert('Please fill all ticket fields');
+      this.showValidationError('ticket', this.ticketForm);
       return;
     }
 
@@ -139,7 +141,6 @@ export class CreateEvent implements OnInit {
       section: this.ticketForm.value.section,
     };
 
-    // Check for duplicate type
     if (this.ticketCategories.find(t => t.type === newTicket.type)) {
       alert('Ticket type already exists');
       return;
@@ -155,7 +156,7 @@ export class CreateEvent implements OnInit {
 
   addPromotionalCode(): void {
     if (!this.promoForm.valid) {
-      alert('Please fill all promotional code fields');
+      this.showValidationError('promotional code', this.promoForm);
       return;
     }
 
@@ -216,7 +217,45 @@ export class CreateEvent implements OnInit {
     return this.eventService.formatPrice(price);
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  private getInvalidFields(form: FormGroup): string[] {
+    const invalidFields: string[] = [];
+    
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
+      if (control && control.invalid) {
+        invalidFields.push(this.getFieldLabel(key));
+      }
+    });
+
+    return invalidFields;
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const fieldLabels: { [key: string]: string } = {
+      'title': 'Event Title',
+      'description': 'Description',
+      'date': 'Date',
+      'time': 'Time',
+      'location': 'Location',
+      'img': 'Event Image URL',
+      'ticketType': 'Ticket Type',
+      'price': 'Price',
+      'quantity': 'Total Seats',
+      'section': 'Seating Section',
+      'code': 'Promo Code',
+      'discount': 'Discount (%)',
+      'expiryDate': 'Expiry Date'
+    };
+    
+    return fieldLabels[fieldName] || fieldName;
+  }
+
+  private showValidationError(formName: string, form: FormGroup): void {
+    const invalidFields = this.getInvalidFields(form);
+    
+    if (invalidFields.length > 0) {
+      const fieldsText = invalidFields.join(', ');
+      alert(`Please fill all ${formName} fields:\n\n${fieldsText}`);
+    }
   }
 }

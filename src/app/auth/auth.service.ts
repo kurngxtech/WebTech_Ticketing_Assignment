@@ -79,41 +79,58 @@ export class AuthService {
     fullName: string;
     email: string;
     phone: string;
-    organizationName: string;
-  }): { success: boolean; message: string; user?: User } {
-    // Check if email already exists
+    organizationName?: string;
+    username?: string;
+    password?: string;
+  }): boolean {
+    this.ensureMockLoaded();
+    
+    // Check if email or username already exists
     if (this.mockUsers.find(u => u.email === data.email)) {
-      return { success: false, message: 'Email already registered' };
+      return false;
     }
 
-    const username = data.email.split('@')[0];
-    const defaultPassword = `TempPass_${Math.random().toString(36).substring(7)}`;
+    if (data.username && this.mockUsers.find(u => u.username === data.username)) {
+      return false;
+    }
+
+    const username = data.username || data.email.split('@')[0];
+    const password = data.password || `TempPass_${Math.random().toString(36).substring(7)}`;
 
     const newUser: User = {
       id: `eo_${Date.now()}`,
       username,
       email: data.email,
-      password: defaultPassword,
+      password,
       role: 'eo',
       fullName: data.fullName,
       phone: data.phone,
-      organizationName: data.organizationName,
+      organizationName: data.organizationName || data.fullName,
       createdAt: new Date().toISOString(),
     };
 
     this.mockUsers.push(newUser);
-
-    // In real app, send email here
-    console.log(
-      `Welcome email sent to ${data.email}. Username: ${username}, Default Password: ${defaultPassword}`
-    );
-
-    return { success: true, message: 'Event organizer registered successfully', user: newUser };
+    return true;
   }
 
-  registerEventOrganizerAsync(data: { fullName: string; email: string; phone: string; organizationName: string }, ms = 300) {
+  removeEventOrganizer(userId: string): boolean {
+    this.ensureMockLoaded();
+    const index = this.mockUsers.findIndex(u => u.id === userId);
+    if (index > -1) {
+      this.mockUsers.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  getAllUsers(): User[] {
+    this.ensureMockLoaded();
+    return [...this.mockUsers];
+  }
+
+  registerEventOrganizerAsync(data: { fullName: string; email: string; phone: string; username?: string; password?: string }, ms = 300) {
     const result = this.registerEventOrganizer(data);
-    return of(result).pipe(delay(ms));
+    return of({ success: result }).pipe(delay(ms));
   }
 
   registerUser(data: {
