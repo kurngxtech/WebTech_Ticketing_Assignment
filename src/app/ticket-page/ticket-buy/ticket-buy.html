@@ -1,14 +1,14 @@
 @if (!isAuthenticated) {
 <section class="ticket-page container-fluid px-4 py-4">
-  <div class="auth-required-message">
-    <div class="message-box">
-      <h2>🔐 Login Required</h2>
-      <p>You need to login to purchase tickets</p>
-      <div class="button-group">
-        <button type="button" class="btn btn-login" routerLink="/login">Login</button>
+   <div class="auth-required-message">
+      <div class="message-box">
+         <h2>🔐 Login Required</h2>
+         <p>You need to login to purchase tickets</p>
+         <div class="button-group">
+            <button type="button" class="btn btn-login" routerLink="/login">Login</button>
+         </div>
       </div>
-    </div>
-  </div>
+   </div>
 </section>
 } @else if (event) {
 <section class="ticket-page container-fluid px-4 py-4">
@@ -205,84 +205,82 @@
 <!-- Payment Modal -->
 @if (showPaymentModal) {
 <div class="modal-overlay">
-  <div class="modal-content payment-modal">
-    <div class="modal-header">
-      <h2>Complete Payment</h2>
-      <button class="close-btn" (click)="cancelBooking()">×</button>
-    </div>
+   <div class="modal-content payment-modal">
+      <div class="modal-header">
+         <h2>Complete Payment</h2>
+         <button class="close-btn" (click)="cancelBooking()">×</button>
+      </div>
 
-    <div class="modal-body">
-      <!-- Order Summary -->
-      <div class="order-summary">
-        <h3>Order Summary</h3>
-        @if (event) {
-          <div class="summary-item">
-            <span>Event:</span>
-            <strong>{{ event.title }}</strong>
-          </div>
-        }
-        @if (cart.length > 0) {
-          <div class="cart-items-summary">
-            @for (item of cart; track item.ticket.id) {
-              <div class="summary-item">
-                <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
-                <strong>{{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}</strong>
-              </div>
+      <div class="modal-body">
+         <!-- Order Summary -->
+         <div class="order-summary">
+            <h3>Order Summary</h3>
+            @if (event) {
+            <div class="summary-item">
+               <span>Event:</span>
+               <strong>{{ event.title }}</strong>
+            </div>
             }
-          </div>
-        } @else if (currentBooking) {
-          <div class="summary-item">
-            <span>Booking ID:</span>
-            <strong>{{ currentBooking.id }}</strong>
-          </div>
-          <div class="summary-item">
-            <span>Price per Ticket:</span>
-            <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
-          </div>
-          <div class="summary-item">
-            <span>Quantity:</span>
-            <strong>{{ currentBooking.quantity }}</strong>
-          </div>
-        }
-        @if (appliedDiscount > 0) {
-        <div class="summary-item discount">
-          <span>Discount ({{ appliedDiscount }}%):</span>
-          <strong>-{{ formattedPrice((totalCartPrice > 0 ? totalCartPrice : (currentBooking?.totalPrice || 0)) * appliedDiscount / 100) }}</strong>
-        </div>
-        }
-        <div class="summary-item total">
-          <span>Total Amount:</span>
-          <strong>{{ formattedPrice(totalCartPrice > 0 ? totalCartPrice * (1 - appliedDiscount / 100) : (currentBooking?.totalPrice || 0)) }}</strong>
-        </div>
+            @if (cart.length > 0) {
+            <div class="cart-items-summary">
+               @for (item of cart; track item.ticket.id) {
+               <div class="summary-item">
+                  <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
+                  <strong>{{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}</strong>
+               </div>
+               }
+            </div>
+            } @else if (currentBooking) {
+            <div class="summary-item">
+               <span>Booking ID:</span>
+               <strong>{{ currentBooking.id }}</strong>
+            </div>
+            <div class="summary-item">
+               <span>Price per Ticket:</span>
+               <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
+            </div>
+            <div class="summary-item">
+               <span>Quantity:</span>
+               <strong>{{ currentBooking.quantity }}</strong>
+            </div>
+            }
+            @if (appliedDiscount > 0) {
+            <div class="summary-item discount">
+               <span>Discount ({{ appliedDiscount }}%):</span>
+               <strong>-{{ formattedPrice((totalCartPrice > 0 ? totalCartPrice : (currentBooking?.totalPrice || 0)) *
+                  appliedDiscount / 100) }}</strong>
+            </div>
+            }
+            <div class="summary-item total">
+               <span>Total Amount:</span>
+               <strong>{{ formattedPrice(totalCartPrice > 0 ? totalCartPrice * (1 - appliedDiscount / 100) :
+                  (currentBooking?.totalPrice || 0)) }}</strong>
+            </div>
+         </div>
+
+         <!-- Payment Method Selection -->
+         <div class="payment-methods">
+            <h3>Select Payment Method</h3>
+            <div class="methods-grid">
+               @for (method of paymentMethods; track method.id) {
+               <button type="button" class="method-btn" [class.active]="paymentMethod === method.id"
+                  (click)="paymentMethod = method.id">
+                  {{ method.name }}
+               </button>
+               }
+            </div>
+         </div>
       </div>
 
-      <!-- Payment Method Selection -->
-      <div class="payment-methods">
-        <h3>Select Payment Method</h3>
-        <div class="methods-grid">
-          @for (method of paymentMethods; track method.id) {
-          <button
-            type="button"
-            class="method-btn"
-            [class.active]="paymentMethod === method.id"
-            (click)="paymentMethod = method.id"
-          >
-            {{ method.name }}
-          </button>
-          }
-        </div>
+      <div class="modal-footer">
+         <button type="button" class="btn btn-secondary" (click)="cancelBooking()">
+            Cancel
+         </button>
+         <button type="button" class="btn btn-primary" (click)="processPayment()" [disabled]="!paymentMethod">
+            Complete Payment
+         </button>
       </div>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="cancelBooking()">
-        Cancel
-      </button>
-      <button type="button" class="btn btn-primary" (click)="processPayment()" [disabled]="!paymentMethod">
-        Complete Payment
-      </button>
-    </div>
-  </div>
+   </div>
 </div>
 }
 

@@ -245,6 +245,18 @@ button:active,
    background: rgba(245, 158, 11, 0.1);
 }
 
+/* Ensure alerts and top messages sit above content but below fixed header visuals */
+.alert,
+.auth-required-message,
+.message-box {
+   position: relative;
+   z-index: 30;
+}
+
+.default-bg-color {
+   background-color: #080808;
+}
+
 .alert-danger {
    border-color: var(--danger);
    background: rgba(239, 68, 68, 0.1);

@@ -1,88 +1,111 @@
-/* Footer styles - Black background */
+/* Bagus Ver */
+.default-font {
+   font-family: 'Outfit', 'Times New Roman', sans-serif;
+   /* Footer styles - Black background */
+}
 
 .custom-footer {
-  padding: 12px 0;
-  font-family: 'Rubik', sans-serif;
-  background: var(--primary-black);
-  border-top: 1px solid rgba(254, 183, 6, 0.15);
-  position: relative;
-  z-index: 10;
-  height: var(--footer-height);
-  margin-top: auto;
+   padding: 12px 0;
+   font-family: 'Rubik', sans-serif;
+   background: var(--primary-black);
+   border-top: 1px solid rgba(254, 183, 6, 0.15);
+   position: relative;
+   z-index: 10;
+   height: var(--footer-height);
+   margin-top: auto;
 }
 
-.custom-footer .container-fluid {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0 18px;
+.title-underline {
+   border-bottom: solid #feb706;
 }
 
-.custom-footer .container-fluid > .d-flex {
-  width: 100%;
+h1 {
+   color: #feb706;
+}
+
+.max-vh {
+   height: auto;
+   /* Ganti dari 80vh */
+   min-height: 60vh;
+   /* Beri minimum height */
 }
 
 .copyright {
-  flex: 0 0 auto;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+   flex: 0 0 auto;
+   font-size: 13px;
+   color: rgba(255, 255, 255, 0.7);
 }
 
-.footer-nav {
-  margin-left: auto;
-  flex: 0 0 auto;
-  margin: 0;
-  padding: 0;
+.w-content {
+   width: 80%;
+}
+
+.h-title-footer {
+   max-height: 15%;
+   padding: 40px 0;
+}
+
+.h-footer-content {
+   height: 70%;
 }
 
 .nav-link {
-  text-decoration: none;
-  color: var(--primary-yellow);
-  font-weight: 500;
-  font-size: 13px;
-  transition: all 0.3s ease;
+   text-decoration: none;
+   color: var(--primary-yellow);
+   font-weight: 500;
+   font-size: 13px;
+   transition: all 0.3s ease;
 }
 
 .nav-link:hover {
-  color: #e6a600;
-  text-shadow: 0 0 8px rgba(254, 183, 6, 0.3);
+   color: #e6a600;
+   text-shadow: 0 0 8px rgba(254, 183, 6, 0.3);
 }
 
-@media (max-width: 768px) {
-  .custom-footer .container-fluid {
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    padding: 0 12px;
-  }
-  
-  .custom-footer .container-fluid > .d-flex {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .copyright {
-    text-align: center;
-    font-size: 12px;
-  }
-  
-  .footer-nav {
-    margin-left: 0;
-  }
-  
-  .nav-link {
-    font-size: 12px;
-    padding: 0 8px;
-  }
+.footer-custom {
+   height: 7rem;
+   color: white;
+   width: 65%;
+   border-top: solid 2px rgb(115, 115, 115);
 }
 
-@media (max-width: 480px) {
-  .custom-footer {
-    padding: 8px 0;
-  }
-  
-  .copyright, .nav-link {
-    font-size: 11px;
-  }
+.border-footer {
+   border-top: solid #feb706;
+}
+
+.rm-underline {
+   text-decoration: none;
+}
+
+.footer-gradient {
+   position: relative;
+   overflow: hidden;
+   isolation: isolate;
+}
+
+.footer-gradient::before {
+   content: "";
+   position: absolute;
+   inset: 0;
+   pointer-events: none;
+   background: radial-gradient(ellipse 110% 90% at center,
+         rgba(255, 255, 255, 0.25) 0%,
+         rgba(255, 255, 255, 0.15) 25%,
+         rgba(255, 255, 255, 0.05) 45%,
+         rgba(0, 0, 0, 0.8) 80%,
+         rgba(0, 0, 0, 1) 100%);
+   opacity: 0.8;
+   /* Kurangi opacity */
+   z-index: -1;
+   /* Pastikan di belakang konten */
+}
+
+/* Konten header tetap di atas spotlight */
+.footer-gradient>* {
+   position: relative;
+   z-index: 2;
+}
+
+.footer-container {
+   clear: both;
 }

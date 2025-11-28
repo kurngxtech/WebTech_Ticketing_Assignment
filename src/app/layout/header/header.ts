@@ -10,7 +10,7 @@ import { User } from '../../auth/auth.types';
 @Component({
    standalone: true,
    selector: 'app-header',
-   imports: [CommonModule, FormsModule, RouterLink],
+   imports: [CommonModule, FormsModule],
    templateUrl: './header.html',
    styleUrls: ['./header.css'],
 })
@@ -24,7 +24,7 @@ export class Header implements OnInit {
       private dataSrv: DataEventService,
       private authService: AuthService,
       private router: Router
-   ) {}
+   ) { }
 
    ngOnInit(): void {
       this.dataSrv.searchResults$.subscribe((list) => {
@@ -35,6 +35,9 @@ export class Header implements OnInit {
          this.currentUser = state.currentUser;
          this.isAuthenticated = state.isAuthenticated;
       });
+   }
+   goToHome(): void {
+      this.router.navigate(['/']);
    }
 
    goToLogin(): void {
@@ -49,6 +52,14 @@ export class Header implements OnInit {
       } else {
          this.router.navigate(['/']);
       }
+   }
+
+   goToAbout(): void {
+      this.router.navigate(['/about']);
+   }
+
+   goToMyBookings(): void {
+      this.router.navigate(['/my-bookings']);
    }
 
    logout(): void {

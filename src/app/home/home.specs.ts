@@ -5,21 +5,21 @@ import { provideRouter } from '@angular/router';
 import { Home } from './home';
 
 describe('Home', () => {
-  let component: Home;
-  let fixture: ComponentFixture<Home>;
-  beforeEach(async () => {
+   let component: Home;
+   let fixture: ComponentFixture<Home>;
+   beforeEach(async () => {
       await TestBed.configureTestingModule({
-        imports: [Home],
-        providers: [provideRouter([])]
-    })
-    .compileComponents();
+         imports: [Home],
+         providers: [provideRouter([])]
+      })
+         .compileComponents();
 
-    fixture = TestBed.createComponent(Home);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+      fixture = TestBed.createComponent(Home);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+   it('should create', () => {
+      expect(component).toBeTruthy();
+   });
 });

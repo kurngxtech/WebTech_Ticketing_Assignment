@@ -102,34 +102,34 @@ export class MyBookings implements OnInit {
 
    selectBooking(bookingId: string) {
       if (!this.currentUserId) return;
-         if (!bookingId) {
-            // deselect
-            this.selectedBookingId = null;
-            this.selectedBooking = null;
-            this.selectedEvent = null;
-            this.selectedQrDataUrl = '';
-            this.selectedTicketType = '';
-            this.canCancelSelectedBooking = false;
-            return;
-         }
+      if (!bookingId) {
+         // deselect
+         this.selectedBookingId = null;
+         this.selectedBooking = null;
+         this.selectedEvent = null;
+         this.selectedQrDataUrl = '';
+         this.selectedTicketType = '';
+         this.canCancelSelectedBooking = false;
+         return;
+      }
 
-         const bookingObj = this.dataEventService.getBookingById(bookingId);
+      const bookingObj = this.dataEventService.getBookingById(bookingId);
       if (!bookingObj) return;
       this.selectedBookingId = bookingId;
       this.selectedBooking = bookingObj;
       this.selectedEvent = this.dataEventService.getEventById(bookingObj.eventId) || null;
 
-         // set ticket type for template
-         this.selectedTicketType = this.selectedEvent?.tickets.find(t => t.id === bookingObj.ticketCategoryId)?.type || '';
+      // set ticket type for template
+      this.selectedTicketType = this.selectedEvent?.tickets.find(t => t.id === bookingObj.ticketCategoryId)?.type || '';
 
-         // Compute whether cancellation is allowed (>= 7 days before event)
-         if (this.selectedEvent && this.selectedBooking) {
-            const eventDate = new Date(this.selectedEvent.date).getTime();
-            const daysUntil = (eventDate - Date.now()) / (1000 * 60 * 60 * 24);
-            this.canCancelSelectedBooking = daysUntil >= 7 && this.selectedBooking.status === 'confirmed';
-         } else {
-            this.canCancelSelectedBooking = false;
-         }
+      // Compute whether cancellation is allowed (>= 7 days before event)
+      if (this.selectedEvent && this.selectedBooking) {
+         const eventDate = new Date(this.selectedEvent.date).getTime();
+         const daysUntil = (eventDate - Date.now()) / (1000 * 60 * 60 * 24);
+         this.canCancelSelectedBooking = daysUntil >= 7 && this.selectedBooking.status === 'confirmed';
+      } else {
+         this.canCancelSelectedBooking = false;
+      }
 
       // Generate QR image for display if booking has qrCode
       if (bookingObj.qrCode) {
