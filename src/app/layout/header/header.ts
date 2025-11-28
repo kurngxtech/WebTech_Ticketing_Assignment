@@ -61,9 +61,8 @@ export class Header implements OnInit {
    }
 
    goToFAQ(): void {
-      this.goToAbout();
-      this.scroller.scrollToAnchor('page-footer');
-      this.isDropdownOpen = false; // Tutup dropdown setelah klik
+      this.router.navigate(['/faq']);
+      this.isDropdownOpen = false;
    }
 
    goToAbout(): void {

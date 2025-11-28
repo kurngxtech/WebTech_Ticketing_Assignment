@@ -1,0 +1,66 @@
+p a {
+   color: #6c757d;
+   text-decoration: underline;
+}
+
+p a:hover {
+   cursor: pointer;
+}
+/* Styling Kustom untuk FAQ */
+
+/* Mengatur Item Accordion agar terlihat lebih modern */
+.custom-accordion-item {
+   border: none;
+   border-bottom: 1px solid #eee;
+   /* Garis pemisah tipis */
+   margin-bottom: 10px;
+   background-color: transparent;
+}
+
+/* Mengatur Tombol Pertanyaan */
+.custom-accordion-button {
+   font-size: 1.1rem;
+   font-weight: 500;
+   color: white;
+   /* Warna Teks Pertanyaan */
+   padding: 1.25rem 0;
+   /* Padding vertikal dihilangkan dari sisi horizontal */
+   background-color: transparent !important;
+   box-shadow: none !important;
+   /* Hilangkan shadow saat fokus/klik */
+   border: none !important;
+   display: flex;
+   align-items: center;
+   text-align: left;
+}
+
+/* Mengatur Ikon di Kiri */
+.faq-icon {
+   margin-right: 15px;
+   color: #777;
+   /* Warna Ikon */
+   line-height: 1;
+}
+
+.faq-icon svg {
+   width: 28px;
+   height: 28px;
+}
+
+/* Mengatur Arrow/Chevron ke kanan */
+.accordion-button::after {
+   margin-left: auto;
+   /* Dorong chevron ke kanan */
+   flex-shrink: 0;
+}
+
+/* Mengatur Isi Jawaban */
+.accordion-body {
+   padding-left: 55px;
+   /* Menjorok ke dalam agar sejajar dengan teks pertanyaan (setelah ikon) */
+   padding-top: 0;
+   padding-bottom: 1.25rem;
+   font-size: 1rem;
+   color: #555;
+   /* Warna Teks Jawaban */
+}
