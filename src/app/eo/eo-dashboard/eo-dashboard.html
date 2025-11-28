@@ -1,114 +1,233 @@
 <div class="eo-dashboard">
+  <!-- Header Section -->
   <div class="dashboard-header">
-    <h1>Event Organizer Dashboard</h1>
-    @if (currentUser) {
-    <p class="welcome-msg">Welcome, {{ currentUser.fullName }}</p>
-    }
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="stats-section">
-    <div class="stat-card">
-      <div class="stat-icon">📊</div>
-      <div class="stat-content">
-        <p class="stat-label">Total Events</p>
-        <p class="stat-value">{{ stats.totalEvents }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">✅</div>
-      <div class="stat-content">
-        <p class="stat-label">Active Events</p>
-        <p class="stat-value">{{ stats.activeEvents }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">💰</div>
-      <div class="stat-content">
-        <p class="stat-label">Total Revenue</p>
-        <p class="stat-value">{{ formatPrice(stats.totalRevenue) }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">🎫</div>
-      <div class="stat-content">
-        <p class="stat-label">Tickets Sold</p>
-        <p class="stat-value">{{ stats.totalTicketsSold }}</p>
-      </div>
+    <div class="header-content">
+      <h1>Event Organizer Dashboard</h1>
+      @if (currentUser) {
+      <p class="header-subtitle">Welcome back, {{ currentUser.fullName }}</p>
+      }
     </div>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="action-buttons">
-    <a routerLink="/eo/create-event" class="btn btn-primary">
-      <span class="btn-icon">+</span> Create New Event
-    </a>
-    <a routerLink="/analytics" class="btn btn-secondary">
-      <span class="btn-icon">📈</span> View Analytics
-    </a>
-  </div>
+  <!-- Main Content Area -->
+  <div class="dashboard-container">
+    <!-- Chart Section -->
+    <div class="chart-section">
+      <div class="chart-card" [class.blur]="showChartOptions">
+        <!-- Chart Header with Options -->
+        <div class="chart-header">
+          <div class="chart-title-area">
+            <p class="chart-statement">{{ getStatementText() }}</p>
+          </div>
+          <button class="menu-button" (click)="toggleChartOptions()" title="Chart options">
+            @if (!showChartOptions) {
+            <span class="icon">⋯</span>
+            } @else {
+            <span class="icon">✕</span>
+            }
+          </button>
+        </div>
 
-  <!-- Events Table -->
-  <div class="events-section">
-    <h2>Your Events</h2>
-    
-    @if (isLoading) {
-    <div class="loading">
-      <p>Loading events...</p>
-    </div>
-    }
+        <!-- Chart Display - Line Chart -->
+        <div class="chart-display" [class.blur]="showChartOptions">
+          <svg class="line-chart" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <g class="grid">
+              @for (i of [0,1,2,3,4]; track i) {
+              <line [attr.x1]="0" [attr.y1]="i * 75" [attr.x2]="1000" [attr.y2]="i * 75" class="grid-line" />
+              }
+            </g>
+            <!-- Line path -->
+            <polyline [attr.points]="getChartLinePoints()" class="chart-line" />
+            <!-- Data points -->
+            @for (point of chartDataPoints; track $index) {
+            <circle [attr.cx]="point.x" [attr.cy]="point.y" r="6" class="data-point" />
+            }
+          </svg>
 
-    @if (!isLoading && eoEvents.length === 0) {
-    <div class="no-events">
-      <p>No events created yet. <a routerLink="/eo/create-event">Create your first event!</a></p>
-    </div>
-    }
-
-    @if (!isLoading && eoEvents.length > 0) {
-    <div class="table-responsive">
-      <table class="events-table">
-        <thead>
-          <tr>
-            <th>Event Name</th>
-            <th>Date</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Tickets Sold</th>
-            <th>Revenue</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (event of eoEvents; track event.id) {
-          <tr>
-            <td>{{ event.title }}</td>
-            <td>{{ event.date }}</td>
-            <td>{{ event.location }}</td>
-            <td>
-              <span class="badge" [ngClass]="getStatusBadgeClass(event.status)">
-                {{ event.status }}
-              </span>
-            </td>
-            <td>{{ getTotalTicketsSold(event) }}</td>
-            <td>{{ formatPrice(getTotalRevenue(event)) }}</td>
-            <td class="action-buttons-cell">
-              <button class="btn-icon-small" (click)="editEvent(event)" title="Edit">
-                ✏️
-              </button>
-              <button class="btn-icon-small" (click)="viewAnalytics(event)" title="Analytics">
-                📊
-              </button>
-              <button class="btn-icon-small btn-danger" (click)="deleteEvent(event)" title="Delete">
-                🗑️
-              </button>
-            </td>
-          </tr>
+          <!-- Chart Options Overlay - Cover entire chart -->
+          @if (showChartOptions) {
+          <div class="chart-options-overlay">
+            <div class="options-group">
+              <p class="options-label">Select Data Type:</p>
+              <div class="option-buttons">
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'events'"
+                  (click)="selectChartType('events')"
+                >
+                  Total Events
+                </button>
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'tickets'"
+                  (click)="selectChartType('tickets')"
+                >
+                  Tickets Sold
+                </button>
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'revenue'"
+                  (click)="selectChartType('revenue')"
+                >
+                  Total Revenue
+                </button>
+              </div>
+            </div>
+          </div>
           }
-        </tbody>
-      </table>
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="time-period-section">
+          <button class="time-toggle-btn" (click)="toggleTimePeriodMenu()" title="Time period">
+            @if (!showTimePeriodMenu) {
+            <span class="icon">⋮</span>
+            } @else {
+            <span class="icon">✕</span>
+            }
+          </button>
+
+          @if (showTimePeriodMenu) {
+          <div class="time-period-menu">
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'daily'"
+              (click)="selectTimePeriod('daily')"
+            >
+              Daily
+            </button>
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'weekly'"
+              (click)="selectTimePeriod('weekly')"
+            >
+              Weekly
+            </button>
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'monthly'"
+              (click)="selectTimePeriod('monthly')"
+            >
+              Monthly
+            </button>
+          </div>
+          }
+        </div>
+      </div>
     </div>
-    }
+
+    <!-- Events Section -->
+    <div class="events-section">
+      <div class="events-header">
+        <h2>Your Events</h2>
+      </div>
+
+      @if (isLoading) {
+      <div class="loading-state">
+        <p>Loading your events...</p>
+      </div>
+      } @else if (eoEvents.length === 0) {
+      <div class="empty-state">
+        <p>No events yet. Start by creating your first event!</p>
+        <button class="btn btn-primary" (click)="createNewEvent()">Create Event</button>
+      </div>
+      } @else {
+      <div class="events-grid">
+        @for (event of eoEvents; track event.id) {
+        <div
+          class="event-card"
+          [class.blur-card]="expandedEventMenuId === event.id"
+          (click)="closeEventMenu()"
+        >
+          <!-- Event Image -->
+          <div class="event-image-section">
+            @if (event.img) {
+            <img [src]="event.img" [alt]="event.title" class="event-image" />
+            } @else {
+            <div class="image-placeholder">📸</div>
+            }
+            <div class="event-status-badge" [ngClass]="getStatusBadgeClass(event.status)">
+              {{ getStatusText(event.status) }}
+            </div>
+          </div>
+
+          <!-- Event Content -->
+          <div class="event-content">
+            <div class="event-header">
+              <h3 class="event-title">{{ event.title }}</h3>
+              <div class="event-meta">
+                <p class="tickets-sold"><strong>Total Tickets Sold:</strong> {{ getTotalTicketsSold(event) }}</p>
+              </div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="event-details">
+              <div class="detail-item">
+                <span class="detail-label">📍 Location:</span>
+                <span class="detail-text">{{ event.location }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">📅 Date:</span>
+                <span class="detail-text">{{ event.date }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">💰 Revenue:</span>
+                <span class="detail-text">{{ formatPrice(getTotalRevenue(event)) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Menu Button -->
+          <div class="event-menu-container">
+            <button
+              class="event-menu-btn"
+              (click)="toggleEventMenu(event.id, $event)"
+              title="Event options"
+            >
+              @if (!expandedEventMenuId || expandedEventMenuId !== event.id) {
+              <span class="icon">⋯</span>
+              } @else {
+              <span class="icon">✕</span>
+              }
+            </button>
+          </div>
+
+          <!-- Event Action Menu Overlay - Cover entire card -->
+          @if (expandedEventMenuId === event.id) {
+          <div class="event-action-overlay" (click)="$event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="overlay-close-btn" (click)="toggleEventMenu(event.id, $event)" title="Close menu">
+              ✕
+            </button>
+
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="action-item edit" (click)="editEvent(event)">
+                  <span class="action-icon">✎</span> Edit Event
+                </button>
+                <button class="action-item analysis" (click)="viewAnalytics(event)">
+                  <span class="action-icon">📊</span> In-depth Analysis
+                </button>
+                <button class="action-item delete" (click)="deleteEvent(event)">
+                  <span class="action-icon">🗑</span> Delete Event
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Create New Event Button (Fixed) -->
+  @if (!isLoading && eoEvents.length > 0) {
+  <button class="create-event-btn" (click)="createNewEvent()" title="Create new event">
+    <span class="btn-icon">+</span>
+    <span class="btn-text">Create New Event</span>
+  </button>
+  }
 </div>
