@@ -1,70 +1,139 @@
-<nav class="custom-header position-fixed fixed-top bg-black">
-   <div class="container-fluid px-0">
-      <div class="row align-items-center header-row gx-3">
-         <div class="col-auto ms-4">
-            <div class="brand" routerLink="/">
-               JOMOKERS TICKET
-            </div>
-         </div>
-
-         <div class="col center-nav">
-            <nav class="main-nav">
-               <ul class="nav-list">
-                  <li><a routerLink="/" class="nav-link rounded"><span class="nav-text">Home</span></a></li>
-                  <li><a routerLink="/about" class="nav-link rounded"><span class="nav-text">About</span></a></li>
-                  
-                  <!-- Unauthenticated User Navigation -->
-                  @if (!isAuthenticated) {
-                     <li><a class="nav-link rounded" (click)="goToLogin()" style="cursor: pointer;">
-                        <span class="nav-text">Login</span>
-                     </a></li>
-                  }
-               </ul>
-            </nav>
-         </div>
-
-         <div class="col-auto">
-            <div class="search-form" role="search">
-               <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
-                  placeholder="Search events..." aria-label="Search events" autocomplete="off" />
-               <button class="search-btn" type="button" (click)="onSearchInput()">
-                  🔍
-               </button>
-               @if (query.trim().length && suggestions.length) {
-               <ul class="search-suggestions">
-                  @for (s of suggestions; track s.id) {
-                  <li (click)="selectSuggestion(s)" tabindex="0">
-                     {{ s.title }}
-                  </li>
-                  }
-               </ul>
-               }
-            </div>
-         </div>
-
-         <div class="col-auto me-4">
-            <!-- Authenticated User Navigation - Profile on Right -->
-            @if (isAuthenticated && currentUser) {
-               <div class="user-nav">
-                  <span class="user-name">👤 {{ currentUser.fullName }}</span>
-                  @if (currentUser.role === 'user') {
-                     <a routerLink="/my-bookings" class="nav-link rounded">
-                        <span class="nav-text">📋 My Bookings</span>
-                     </a>
-                  } @else {
-                     <a class="nav-link rounded" (click)="goToDashboard()" style="cursor: pointer;">
-                        <span class="nav-text">
-                           @if (currentUser.role === 'eo') { 📊 Dashboard }
-                           @if (currentUser.role === 'admin') { ⚙️ Admin }
-                        </span>
-                     </a>
-                  }
-                  <a class="nav-link rounded logout-btn" (click)="logout()" style="cursor: pointer;">
-                     <span class="nav-text">Logout</span>
-                  </a>
-               </div>
-            }
-         </div>
+<div class="default-font default-bg-color h-header-page underline-header d-flex align-items-center">
+  <div class="container-fluid p-0">
+    <div class="row g-0">
+      <!-- Logo Web / Judul -->
+      <div class="col-sm-4 col-md-12 col-xxl-3 title-wrap">
+        <div class="title">
+          <h3>CONCERT TICKET</h3>
+        </div>
+        HOME
       </div>
-   </div>
-</nav>
+
+      <!-- list navbar, search bar, login -->
+      <!-- List -->
+      <div class="col-md-12 col-xxl-6 p-0 g-0 d-none d-md-block">
+        <div class="h-100 gap-3 d-flex justify-content-center align-items-center">
+          <ul class="d-flex list-group list-group-horizontal text-white">
+            <li class="fw-bold px-4 py-2 nav-link">
+              <a routerLink="/home"><span class="nav-text">HOME</span></a>
+            </li>
+            <li class="fw-bold px-4 py-2 nav-link">
+              <a routerLink="/tickets"><span class="nav-text">TICKETS</span></a>
+            </li>
+            <li class="fw-bold px-4 py-2 nav-link">
+              <a routerLink="/faq"><span class="nav-text">FAQ</span></a>
+            </li>
+            <li class="fw-bold px-4 py-2 nav-link">
+              <a routerLink="/contact-us"><span class="nav-text">CONTACT US</span></a>
+            </li>
+            <li class="fw-bold px-4 py-2 nav-link">
+              <a routerLink="/about"><span class="nav-text">ABOUT</span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="col-sm-4 col-md-12 col-xxl-2 p-wrap-search">
+        <div class="search-form p-sb" role="search">
+          <input
+            class="search-input"
+            type="search"
+            [(ngModel)]="query"
+            (input)="onSearchInput()"
+            placeholder="Search events..."
+            aria-label="Search events"
+            autocomplete="off"
+          />
+          <button class="search-btn p-search-button" type="button" (click)="onSearchInput()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-search"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"
+              />
+            </svg>
+          </button>
+          @if (query.trim().length && suggestions.length) {
+          <ul class="search-suggestions">
+            @for (s of suggestions; track s) {
+            <li (click)="selectSuggestion(s)" tabindex="0">
+              {{ s.title }}
+            </li>
+            }
+          </ul>
+          }
+        </div>
+      </div>
+
+      <!-- Login -->
+      <div class="col-sm-4 col-md-12 col-xxl-1 g-0 buttonAccount">
+        <div>
+          <!-- Tombol Login hanya show ketika belum login -->
+          @if (!isAuthenticated || !currentUser) {
+          <button type="button" class="btn btn-warning button-size" (click)="goToLogin()">
+            Login
+          </button>
+          } @if (isAuthenticated && currentUser) {
+          <div class="dropdown">
+            <button
+              class="btn btn-link btn-dark dropdown-toggle p-0 text-decoration-none text-white"
+              data-bs-toggle="dropdown"
+            >
+              <div class="d-flex align-items-center">
+                <div class="profile-avatar">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    class="bi bi-person-circle"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"
+                    />
+                  </svg>
+                </div>
+                <span class="ms-2 small">{{ currentUser.fullName }}</span>
+              </div>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+              @if (currentUser.role === 'user') {
+              <li>
+                <a class="dropdown-item" routerLink="/my-bookings" style="cursor: pointer">
+                  📋 My Bookings
+                </a>
+              </li>
+              } @else {
+              <li>
+                <a class="dropdown-item" (click)="goToDashboard()" style="cursor: pointer">
+                  @if (currentUser.role === 'eo') { 📊 Dashboard } @if (currentUser.role ===
+                  'admin') { ⚙️ Admin }
+                </a>
+              </li>
+              }
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a class="dropdown-item text-danger" (click)="logout()" style="cursor: pointer">
+                  🚪 Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
