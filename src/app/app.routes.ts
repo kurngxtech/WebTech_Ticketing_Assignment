@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { Home } from './home/home';
 import { TicketBuy } from './ticket-page/ticket-buy/ticket-buy';
 import { UserLoginPage } from './login/sign-in-page-user/user-login-page';
-import { UserSignUp } from './login/sign-up-page-user/user-sign-up';
 import { About } from './about/about';
 import { MyBookings } from './user/my-bookings/my-bookings';
 
@@ -11,7 +10,6 @@ export const routes: Routes = [
    { path: 'about', component: About },
    { path: 'ticket/:id', component: TicketBuy },
    { path: 'login', component: UserLoginPage },
-   { path: 'sign-up', component: UserSignUp },
    { path: 'my-bookings', component: MyBookings },
    // Lazy load admin/eo modules
    { 

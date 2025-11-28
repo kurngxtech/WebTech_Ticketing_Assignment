@@ -32,7 +32,9 @@ export class AuthService {
     }
   }
 
-  constructor() {}
+  constructor() {
+    this.restoreAuthState();
+  }
 
   // Initialize mock users after construction to avoid require at module-eval time in some build setups
   ngOnInit?(): void {
@@ -62,6 +64,7 @@ export class AuthService {
     };
 
     this.authState.next(authData);
+    this.persistAuthState(authData);
     return { success: true, message: 'Login successful', user };
   }
 
@@ -150,6 +153,7 @@ export class AuthService {
       currentUser: null,
       isAuthenticated: false,
     });
+    this.clearAuthState();
   }
 
   getCurrentUser(): User | null {
@@ -181,5 +185,42 @@ export class AuthService {
   changePasswordAsync(userId: string, oldPassword: string, newPassword: string, ms = 300) {
     const result = this.changePassword(userId, oldPassword, newPassword);
     return of(result).pipe(delay(ms));
+  }
+
+  // Private helper methods for localStorage persistence
+  private persistAuthState(authData: AuthState): void {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('authState', JSON.stringify(authData));
+      } catch (e) {
+        console.warn('Failed to persist auth state:', e);
+      }
+    }
+  }
+
+  private restoreAuthState(): void {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('authState');
+        if (stored) {
+          const authData = JSON.parse(stored) as AuthState;
+          if (authData.isAuthenticated && authData.currentUser) {
+            this.authState.next(authData);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore auth state:', e);
+      }
+    }
+  }
+
+  private clearAuthState(): void {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem('authState');
+      } catch (e) {
+        console.warn('Failed to clear auth state:', e);
+      }
+    }
   }
 }

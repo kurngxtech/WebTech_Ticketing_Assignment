@@ -215,4 +215,8 @@ export class CreateEvent implements OnInit {
   formatPrice(price: number): string {
     return this.eventService.formatPrice(price);
   }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
 }

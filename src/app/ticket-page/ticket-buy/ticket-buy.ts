@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
+import { PdfGeneratorService } from '../../services/pdf-generator.service';
 import { EventItem, TicketCategory, Booking } from '../../data-event-service/data-event';
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
@@ -47,6 +48,7 @@ export class TicketBuy implements OnInit {
       private route: ActivatedRoute,
       private dataSrv: DataEventService,
       private authService: AuthService,
+      private pdfGeneratorService: PdfGeneratorService,
       private router: Router
    ) { }
 
@@ -85,6 +87,20 @@ export class TicketBuy implements OnInit {
          : 'Invalid coupon code';
    }
 
+   incrementQuantity(ticketId: string, maxRemaining: number): void {
+      const currentQty = this.quantities[ticketId] || 1;
+      if (currentQty < maxRemaining) {
+         this.quantities[ticketId] = currentQty + 1;
+      }
+   }
+
+   decrementQuantity(ticketId: string): void {
+      const currentQty = this.quantities[ticketId] || 1;
+      if (currentQty > 1) {
+         this.quantities[ticketId] = currentQty - 1;
+      }
+   }
+
    getRemaining(t: TicketCategory): number {
       return t.total - t.sold;
    }
@@ -98,7 +114,7 @@ export class TicketBuy implements OnInit {
    purchase(ticket: TicketCategory, qty = 1): void {
       // Check if user is authenticated
       if (!this.isAuthenticated) {
-         this.message = '🔐 Please login or sign up to purchase tickets';
+         this.message = '🔐 Please login to purchase tickets';
          setTimeout(() => {
             this.router.navigate(['/login']);
          }, 2000);
@@ -223,9 +239,9 @@ export class TicketBuy implements OnInit {
             dark: '#000000',
             light: '#ffffff'
          }
-      }).then(url => {
+      }).then((url: string) => {
          this.qrCodeDataUrl = url;
-      }).catch(err => {
+      }).catch((err: Error) => {
          console.error('Error generating QR code:', err);
       });
 
@@ -287,6 +303,31 @@ export class TicketBuy implements OnInit {
       link.click();
    }
 
+   /**
+    * Download complete ticket as PDF
+    */
+   downloadTicketPDF(): void {
+      if (!this.currentBooking || !this.event) return;
+
+      const ticketCategory = this.event.tickets.find(t => t.id === this.currentBooking!.ticketCategoryId);
+      if (!ticketCategory) return;
+
+      const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+
+      this.pdfGeneratorService.generateTicketPDF(
+         this.currentBooking.id,
+         this.qrCodeData,
+         this.event.title,
+         ticketCategory.type,
+         this.currentBooking.quantity,
+         this.currentBooking.totalPrice,
+         this.event.date,
+         userName
+      ).catch(error => {
+         console.error('Error generating PDF:', error);
+      });
+   }
+
    backToHome(): void {
       this.showQRCodeDisplay = false;
       this.currentBooking = null;
@@ -326,7 +367,7 @@ export class TicketBuy implements OnInit {
    joinWaitlist(ticket: TicketCategory): void {
       // Check if user is authenticated
       if (!this.isAuthenticated) {
-         this.message = '🔐 Please login or sign up to join waitlist';
+         this.message = '🔐 Please login to join waitlist';
          setTimeout(() => {
             this.router.navigate(['/login']);
          }, 2000);
