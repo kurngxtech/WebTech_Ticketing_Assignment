@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, HostListener } from '@angular/core';
+import { CommonModule, ViewportScroller } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
@@ -19,12 +19,18 @@ export class Header implements OnInit {
    suggestions: EventItem[] = [];
    currentUser: User | null = null;
    isAuthenticated = false;
+   isDropdownOpen = false;
 
    constructor(
       private dataSrv: DataEventService,
       private authService: AuthService,
-      private router: Router
+      private router: Router,
+      private scroller: ViewportScroller
    ) { }
+
+   toggleDropdown(): void {
+      this.isDropdownOpen = !this.isDropdownOpen;
+   }
 
    ngOnInit(): void {
       this.dataSrv.searchResults$.subscribe((list) => {
@@ -54,8 +60,15 @@ export class Header implements OnInit {
       }
    }
 
+   goToFAQ(): void {
+      this.goToAbout();
+      this.scroller.scrollToAnchor('page-footer');
+      this.isDropdownOpen = false; // Tutup dropdown setelah klik
+   }
+
    goToAbout(): void {
       this.router.navigate(['/about']);
+      this.isDropdownOpen = false;
    }
 
    goToMyBookings(): void {
@@ -69,6 +82,11 @@ export class Header implements OnInit {
 
    onSearchInput(): void {
       this.dataSrv.setSearchQuery(this.query);
+   }
+
+   scrollToFooter(): void {
+      this.scroller.scrollToAnchor('page-footer');
+      this.isDropdownOpen = false; // Tutup dropdown setelah klik
    }
 
    selectSuggestion(ev: EventItem): void {

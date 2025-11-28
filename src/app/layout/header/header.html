@@ -16,16 +16,21 @@
                   <li class="fw-bold px-4 py-2 nav-link"><a (click)="goToHome()"><span class="nav-text">HOME</span></a>
                   </li>
                   <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">TICKETS</span></a></li>
-                  <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">FAQ</span></a></li>
-                  <li class="fw-bold px-4 py-2 nav-link"><a><span class="nav-text">CONTACT US</span></a></li>
-                  <li class="fw-bold px-4 py-2 nav-link"><a (click)="goToAbout()"><span
-                           class="nav-text">ABOUT</span></a></li>
+                  <li class="fw-bold px-4 py-2 nav-link dropdown">
+                     <a class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"><span
+                           class="nav-text">ABOUT</span></a>
+                     <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" (click)="goToFAQ()">❔ FAQ</a></li>
+                        <li><a class="dropdown-item" (click)="scrollToFooter()">☎️ Contact Us</a></li>
+                        <li><a class="dropdown-item" (click)="goToAbout()">👥 About Us</a></li>
+                     </ul>
+                  </li>
                </ul>
             </div>
          </div>
 
          <!-- Search Bar -->
-         <div class="col-sm-4 col-md-12 col-xxl-2 p-wrap-search">
+         <div class=" col-sm-4 col-md-12 col-xxl-2 p-wrap-search">
             <div class="search-form p-sb" role="search">
                <input class="search-input" type="search" [(ngModel)]="query" (input)="onSearchInput()"
                   placeholder="Search events..." aria-label="Search events" autocomplete="off" />
@@ -58,7 +63,7 @@
 
                @if (isAuthenticated && currentUser) {
                <div class="dropdown">
-                  <button class="btn btn-link btn-dark dropdown-toggle p-0 text-decoration-none text-white"
+                  <button class="btn dropdown-toggle p-0 text-decoration-none text-white nav-link"
                      data-bs-toggle="dropdown">
                      <div class="d-flex align-items-center">
                         <div class="profile-avatar">
