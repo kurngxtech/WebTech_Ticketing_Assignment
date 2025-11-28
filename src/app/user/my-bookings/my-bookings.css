@@ -170,30 +170,30 @@
 }
 
 .sort-item.confirmed {
-   border-left: 4px solid var(--success-color);
+   border-left: 4px solid var(--success);
 }
 
 .sort-item.confirmed.active {
-   background: var(--success-color);
-   border-color: var(--success-color);
+   background: var(--success);
+   border-color: var(--success);
 }
 
 .sort-item.pending {
-   border-left: 4px solid var(--warning-color);
+   border-left: 4px solid var(--warning);
 }
 
 .sort-item.pending.active {
-   background: var(--warning-color);
-   border-color: var(--warning-color);
+   background: var(--warning);
+   border-color: var(--warning);
 }
 
 .sort-item.cancelled {
-   border-left: 4px solid var(--danger-color);
+   border-left: 4px solid var(--danger);
 }
 
 .sort-item.cancelled.active {
-   background: var(--danger-color);
-   border-color: var(--danger-color);
+   background: var(--danger);
+   border-color: var(--danger);
 }
 
 .sort-item.waitlist {
@@ -216,6 +216,7 @@
 
 .sort-item.active .sort-count {
    background: rgba(0, 0, 0, 0.2);
+   font-weight: bolder;
 }
 
 /* ============ LOADING ============ */
@@ -641,8 +642,8 @@
 
 .btn-cancel {
    background: transparent;
-   color: var(--danger-color);
-   border: 2px solid var(--danger-color);
+   color: var(--danger);
+   border: 2px solid var(--danger);
 }
 
 .btn-cancel:hover {
