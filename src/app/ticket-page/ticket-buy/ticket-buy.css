@@ -5,7 +5,15 @@
    min-height: calc(100vh - 120px);
    /* ensure content clears the fixed header */
    padding-top: 72px;
+   padding-left: 0;
+   padding-right: 0;
    animation: fadeIn 240ms ease-in;
+}
+
+.ticket-page>.row {
+   /* Menghilangkan margin negatif bawaan pada row */
+   margin-left: 0 !important;
+   margin-right: 0 !important;
 }
 
 .left .frame {
@@ -18,12 +26,9 @@
    align-items: center;
    justify-content: center;
    box-shadow: var(--card-shadow);
-   display: grid;
    grid-template-columns: 1fr;
    gap: 0;
-   min-height: calc(100vh - 72px);
-   padding-top: 100px;
-   animation: fadeIn 240ms ease-in;
+   border: 2px solid rgba(254, 183, 6, 0.15);
 }
 
 .left .frame {
@@ -872,10 +877,13 @@ h3 {
    border: 2px solid rgba(254, 183, 6, 0.3);
    border-radius: 12px;
    padding: 20px;
-   position: sticky;
+   position: fixed;
    top: 100px;
    max-height: calc(100vh - 140px);
    overflow-y: auto;
+   margin-left: 0;
+   width: 100%;
+   right: 20px;
 }
 
 .shopping-cart-section h2,
@@ -1046,17 +1054,26 @@ h3 {
 @media (max-width: 1024px) {
    .ticket-page {
       padding-top: 100px;
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
       grid-template-columns: 1fr;
       gap: 20px;
    }
 
    .shopping-cart-section {
-      top: 80px;
-      max-height: calc(100vh - 120px);
+      position: static;
+      top: auto;
+      right: auto;
+      width: 100%;
+      max-width: none;
+      margin-bottom: 20px;
    }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+   .padding-description {
+      padding-top: 1rem;
+   }
    .ticket-page {
       padding-top: 100px;
       padding-left: var(--spacing-md);
