@@ -1,15 +1,3 @@
-/* Bagus Ver */
-.custom-footer {
-   padding: 12px 0;
-   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-   background: var(--primary-black);
-   border-top: 1px solid rgba(254, 183, 6, 0.15);
-   position: relative;
-   z-index: 10;
-   height: var(--footer-height);
-   margin-top: auto;
-}
-
 .title-underline {
    border-bottom: solid #feb706;
 }
@@ -26,14 +14,10 @@ h1 {
    /* Beri minimum height */
 }
 
-.copyright {
-   flex: 0 0 auto;
-   font-size: 13px;
-   color: rgba(255, 255, 255, 0.7);
-}
+
 
 .w-content {
-   width:65%;
+   width: 65%;
 }
 
 .h-footer-content {
