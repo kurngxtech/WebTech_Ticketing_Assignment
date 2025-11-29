@@ -74,6 +74,10 @@ export class Header implements OnInit {
       this.router.navigate(['/my-bookings']);
    }
 
+   goToTicketList(): void {
+      this.router.navigate(['/ticket-list']);
+   }
+
    logout(): void {
       this.authService.logout();
       this.router.navigate(['/']);

@@ -16,7 +16,7 @@
    <section class="ticket-page container-fluid px-4 py-4 w-75">
       <div class=" row h-100">
          <!-- Left column: scaled image (50%) -->
-         <div class="col-lg-6 col-md-12">
+         <div class="col-lg-6 col-md-12 my-3">
             <aside class="left">
                <div class="frame">
                   <img [src]="event.img" [alt]="event.title" />
@@ -27,7 +27,7 @@
          <!-- Right column: event details (50%) -->
          <div class="col-lg-6 col-md-12">
             <main class="right">
-               <h2 class="title">{{ event.title }}</h2>
+               <h2 class="title fw-bold">{{ event.title }}</h2>
 
                <!-- Description fills the space -->
                <p class="desc">{{ event.description }}</p>
@@ -54,9 +54,9 @@
       </div>
 
       <!-- Full width: ticket purchase section with cart -->
-      <div class="row mt-4 mb-5">
+      <div class="row my-3">
          <!-- Left: Available Tickets -->
-         <div class="col-lg-12">
+         <div class="col-lg-12 p-0">
             <div class="tickets-list">
                <h3>Available Tickets</h3>
                @if (event.tickets.length) {
@@ -104,8 +104,8 @@
       </div>
 
       <!-- Right: Shopping Cart -->
-      <div class="col-lg-6 text-white">
-         <div class="shopping-cart-section">
+      <div class="col-lg-12 text-white">
+         <div class="shopping-cart-section w-50">
             <h3 class="text-white">🛒 Shopping Cart</h3>
             @if (cart.length > 0) {
             <div class="cart-items">

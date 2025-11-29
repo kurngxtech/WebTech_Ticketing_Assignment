@@ -1,0 +1,61 @@
+<div class="w-100 d-flex justify-content-center bg-black py-4 font">
+   <section class="events-section w-75">
+      <div class="events-header d-flex justify-content-between align-items-center mb-4">
+         <h2 class="text-white fw-bold">All Events</h2>
+
+         <div class="layout-switch">
+            <button class="btn btn-black me-2" [class.active]="!isListView" (click)="setLayout(false)" title="Grid View">
+               <i class="bi bi-grid-fill"></i> GRID
+            </button>
+            <button class="btn btn-black" [class.active]="isListView" (click)="setLayout(true)" title="List View">
+               <i class="bi bi-list-task"></i> LIST
+            </button>
+         </div>
+      </div>
+
+      @if (isListView) {
+      <div class="events-list">
+         @for (s of getDisplaySlides(); track $index; let i = $index) {
+         <div class="event-item list-view mb-3 p-3 rounded d-flex align-items-center justify-content-between" (click)="goTo(s.index)"
+            (keydown.enter)="goTo(s.index)" role="button" tabindex="0">
+            <div class="event-media me-3" aria-hidden="true">
+               <img [src]="s.data.img" class="event-image-list rounded" alt="event image" />
+            </div>
+
+            <div class="event-info flex-grow-1">
+               <p class="event-date mb-1 text-white-50">{{ s.data.date }} - {{ s.data.time }}</p>
+               <h3 class="event-title-list fw-bold mb-1">{{ s.data.title }}</h3>
+               <p class="event-description-list text-white-75">{{ s.data.description }}</p>
+            </div>
+
+            <div class="event-actions ms-3">
+               <button class="btn btn-warning fw-bold buy-ticket-btn" (click)="$event.stopPropagation(); goTo(s.index)">
+                  BUY TICKETS
+               </button>
+               <p class="text-white-50 text-end mt-1">Start from {{ s.data.price }}</p>
+            </div>
+         </div>
+         }
+      </div>
+      }
+
+      @else {
+      <div class="cards-grid">
+         @for (s of getDisplaySlides(); track $index; let i = $index) {
+         <div class="card" [class.highlight]="i < 3" (click)="goTo(s.index)" (keydown.enter)="goTo(s.index)"
+            role="button" tabindex="0">
+            <div class="card-media" aria-hidden="true">
+               <img [src]="s.data.img" class="card-image" alt="event" />
+               <div class="overlay">
+                  <h4 class="card-title">{{ s.data.title }}</h4>
+                  <p class="card-date">{{ s.data.date }}</p>
+                  <p class="card-location">{{ s.data.description }}</p>
+                  <div class="card-price">{{ s.data.price }}</div>
+               </div>
+            </div>
+         </div>
+         }
+      </div>
+      }
+   </section>
+</div>
