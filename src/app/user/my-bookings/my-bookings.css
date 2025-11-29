@@ -1,5 +1,4 @@
 .my-bookings-page {
-   background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 50%, var(--light-black) 100%);
    color: var(--text-white);
    min-height: 100vh;
    padding-top: 120px;

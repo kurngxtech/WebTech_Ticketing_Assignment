@@ -1,6 +1,7 @@
 h3 {
    color: #feb706;
    font-weight: bolder;
+   cursor: pointer;
 }
 
 .container-fluid {
@@ -69,20 +70,19 @@ h3 {
    position: relative;
    font-weight: 500;
    padding: 6px 8px;
-   overflow: hidden;
 }
 
-/* Text color reveal animation: white to gold, left to right */
+
 .nav-text {
-   --gold: rgba(254, 183, 6, 1);
+   --gold: #feb706;
    display: inline-block;
-   background: linear-gradient(90deg, var(--gold) 0%, var(--gold) 50%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 100%);
-   background-size: 200% 100%;
-   background-position: 100% 0;
-   -webkit-background-clip: text;
-   background-clip: text;
-   -webkit-text-fill-color: transparent;
-   transition: background-position 420ms ease;
+   color: #ffffff;
+   background: none;
+   -webkit-background-clip: unset;
+   background-clip: unset;
+   -webkit-text-fill-color: initial;
+   transition: color 420ms ease;
+
 }
 
 .nav-link:hover .nav-text {
@@ -106,14 +106,61 @@ h3 {
    transition: color 350ms ease-in-out, opacity 350ms ease-in-out;
 }
 
-/* styling list navbar */
+.nav-link.dropdown .dropdown-toggle {
+   background-color: transparent !important;
+   border: none !important;
+   box-shadow: none !important;
+   padding: 0 !important;
+   line-height: inherit;
+}
+
+.nav-link.dropdown .dropdown-toggle:hover,
+.nav-link.dropdown .dropdown-toggle:focus,
+.nav-link.dropdown .dropdown-toggle:active,
+.nav-link.dropdown .dropdown-toggle:not(.collapsed) {
+   background-color: transparent !important;
+   border: none !important;
+   box-shadow: none !important;
+   outline: none !important;
+   color: inherit !important;
+}
+
+.nav-link.dropdown .dropdown-toggle::after {
+   display: none;
+}
+
+.nav-link.dropdown {
+   font-weight: 700 !important;
+}
+
+.nav-link.dropdown .nav-text {
+   font-weight: 700 !important;
+}
+
+.nav-link.dropdown .dropdown-toggle {
+   display: flex;
+   align-items: center;
+}
+
+
+.dropdown-menu-dark .dropdown-item:hover,
+.dropdown-menu-dark .dropdown-item:focus,
+.dropdown-menu-dark .dropdown-item:active {
+   background-color: rgba(255, 255, 255, 0.1) !important;
+   color: #ffffff !important;
+}
+
+.dropdown-menu-dark .dropdown-item.active {
+   background-color: rgba(255, 255, 255, 0.1) !important;
+   color: #ffffff !important;
+}
+
 .underline-header {
    border-bottom: solid 3px #feb706;
    position: relative;
    overflow: visible;
 }
 
-/* Spotlight radial gradient putih */
 .underline-header::before {
    content: "";
    position: absolute;

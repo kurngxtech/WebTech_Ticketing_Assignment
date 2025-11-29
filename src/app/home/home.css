@@ -1,11 +1,11 @@
 /* Dark themed body + cards */
 .padding-body {
-   padding-top: calc(var(--header-height) + var(--spacing-md));
+   padding-top: var(--header-height * 1.5);
 }
 
 @media (max-width: 900px) {
    .padding-body {
-      padding-top: 150px;
+      padding-top: var(--header-height * 0.5);
    }
 }
 
