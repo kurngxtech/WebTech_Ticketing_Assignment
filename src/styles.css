@@ -260,12 +260,6 @@ button:active,
 
 .default-bg-color {
    background-color: #080808;
-<<<<<<< HEAD
-}
-
-.font {
-   font-family: sans-serif;
-=======
 }
 
 .alert-danger {
@@ -462,5 +456,4 @@ button:active,
       padding: var(--spacing-xs) var(--spacing-sm);
       font-size: 0.9rem;
    }
->>>>>>> origin/adri/pages/home
 }
