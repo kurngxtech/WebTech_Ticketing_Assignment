@@ -194,7 +194,7 @@ h3 {
 }
 
 .default-font {
-   font-family: 'Outfit', 'Times New Roman', sans-serif;
+   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 ul li a span {

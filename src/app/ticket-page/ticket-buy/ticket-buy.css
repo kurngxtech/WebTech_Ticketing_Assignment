@@ -960,11 +960,6 @@
       max-width: none;
       margin-bottom: 20px;
    }
-
-   .tickets-grid {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-   }
 }
 
 @media (max-width: 992px) {
@@ -972,30 +967,47 @@
       padding-top: 1rem;
    }
    .ticket-page {
-      min-height: calc(100vh - 100px);
-      padding-top: 72px;
+      padding-top: 100px;
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
+      grid-template-columns: 1fr;
    }
 
-   .right {
-      padding: 0;
+   .right .title {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
    }
 
-   .tickets-grid {
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+   .right .desc {
+      font-size: 13px;
    }
 
-   .ticket-card {
-      padding: 16px;
+   .meta div {
+      font-size: 12px;
    }
 
-   .ticket-card h3 {
-      font-size: 0.95rem;
-      margin-bottom: 8px;
+   .ticket-row {
+      flex-direction: column;
+      align-items: flex-start;
    }
 
-   .ticket-card .price {
-      font-size: 1.2rem;
+   .ticket-actions {
+      width: 100%;
+      margin-top: 12px;
+      flex-direction: column;
+      gap: 10px;
+   }
+
+   .qty-wrap {
+      width: 100%;
+   }
+
+   .qty-wrap input {
+      width: 100%;
+   }
+
+   .btn-add-cart {
+      width: 100%;
    }
 
    .shopping-cart-section {

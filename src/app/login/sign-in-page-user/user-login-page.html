@@ -15,13 +15,13 @@
 
             <!-- Error Message -->
             @if (errorMessage) {
-               <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                  {{ errorMessage }}
-                  <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+               <div class="alert alert-danger alert-dismissible fade show" role="alert" style="animation: slideIn 0.3s ease-in;">
+                  <strong>Error!</strong> {{ errorMessage }}
+                  <button type="button" class="btn-close" (click)="clearError()"></button>
                </div>
             }
 
-            <form (ngSubmit)="login()" #loginForm="ngForm">
+            <form (ngSubmit)="login()">
                <div class="mb-3">
                   <label for="username" class="form-label text-white">Username or Email</label>
                   <input 
