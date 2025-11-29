@@ -108,3 +108,14 @@ h1 {
 p {
    margin: 0;
 }
+
+@media (max-width: 1200px) {
+   .col-lg-6 {
+      margin: 1.5rem 0;
+      text-align: center;
+   }
+
+   .p-responsive {
+      padding-top: 1rem;
+   }
+}
