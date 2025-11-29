@@ -168,6 +168,11 @@ export class AuthService {
       return this.authState.value.currentUser || null;
    }
 
+   getAllUsers(): User[] {
+      this.ensureMockLoaded();
+      return [...this.mockUsers];
+   }
+
    isAuthenticated(): boolean {
       return this.authState.value.isAuthenticated;
    }

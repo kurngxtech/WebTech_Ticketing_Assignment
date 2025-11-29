@@ -76,7 +76,7 @@ export class AdminDashboard implements OnInit {
   loadRegisteredEOs(): void {
     // Get all registered EO users
     const allUsers = this.authService.getAllUsers();
-    this.registeredEOs = allUsers.filter(u => u.role === 'eo') || [];
+    this.registeredEOs = allUsers.filter((u: User) => u.role === 'eo') || [];
   }
 
   loadAllEOEvents(): void {
