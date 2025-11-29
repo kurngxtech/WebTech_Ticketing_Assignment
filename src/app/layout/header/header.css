@@ -1,6 +1,7 @@
 h3 {
    color: #feb706;
    font-weight: bolder;
+   cursor: pointer;
 }
 
 .container-fluid {
