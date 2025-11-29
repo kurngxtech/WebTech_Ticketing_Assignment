@@ -123,6 +123,7 @@ h3 {
    box-shadow: none !important;
    outline: none !important;
    color: inherit !important;
+   transform: none !important;
 }
 
 .nav-link.dropdown .dropdown-toggle::after {
@@ -245,6 +246,7 @@ img {
 /* styling button login/sign up */
 .button-size {
    padding: 5px 25px;
+   transform: none !important;
 }
 
 .buttonAccount {
