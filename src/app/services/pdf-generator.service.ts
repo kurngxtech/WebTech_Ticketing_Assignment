@@ -83,7 +83,7 @@ export class PdfGeneratorService {
          pdf.text(`Date: ${eventDate}`, infoMargin, yPosition + 38);
          pdf.text(`Ticket Type: ${ticketType}`, pageWidth / 2, yPosition + 8);
          pdf.text(`Quantity: ${quantity}`, pageWidth / 2, yPosition + 18);
-         pdf.text(`Total Price: IDR ${totalPrice.toLocaleString('id-ID')}`, pageWidth / 2, yPosition + 28);
+         pdf.text(`Total Price: $ ${totalPrice}`, pageWidth / 2, yPosition + 28);
 
          yPosition += 60;
 
@@ -126,7 +126,7 @@ export class PdfGeneratorService {
          pdf.setFontSize(9);
          pdf.setTextColor(100, 100, 100);
          pdf.text('Please save this ticket and show the QR code for check-in', pageWidth / 2, yPosition + 10, { align: 'center' });
-         pdf.text(`Generated: ${new Date().toLocaleString('id-ID')}`, pageWidth / 2, yPosition + 20, { align: 'center' });
+         pdf.text(`Generated: ${new Date().toLocaleString('en-US')}`, pageWidth / 2, yPosition + 20, { align: 'center' });
 
          // Save PDF
          pdf.save(`ticket_${bookingId}.pdf`);
@@ -197,7 +197,7 @@ export class PdfGeneratorService {
             const infoMargin = 15;
             pdf.text(`Booking: ${booking.bookingId} | Event: ${booking.eventTitle}`, infoMargin, yPosition + 8);
             pdf.text(`Type: ${booking.ticketType} | Qty: ${booking.quantity} | Date: ${booking.eventDate}`, infoMargin, yPosition + 18);
-            pdf.text(`Total: IDR ${booking.totalPrice.toLocaleString('id-ID')}`, infoMargin, yPosition + 28);
+            pdf.text(`Total: $ ${booking.totalPrice}`, infoMargin, yPosition + 28);
 
             yPosition += 50;
 

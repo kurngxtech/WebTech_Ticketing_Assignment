@@ -353,7 +353,7 @@ async generateTicketPDF(
 - `eventTitle` - Event name
 - `ticketType` - Type of ticket (e.g., VIP, General)
 - `quantity` - Number of tickets
-- `totalPrice` - Total price in IDR
+- `totalPrice` - Total price in USD
 - `eventDate` - Event date
 - `userName` - Customer's full name
 

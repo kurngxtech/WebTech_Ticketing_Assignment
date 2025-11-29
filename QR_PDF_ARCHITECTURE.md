@@ -172,7 +172,7 @@ processPayment() Method
 │  Event: Concert 2025                           │
 │  Date: Jan 15, 2025                            │
 │  Ticket Type: VIP | Quantity: 2                │
-│  Total Price: IDR 1,000,000                    │
+│  Total Price: $ 1,000                    │
 └─────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────┐

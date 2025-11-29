@@ -357,11 +357,11 @@ export class TicketBuy implements OnInit {
    }
 
    formattedPrice(priceNum: number): string {
-      return priceNum.toLocaleString('id-ID', {
+      return new Intl.NumberFormat('en-US', {
          style: 'currency',
-         currency: 'IDR',
+         currency: 'USD',
          maximumFractionDigits: 0
-      });
+      }).format(priceNum);
    }
 
    joinWaitlist(ticket: TicketCategory): void {

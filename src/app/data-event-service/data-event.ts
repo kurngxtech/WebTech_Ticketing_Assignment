@@ -8,7 +8,7 @@ export class DataEvent { }
 export interface TicketCategory {
    id: string;
    type: string;
-   price: number; // in IDR
+   price: number; // in USD
    total: number; // total seats
    sold: number; // sold seats
    section?: string; // e.g., "A", "B", "C" - seating section
