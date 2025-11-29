@@ -383,6 +383,6 @@ export class DataEventService {
   }
 
   formatPrice(price: number): string {
-    return price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
   }
 }

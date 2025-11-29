@@ -137,7 +137,7 @@ TOTAL: +338 lines of new code, 0 breaking changes
 │ Event: Concert 2025                    │
 │ Date: Jan 15, 2025                     │
 │ Ticket Type: VIP | Qty: 2              │
-│ Total: IDR 1,000,000                   │
+│ Total: $ 1,000                   │
 ├────────────────────────────────────────┤
 │                                        │
 │          ╔──────────────╗              │

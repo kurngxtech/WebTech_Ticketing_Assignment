@@ -155,7 +155,7 @@ Methods:
 ║ Event: Concert 2025            ║  ← Booking Details
 ║ Date: Jan 15, 2025             ║
 ║ Ticket: VIP | Qty: 2           ║
-║ Total: IDR 1,000,000           ║
+║ Total: $ 1,000           ║
 ║                                ║
 ╠════════════════════════════════╣
 ║                                ║

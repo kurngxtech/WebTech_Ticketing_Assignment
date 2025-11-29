@@ -96,7 +96,7 @@ Username: bob_eo | Email: bob@events.com | Org: Concert Productions Ltd
    - Event title, date (future date)
    - Description, location, image URL
    - Add 3 ticket types (VIP, Regular, Early Bird)
-   - Set prices: VIP=500k, Regular=350k, Early=300k
+   - Set prices: VIP=$500, Regular=$350, Early=$300
    - Assign sections to each type
    - Add promotional codes (e.g., SAVE20=20% off)
 4. Review and create
@@ -346,7 +346,7 @@ USER:
 {
   id: string;                // Unique ticket ID
   type: string;              // E.g., "VIP", "Regular"
-  price: number;             // Price in IDR
+  price: number;             // Price in USD
   total: number;             // Total capacity
   sold: number;              // Currently sold
   section?: string;          // Auditorium section

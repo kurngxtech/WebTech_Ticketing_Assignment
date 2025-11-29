@@ -154,7 +154,7 @@ export class AnalyticsReports implements OnInit {
   }
 
   getStatementValue(): string {
-    if (!this.analytics) return 'Rp 0';
+    if (!this.analytics) return '$0';
     return this.formatPrice(this.analytics.totalRevenue);
   }
 }
