@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
    templateUrl: './user-login-page.html',
    styleUrl: './user-login-page.css',
 })
-export class UserLoginPage {
+export class UserLoginPage implements OnInit {
    username: string = '';
    password: string = '';
    rememberMe: boolean = false;
@@ -30,9 +30,14 @@ export class UserLoginPage {
 
       this.isLoading = true;
       this.errorMessage = '';
-         // Use async AuthService helper that simulates network latency in dev
-         this.authService.loginAsync(this.username, this.password, 500).subscribe(result => {
+      const tempPassword = this.password;
+      // Use async AuthService helper that simulates network latency in dev
+      this.authService.loginAsync(this.username, tempPassword, 500).subscribe(
+         result => {
             if (result.success && result.user) {
+               // Clear password after successful login
+               this.password = '';
+               
                // Store remember me preference (only if localStorage is available)
                if (this.rememberMe && typeof localStorage !== 'undefined') {
                   localStorage.setItem('rememberedUsername', this.username);
@@ -49,12 +54,20 @@ export class UserLoginPage {
                }
             } else {
                this.errorMessage = result.message || 'Login failed. Please try again.';
+               this.isLoading = false;
+               // Keep password visible so user can edit and retry
             }
-            this.isLoading = false;
-         }, err => {
+         },
+         err => {
             this.errorMessage = 'Login failed. Please try again.';
             this.isLoading = false;
-         });
+            // Keep password visible so user can edit and retry
+         }
+      );
+   }
+
+   clearError() {
+      this.errorMessage = '';
    }
 
    goToHome() {

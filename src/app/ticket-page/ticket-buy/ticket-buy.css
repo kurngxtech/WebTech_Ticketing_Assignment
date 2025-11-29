@@ -26,26 +26,6 @@
    align-items: center;
    justify-content: center;
    box-shadow: var(--card-shadow);
-   grid-template-columns: 1fr;
-   gap: 0;
-   border: 2px solid rgba(254, 183, 6, 0.15);
-}
-
-.left .frame {
-   width: 100%;
-   aspect-ratio: 16/9;
-   border-radius: 12px;
-   overflow: hidden;
-   background: rgba(45, 45, 45, 0.5);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   box-shadow: var(--shadow-lg);
-   border: 2px solid rgba(254, 183, 6, 0.15);
-}
-
-h3 {
-   color: var(--primary-yellow);
 }
 
 .left .frame img {
@@ -969,11 +949,7 @@ h3 {
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
    .ticket-page {
-      padding-top: 100px;
-      padding-left: var(--spacing-md);
-      padding-right: var(--spacing-md);
-      grid-template-columns: 1fr;
-      gap: 20px;
+      padding-top: 72px;
    }
 
    .shopping-cart-section {
