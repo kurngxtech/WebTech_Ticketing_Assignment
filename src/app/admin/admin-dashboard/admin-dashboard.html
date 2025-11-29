@@ -1,74 +1,387 @@
 <div class="admin-dashboard">
-   <div class="dashboard-header">
-      <h1>Admin Dashboard</h1>
-      @if (currentUser) {
-      <p class="welcome-msg">Welcome, {{ currentUser.fullName }}</p>
+  <!-- Dashboard Top Bar with Profile and Logout -->
+  <div class="dashboard-top-bar">
+    <div class="top-bar-content">
+      <h1 class="dashboard-title">Admin Dashboard</h1>
+      
+      <div class="profile-section">
+        @if (currentUser) {
+        <div class="profile-info">
+          <span class="profile-name">{{ currentUser.fullName }}</span>
+          <span class="profile-role">{{ currentUser.role | uppercase }}</span>
+        </div>
+        
+        <button class="logout-btn" (click)="logout()" title="Logout">
+          <span class="logout-icon">🚪</span>
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="dashboard-container">
+    <!-- Chart Section -->
+    <div class="chart-section">
+      <div class="chart-card" [class.blur]="showChartOptions">
+        <!-- Chart Header with Options -->
+        <div class="chart-header">
+          <div class="chart-title-area">
+            <p class="chart-statement">{{ getStatementText() }}</p>
+          </div>
+          <button class="menu-button" (click)="toggleChartOptions()" title="Chart options">
+            @if (!showChartOptions) {
+            <span class="icon">⋯</span>
+            } @else {
+            <span class="icon">✕</span>
+            }
+          </button>
+        </div>
+
+        <!-- Chart Display - Line Chart -->
+        <div class="chart-display" [class.blur]="showChartOptions">
+          <svg class="line-chart" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid lines -->
+            <g class="grid">
+              @for (i of [0,1,2,3,4]; track i) {
+              <line [attr.x1]="0" [attr.y1]="i * 75" [attr.x2]="1000" [attr.y2]="i * 75" class="grid-line" />
+              }
+            </g>
+            <!-- Line path -->
+            <polyline [attr.points]="getChartLinePoints()" class="chart-line" />
+            <!-- Data points -->
+            @for (point of chartDataPoints; track $index) {
+            <circle [attr.cx]="point.x" [attr.cy]="point.y" r="6" class="data-point" />
+            }
+          </svg>
+
+          <!-- Chart Options Overlay -->
+          @if (showChartOptions) {
+          <div class="chart-options-overlay">
+            <div class="options-group">
+              <p class="options-label">Select Data Type:</p>
+              <div class="option-buttons">
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'events'"
+                  (click)="selectChartType('events')"
+                >
+                  Total Events
+                </button>
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'tickets'"
+                  (click)="selectChartType('tickets')"
+                >
+                  Tickets Sold
+                </button>
+                <button
+                  class="option-btn"
+                  [class.active]="selectedChartType === 'revenue'"
+                  (click)="selectChartType('revenue')"
+                >
+                  Total Revenue
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="time-period-section">
+          <button class="time-toggle-btn" (click)="toggleTimePeriodMenu()" title="Time period">
+            @if (!showTimePeriodMenu) {
+            <span class="icon">⋮</span>
+            } @else {
+            <span class="icon">✕</span>
+            }
+          </button>
+
+          @if (showTimePeriodMenu) {
+          <div class="time-period-menu">
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'daily'"
+              (click)="selectTimePeriod('daily')"
+            >
+              Daily
+            </button>
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'weekly'"
+              (click)="selectTimePeriod('weekly')"
+            >
+              Weekly
+            </button>
+            <button
+              class="time-option"
+              [class.active]="selectedTimePeriod === 'monthly'"
+              (click)="selectTimePeriod('monthly')"
+            >
+              Monthly
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="events-section">
+      <div class="events-header">
+        <h2>All Events</h2>
+      </div>
+
+      @if (isLoading) {
+      <div class="loading-state">
+        <p>Loading all events...</p>
+      </div>
+      } @else if (allEOEvents.length === 0) {
+      <div class="empty-state">
+        <p>No events yet.</p>
+      </div>
+      } @else {
+      <div class="events-grid">
+        @for (event of allEOEvents; track event.id) {
+        <div
+          class="event-card"
+          [class.blur-card]="expandedEventMenuId === event.id"
+          (click)="closeEventMenu()"
+        >
+          <!-- Event Image -->
+          <div class="event-image-section">
+            @if (event.img) {
+            <img [src]="event.img" [alt]="event.title" class="event-image" />
+            } @else {
+            <div class="image-placeholder">📸</div>
+            }
+            <div class="event-status-badge" [ngClass]="getStatusBadgeClass(event.status)">
+              {{ getStatusText(event.status) }}
+            </div>
+          </div>
+
+          <!-- Event Content -->
+          <div class="event-content">
+            <div class="event-header">
+              <h3 class="event-title">{{ event.title }}</h3>
+              <div class="event-meta">
+                <p class="tickets-sold"><strong>Total Tickets Sold:</strong> {{ getTotalTicketsSold(event) }}</p>
+              </div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="event-details">
+              <div class="detail-item">
+                <span class="detail-label">📍 Location:</span>
+                <span class="detail-text">{{ event.location }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">📅 Date:</span>
+                <span class="detail-text">{{ event.date }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">💰 Revenue:</span>
+                <span class="detail-text">{{ formatPrice(getTotalRevenue(event)) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Menu Button -->
+          <div class="event-menu-container">
+            <button
+              class="event-menu-btn"
+              (click)="toggleEventMenu(event.id, $event)"
+              title="Event options"
+            >
+              @if (!expandedEventMenuId || expandedEventMenuId !== event.id) {
+              <span class="icon">⋯</span>
+              } @else {
+              <span class="icon">✕</span>
+              }
+            </button>
+          </div>
+
+          <!-- Event Action Menu Overlay - Cover entire card -->
+          @if (expandedEventMenuId === event.id) {
+          <div class="event-action-overlay" (click)="$event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="overlay-close-btn" (click)="toggleEventMenu(event.id, $event)" title="Close menu">
+              ✕
+            </button>
+
+            <div class="action-group">
+              <div class="action-buttons" style="grid-template-columns: 1fr;">
+                <button class="action-item analysis" (click)="viewAnalytics(event)">
+                  <span class="action-icon">📊</span> In-depth Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
       }
-   </div>
+    </div>
 
-   <!-- Auditorium Statistics -->
-   @if (auditoriumStats) {
-   <div class="stats-section">
-      <h2>Auditorium Statistics</h2>
-
-      <div class="stats-grid">
-         <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-               <p class="stat-label">Total Events</p>
-               <p class="stat-value">{{ auditoriumStats.totalEvents }}</p>
-            </div>
-         </div>
-
-         <div class="stat-card">
-            <div class="stat-icon">🎫</div>
-            <div class="stat-content">
-               <p class="stat-label">Total Bookings</p>
-               <p class="stat-value">{{ auditoriumStats.totalBookings }}</p>
-            </div>
-         </div>
-
-         <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-content">
-               <p class="stat-label">Total Revenue</p>
-               <p class="stat-value">{{ formatPrice(auditoriumStats.totalRevenue) }}</p>
-            </div>
-         </div>
-
-         <div class="stat-card">
-            <div class="stat-icon">🪑</div>
-            <div class="stat-content">
-               <p class="stat-label">Occupancy Rate</p>
-               <p class="stat-value">{{ auditoriumStats.occupancyRate | number: '1.1-1' }}%</p>
-            </div>
-         </div>
+    <!-- Event Organizers Section -->
+    <div class="eos-section">
+      <div class="eos-header">
+        <h2>Registered Event Organizers</h2>
+        <button class="btn btn-primary" (click)="toggleRegistrationForm()" title="Register new EO">
+          <span class="btn-icon">+</span>
+          Register Event Organizer
+        </button>
       </div>
-   </div>
-   }
 
-   <!-- Admin Actions -->
-   <div class="actions-section">
-      <h2>Admin Tools</h2>
-      <div class="action-buttons">
-         <a routerLink="/analytics" class="btn btn-primary">
-            <span class="btn-icon">📈</span> View Detailed Analytics
-         </a>
-         <button class="btn btn-secondary" (click)="loadStats()">
-            <span class="btn-icon">🔄</span> Refresh Statistics
-         </button>
+      <!-- Registration Form -->
+      @if (showRegistrationForm) {
+      <div class="registration-card">
+        <h3>Register New Event Organizer</h3>
+        
+        @if (registrationMessage) {
+        <div class="message-box" [class.success]="registrationSuccess" [class.error]="!registrationSuccess">
+          {{ registrationMessage }}
+        </div>
+        }
+
+        <form [formGroup]="registrationForm" (ngSubmit)="registerEventOrganizer()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="fullName" 
+                placeholder="e.g., John Doe">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                formControlName="email" 
+                placeholder="e.g., john@example.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                formControlName="phone" 
+                placeholder="e.g., 08123456789">
+            </div>
+            <div class="form-group">
+              <label>Organization Name</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="organizationName" 
+                placeholder="e.g., ABC Event Company">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Username *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="username" 
+                placeholder="e.g., johndoe">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Password *</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                formControlName="password" 
+                placeholder="Minimum 6 characters">
+            </div>
+            <div class="form-group">
+              <label>Confirm Password *</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                formControlName="confirmPassword" 
+                placeholder="Re-enter password">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" (click)="toggleRegistrationForm()">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-success" 
+              [disabled]="!registrationForm.valid || isSubmitting">
+              @if (isSubmitting) {
+              <span>Registering...</span>
+              } @else {
+              <span>Register Event Organizer</span>
+              }
+            </button>
+          </div>
+        </form>
       </div>
-   </div>
+      }
 
-   <!-- Information Box -->
-   <div class="info-box">
-      <h3>System Overview</h3>
-      <ul>
-         <li>Monitor auditorium utilization and performance metrics</li>
-         <li>Track event organizers and their events</li>
-         <li>View comprehensive analytics and revenue reports</li>
-         <li>Manage user accounts and event organizer registrations</li>
-         <li>Monitor ticket sales and occupancy rates</li>
-      </ul>
-   </div>
+      <!-- Event Organizers List -->
+      @if (registeredEOs.length > 0) {
+      <div class="eos-grid">
+        @for (eo of registeredEOs; track eo.id) {
+        <div class="eo-card">
+          <div class="eo-header">
+            <div class="eo-avatar">{{ eo.fullName.charAt(0).toUpperCase() }}</div>
+            <div class="eo-info">
+              <h3 class="eo-name">{{ eo.fullName }}</h3>
+              <p class="eo-username">@{{ eo.username }}</p>
+            </div>
+          </div>
+
+          <div class="eo-details">
+            <div class="detail-item">
+              <span class="detail-label">📧 Email:</span>
+              <span class="detail-text">{{ eo.email }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">📱 Phone:</span>
+              <span class="detail-text">{{ eo.phone }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">🏢 Organization:</span>
+              <span class="detail-text">{{ eo.organizationName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">📅 Registered:</span>
+              <span class="detail-text">{{ eo.createdAt }}</span>
+            </div>
+          </div>
+
+          <div class="eo-actions">
+            <button class="btn btn-danger-small" (click)="removeEventOrganizer(eo.id)" title="Remove EO">
+              <span class="icon">🗑</span> Remove
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="empty-state">
+        <p>No Event Organizers registered yet.</p>
+        <button class="btn btn-primary" (click)="toggleRegistrationForm()">
+          Register First Event Organizer
+        </button>
+      </div>
+      }
+    </div>
+  </div>
 </div>

@@ -8,7 +8,6 @@ app-root {
    min-height: 100vh;
    display: flex;
    flex-direction: column;
-   background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 50%, var(--light-black) 100%);
    color: var(--text-white);
 }
 
@@ -20,6 +19,7 @@ app-root {
 /* Page transition animation */
 .router-container {
    animation: fadeInUp 0.3s ease-in;
+   background-color: var(--primary-black);
 }
 
 @keyframes fadeInUp {

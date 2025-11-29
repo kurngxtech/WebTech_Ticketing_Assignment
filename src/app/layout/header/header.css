@@ -288,7 +288,7 @@ img {
 .search-suggestions li {
    padding: 10px 12px;
    cursor: pointer;
-   color: var(--text);
+   color: var(--primary-yellow);
 }
 
 .search-suggestions li:hover,
@@ -336,7 +336,7 @@ li a:hover {
    transform: translateY(-50%);
    background: transparent;
    border: none;
-   color: var(--text);
+   color: var(--primary-yellow);
    font-size: 16px;
    cursor: pointer;
 }

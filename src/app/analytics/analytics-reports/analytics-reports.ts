@@ -1,53 +1,48 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
 import { EventItem, EventAnalytics } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
 
+interface ChartDataPoint {
+  x: number;
+  y: number;
+}
+
+type TimePeriod = 'daily' | 'weekly' | 'monthly';
+
 @Component({
   selector: 'app-analytics-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './analytics-reports.html',
   styleUrls: ['./analytics-reports.css']
 })
 export class AnalyticsReports implements OnInit {
   currentUser: User | null = null;
   selectedEventId: number | null = null;
-  selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'daily';
+  selectedTimePeriod: TimePeriod = 'daily';
   
-  events: EventItem[] = [];
   currentEvent: EventItem | null = null;
   analytics: EventAnalytics | null = null;
-  auditoriumStats: any = null;
-
-  isAdmin = false;
-  isEO = false;
+  chartDataPoints: ChartDataPoint[] = [];
+  showTimePeriodMenu = false;
 
   constructor(
     private eventService: DataEventService,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     
     if (!this.currentUser) {
+      this.router.navigate(['/login']);
       return;
-    }
-
-    this.isAdmin = this.currentUser.role === 'admin';
-    this.isEO = this.currentUser.role === 'eo';
-
-    if (this.isAdmin) {
-      this.events = this.eventService.getEvents();
-      this.auditoriumStats = this.eventService.getAuditoriumAnalytics();
-    } else if (this.isEO) {
-      this.events = this.eventService.getEventsByOrganizer(this.currentUser.id);
     }
 
     // Check for eventId in query params
@@ -64,12 +59,61 @@ export class AnalyticsReports implements OnInit {
       this.currentEvent = this.eventService.getEventById(this.selectedEventId) || null;
       if (this.currentEvent) {
         this.analytics = this.eventService.generateEventAnalytics(this.selectedEventId);
+        this.generateLineChartPoints();
       }
     }
   }
 
-  onEventSelect(): void {
-    this.loadEventAnalytics();
+  generateLineChartPoints(): void {
+    if (!this.analytics) return;
+    
+    const bookings = Object.entries(this.analytics.bookingsByDate).map(([date, data]: any) => ({
+      date,
+      count: data.count,
+      revenue: data.revenue
+    }));
+
+    if (bookings.length === 0) {
+      this.chartDataPoints = [];
+      return;
+    }
+
+    const maxValue = Math.max(...bookings.map(b => b.revenue));
+
+    const chartHeight = 300;
+    const chartWidth = 1000;
+    const padding = 40;
+
+    this.chartDataPoints = bookings.map((booking, index) => ({
+      x: padding + (index / (bookings.length - 1 || 1)) * (chartWidth - 2 * padding),
+      y: chartHeight - ((booking.revenue / maxValue) * (chartHeight - 2 * padding)) - padding
+    }));
+  }
+
+  getLinePoints(): string {
+    return this.chartDataPoints.map(p => `${p.x},${p.y}`).join(' ');
+  }
+
+  toggleTimePeriodMenu(): void {
+    this.showTimePeriodMenu = !this.showTimePeriodMenu;
+  }
+
+  selectTimePeriod(period: TimePeriod): void {
+    this.selectedTimePeriod = period;
+    this.showTimePeriodMenu = false;
+  }
+
+  closeTimePeriodMenu(): void {
+    this.showTimePeriodMenu = false;
+  }
+
+  goBack(): void {
+    const previousUrl = this.currentUser?.role === 'eo' ? '/eo' : '/admin';
+    this.router.navigate([previousUrl]);
+  }
+
+  printPDF(): void {
+    window.print();
   }
 
   formatPrice(price: number): string {
@@ -105,51 +149,12 @@ export class AnalyticsReports implements OnInit {
     }));
   }
 
-  downloadReport(): void {
-    if (!this.currentEvent || !this.analytics) return;
-
-    const reportContent = `
-EVENT ANALYTICS REPORT
-=====================
-Event: ${this.currentEvent.title}
-Date: ${new Date().toLocaleDateString()}
-
-EVENT DETAILS:
-- Event Name: ${this.currentEvent.title}
-- Date: ${this.currentEvent.date}
-- Time: ${this.currentEvent.time}
-- Location: ${this.currentEvent.location}
-- Organizer: ${this.currentEvent.organizer}
-
-SALES SUMMARY:
-- Total Revenue: ${this.formatPrice(this.analytics.totalRevenue)}
-- Total Tickets Sold: ${this.analytics.totalTicketsSold}
-- Total Seats Occupied: ${this.analytics.totalSeatsOccupied}
-- Occupancy Rate: ${this.getOccupancyPercentage()}%
-
-TICKET BREAKDOWN:
-${Object.entries(this.analytics.byTicketType).map(([ticketId, data]: any) => {
-  const ticket = this.currentEvent?.tickets.find(t => t.id === ticketId);
-  return `- ${ticket?.type}: ${data.sold} sold, ${this.formatPrice(data.revenue)} revenue`;
-}).join('\n')}
-
-BOOKING TIMELINE:
-${this.getBookingsByPeriod().map(b => 
-  `- ${b.date}: ${b.count} bookings, ${this.formatPrice(b.revenue)} revenue`
-).join('\n')}
-    `;
-
-    // Create download link
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportContent));
-    element.setAttribute('download', `${this.currentEvent.title}_report.txt`);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  getStatementText(): string {
+    return `Total Revenue (${this.selectedTimePeriod.charAt(0).toUpperCase() + this.selectedTimePeriod.slice(1)})`;
   }
 
-  print(): void {
-    window.print();
+  getStatementValue(): string {
+    if (!this.analytics) return 'Rp 0';
+    return this.formatPrice(this.analytics.totalRevenue);
   }
 }
