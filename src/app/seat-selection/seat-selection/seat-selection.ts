@@ -99,15 +99,5 @@ export class SeatSelection implements OnInit {
    getRowLabel(index: number): string {
       return String.fromCharCode(65 + index);
    }
-
-   bookSelectedSeats(): void {
-      const selectedSeats = this.getSelectedSeats().map(seat => seat.id);
-
-      // 1. Panggil fungsi checkout di service (mengatur showPaymentModal = true)
-      this.ticketBuy.checkoutWithSeats(selectedSeats);
-
-      // 2. NAVIGASI KEMBALI ke halaman TicketBuy
-      // ASUMSI: eventId disimpan di service TicketBuy saat di-load
-   }
 }
 
