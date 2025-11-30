@@ -6,6 +6,7 @@ import { About } from './about/about';
 import { MyBookings } from './user/my-bookings/my-bookings';
 import { Faq } from './faq/faq/faq';
 import { TicketList } from './ticket-list/ticket-list/ticket-list';
+import { SeatSelection } from './seat-selection/seat-selection/seat-selection';
 
 export const routes: Routes = [
    { path: '', component: Home },
@@ -15,6 +16,7 @@ export const routes: Routes = [
    { path: 'my-bookings', component: MyBookings },
    { path: 'faq', component: Faq },
    { path: 'ticket-list', component: TicketList },
+   { path: 'seat-selection', component: SeatSelection },
    // Lazy load admin/eo modules
    {
       path: 'admin',

@@ -157,10 +157,137 @@
    </section>
    }
 
+   @if (showSelectionSeats) {
+   <!-- Selection Seats -->
+   <div class="modal-overlay">
+      <!-- <div class="modal-dialog"> -->
+      <div class="modal-content-seat">
+         <div class="seat-map-scroll-wrapper default-bg-color font">
+            <!-- Auditorium Custom Seat -->
+            <div class="auditorium-map-container">
+               <div class="map-title-bar">
+                  <h2 class="map-title">Auditorium Seating Map</h2>
+               </div>
+
+               <div class="seating-section lower-foyer">
+                  <h3 class="section-label">LOWER FOYER</h3>
+
+                  <div class="seating-row upper-row">
+
+                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:0:1">
+                        <div class="block-label">{{ block.name }}</div>
+                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                           <button *ngFor="let seat of row; let j = index" class="seat-button"
+                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                              [attr.aria-label]="'Kursi ' + seat.id">
+                              <span class="seat-number">{{ j + 1 }}</span>
+                           </button>
+                        </div>
+                     </div>
+
+                     <div class="center-foyer-stack">
+                        <div class="seat-block vip-block" *ngFor="let block of seatingBlocks | slice:1:2">
+                           <div class="block-label">{{ block.name }}</div>
+                           <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                              <button *ngFor="let seat of row; let j = index" class="seat-button vip-seat"
+                                 [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                                 [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                                 [attr.aria-label]="'Kursi ' + seat.id">
+                                 <span class="seat-number">{{ j + 1 }}</span>
+                              </button>
+                           </div>
+                        </div>
+
+                        <div class="seat-block" *ngFor="let block of seatingBlocks | slice:2:3">
+                           <div class="block-label">{{ block.name }}</div>
+                           <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                              <button *ngFor="let seat of row; let j = index" class="seat-button"
+                                 [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                                 [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                                 [attr.aria-label]="'Kursi ' + seat.id">
+                                 <span class="seat-number">{{ j + 1 }}</span>
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:3:4">
+                        <div class="block-label">{{ block.name }}</div>
+                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                           <button *ngFor="let seat of row; let j = index" class="seat-button"
+                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                              [attr.aria-label]="'Kursi ' + seat.id">
+                              <span class="seat-number">{{ j + 1 }}</span>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="seating-spacer"></div>
+
+               <div class="seating-section balcony-level">
+                  <h3 class="section-label">BALCONY</h3>
+
+                  <div class="seating-row lower-row">
+
+                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:4:5">
+                        <div class="block-label">{{ block.name }}</div>
+                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                           <button *ngFor="let seat of row; let j = index" class="seat-button"
+                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                              [attr.aria-label]="'Kursi ' + seat.id">
+                              <span class="seat-number">{{ j + 1 }}</span>
+                           </button>
+                        </div>
+                     </div>
+
+                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:5:6">
+                        <div class="block-label">{{ block.name }}</div>
+                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                           <button *ngFor="let seat of row; let j = index" class="seat-button"
+                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                              [attr.aria-label]="'Kursi ' + seat.id">
+                              <span class="seat-number">{{ j + 1 }}</span>
+                           </button>
+                        </div>
+                     </div>
+
+                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:6:7">
+                        <div class="block-label">{{ block.name }}</div>
+                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                           <button *ngFor="let seat of row; let j = index" class="seat-button"
+                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
+                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
+                              [attr.aria-label]="'Kursi ' + seat.id">
+                              <span class="seat-number">{{ j + 1 }}</span>
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="map-footer">
+                  <button class="book-button" [disabled]="!isAnySeatSelected" (click)="startPaymentProcess()">Book
+                     Selected
+                     Seats
+                     ({{ getSelectedSeats().length
+                     }})</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   }
+
    <!-- Payment Modal -->
    @if (showPaymentModal) {
    <div class="modal-overlay">
-      <div class="modal-content payment-modal">
+      <div class="modal-content payment-modal bg-dark text-white">
          <div class="modal-header">
             <h2>Complete Payment</h2>
             <button class="close-btn" (click)="cancelBooking()">×</button>
@@ -176,6 +303,18 @@
                   <strong>{{ event.title }}</strong>
                </div>
                }
+
+               @if (selectedSeats.length > 0) {
+               <div class="seats-summary my-2">
+                  <strong>Selected Seats ({{ selectedSeats.length }}):</strong>
+                  <p class="seat-ids">{{ selectedSeats.join(', ') }}</p>
+               </div>
+               <div class="summary-item">
+                  <span>Ticket Type:</span>
+                  <strong>Seat Selection (Custom)</strong>
+               </div>
+               }
+
                @if (cart.length > 0) {
                <div class="cart-items-summary">
                   @for (item of cart; track item.ticket.id) {
@@ -242,7 +381,7 @@
    <!-- QR Code Display Modal -->
    @if (showQRCodeDisplay) {
    <div class="modal-overlay">
-      <div class="modal-content qr-display-modal">
+      <div class="modal-content qr-display-modal bg-dark text-white">
          <div class="modal-header">
             <h2>✓ Your Booking Confirmed!</h2>
             <button class="close-btn" (click)="closeQRCodeDisplay()">×</button>

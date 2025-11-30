@@ -1,5 +1,5 @@
 // src/app/ticket-page/ticket-buy/ticket-buy.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
@@ -9,6 +9,22 @@ import { EventItem, TicketCategory, Booking } from '../../data-event-service/dat
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
 
+interface Seat {
+   id: string;
+   status: 'available' | 'booked' | 'selected';
+}
+
+interface SeatingBlock {
+   name: string; // Contoh: 'LF-A', 'VIP', 'B-B'
+   rows: number;
+   seatsPerRow: number;
+   seatsData: Seat[][]; // Data kursi yang sebenarnya
+}
+
+@Injectable({
+   providedIn: 'root'
+})
+
 @Component({
    selector: 'app-ticket-buy',
    standalone: true,
@@ -17,6 +33,20 @@ import * as QRCode from 'qrcode';
    styleUrls: ['./ticket-buy.css']
 })
 export class TicketBuy implements OnInit {
+
+   // Definisikan semua blok kursi dengan dimensi baru
+   seatingBlocks: SeatingBlock[] = [
+      // LOWER FOYER
+      { name: 'LF-A', rows: 12, seatsPerRow: 15, seatsData: [] },
+      { name: 'VIP', rows: 4, seatsPerRow: 15, seatsData: [] },
+      { name: 'LF-B', rows: 8, seatsPerRow: 15, seatsData: [] },
+      { name: 'LF-C', rows: 12, seatsPerRow: 15, seatsData: [] },
+      // BALCONY
+      { name: 'B-A', rows: 5, seatsPerRow: 11, seatsData: [] },
+      { name: 'B-B', rows: 5, seatsPerRow: 23, seatsData: [] },
+      { name: 'B-C', rows: 5, seatsPerRow: 11, seatsData: [] },
+   ];
+
    event?: EventItem;
    eventId!: number;
    couponCode = '';
@@ -25,6 +55,7 @@ export class TicketBuy implements OnInit {
    quantities: { [ticketId: string]: number } = {};
    currentUserId = '';
    isAuthenticated = false;
+   showSelectionSeats = false;
 
    // Booking state
    bookingInProgress = false;
@@ -37,12 +68,104 @@ export class TicketBuy implements OnInit {
    cart: Array<{ ticket: TicketCategory; qty: number }> = [];
    showContinueShopping = false;
    totalCartPrice = 0;
+   selectedSeats: Array<string> = [];
    paymentMethods = [
       { id: 'credit-card', name: 'Credit Card' },
       { id: 'debit-card', name: 'Debit Card' },
       { id: 'e-wallet', name: 'E-Wallet' },
       { id: 'bank-transfer', name: 'Bank Transfer' }
    ];
+
+   calculatePriceFromSeats(seats: Array<string>): number {
+      // ASUMSI: Harga per kursi didasarkan pada harga tiket kategori pertama (atau kategori General)
+      const firstTicket = this.event?.tickets[0];
+
+      if (!firstTicket) {
+         // Fallback price jika tidak ada kategori tiket
+         return seats.length * 50;
+      }
+
+      const price = this.ticketPriceAfterDiscount(firstTicket);
+      return seats.length * price;
+   }
+
+   startPaymentProcess(): void {
+      // 1. Dapatkan daftar kursi yang dipilih secara internal
+      const selectedSeatsArray = this.getSelectedSeats().map(seat => seat.id);
+
+      // 2. Cek validasi (sesuai logika awal Anda)
+      if (selectedSeatsArray.length === 0) {
+         this.message = 'Please select at least one seat.';
+         return;
+      }
+
+      // [Optional: Tambahkan logika otentikasi di sini jika belum ada di bookSelectedSeats()]
+      // if (!this.isAuthenticated) { ... }
+
+      // 3. Simpan data kursi
+      this.selectedSeats = selectedSeatsArray;
+
+      // 4. Hitung harga total baru
+      // Fungsi calculatePriceFromSeats() harus menerima argumen, tapi kita sudah punya
+      // selectedSeatsArray yang merupakan array<string>
+      this.totalCartPrice = this.calculatePriceFromSeats(selectedSeatsArray);
+
+      // 5. Tampilkan modal pembayaran
+      this.showPaymentModal = true;
+      this.showSelectionSeats = false;
+      this.showQRCodeDisplay = false; // Pastikan modal QR ditutup
+      this.message = ''; // Reset pesan
+   }
+
+   initializeSeats(numRows: number, seatsPerRow: number, blockName: string): Seat[][] {
+      const seats: Seat[][] = [];
+      for (let i = 0; i < numRows; i++) {
+         const row: Seat[] = [];
+         const rowLabel = this.getRowLabel(i); // Ambil label A, B, C...
+         for (let j = 0; j < seatsPerRow; j++) {
+            row.push({
+               id: `${blockName}-${rowLabel}${j + 1}`, // Contoh: LF-A-A1
+               status: 'available'
+            });
+         }
+         seats.push(row);
+      }
+      return seats;
+   }
+
+   // Fungsi Toggle yang direvisi untuk bekerja dengan struktur blok
+   toggleSeat(blockName: string, rowIndex: number, seatIndex: number): void {
+      const block = this.seatingBlocks.find(b => b.name === blockName);
+      if (!block) return;
+
+      const seat = block.seatsData[rowIndex][seatIndex];
+
+      if (seat.status === 'booked') {
+         return;
+      }
+
+      // Toggle status: selected <-> available
+      seat.status = (seat.status === 'selected') ? 'available' : 'selected';
+
+      console.log(`Kursi ${seat.id} diubah menjadi ${seat.status}`);
+   }
+
+   // Getter: Mendapatkan array semua kursi yang dipilih
+   getSelectedSeats(): Seat[] {
+      return this.seatingBlocks.flatMap(block =>
+         block.seatsData.flat().filter(seat => seat.status === 'selected')
+      );
+   }
+
+   // Getter: Mengecek apakah ada kursi yang dipilih
+   get isAnySeatSelected(): boolean {
+      return this.getSelectedSeats().length > 0;
+   }
+
+   // Fungsi untuk mendapatkan label baris (A, B, C...)
+   getRowLabel(index: number): string {
+      return String.fromCharCode(65 + index);
+   }
 
    constructor(
       private route: ActivatedRoute,
@@ -78,6 +201,15 @@ export class TicketBuy implements OnInit {
             }
          }
       });
+
+      // Inisialisasi data kursi untuk setiap blok
+      this.seatingBlocks.forEach(block => {
+         block.seatsData = this.initializeSeats(block.rows, block.seatsPerRow, block.name);
+      });
+
+      // Simulasikan beberapa kursi yang sudah di-booked (contoh)
+      this.seatingBlocks[0].seatsData[0][0].status = 'booked'; // LF-A, R1, S1
+      this.seatingBlocks[1].seatsData[1][7].status = 'booked'; // VIP, R2, S8
    }
 
    applyCoupon(): void {
@@ -184,7 +316,7 @@ export class TicketBuy implements OnInit {
          return;
       }
 
-      this.showPaymentModal = true;
+      this.showSelectionSeats = true;
    }
 
    continueShopping(): void {
@@ -200,31 +332,67 @@ export class TicketBuy implements OnInit {
    processPayment(): void {
       // Generate QR code using qrcode library
       if (!this.event) return;
+      let qrData = '';
+      let totalBookingQty = 0;
 
-      // Process all items in cart or single booking
-      const itemsToProcess = this.cart.length > 0 ? this.cart :
-         (this.currentBooking ? [{ ticket: this.event.tickets.find(t => t.id === this.currentBooking!.ticketCategoryId)!, qty: this.currentBooking.quantity }] : []);
+      // KASUS 1: Pengguna datang dari Pemilihan Kursi (Prioritas)
+      if (this.selectedSeats && this.selectedSeats.length > 0) {
+         totalBookingQty = this.selectedSeats.length;
 
-      if (itemsToProcess.length === 0) return;
+         // 1. Tentukan kategori tiket (Asumsi: Menggunakan kategori pertama untuk harga)
+         const ticketCategory = this.event.tickets[0];
+         if (!ticketCategory) return;
 
-      // If cart has items, create bookings for each cart item
-      if (this.cart.length > 0) {
+         // 2. Buat Booking Baru di Data Service
+         const result = this.dataSrv.buyTicket(this.eventId, ticketCategory.id, totalBookingQty, this.currentUserId);
+
+         if (result.success && result.booking) {
+            this.currentBooking = result.booking;
+            this.currentBooking.discountApplied = this.appliedDiscount;
+            // ASUMSI: totalCartPrice sudah dihitung di checkoutWithSeats()
+            this.currentBooking.totalPrice = this.totalCartPrice;
+
+            // 3. QR Data Khusus Kursi: Masukkan ID Kursi yang dipilih
+            // Format: [EventID]|[Section/Type]|SEATS:[ID1,ID2,...]|[EventDate]
+            const seatIdsString = this.selectedSeats.join(',');
+            qrData = `${this.event.id}|SEATS|SEATS:${seatIdsString}|${this.event.date}`;
+         } else {
+            // Gagal membuat booking
+            this.message = 'Error creating seat booking.';
+            return;
+         }
+
+         // Kosongkan cart untuk menghindari duplikasi proses
+         this.cart = [];
+
+      }
+      // KASUS 2: Pengguna datang dari Cart Lama
+      else if (this.cart.length > 0) {
+
+         // Logic original untuk memproses cart item
          for (const cartItem of this.cart) {
             const result = this.dataSrv.buyTicket(this.eventId, cartItem.ticket.id, cartItem.qty, this.currentUserId);
             if (result.success && result.booking) {
                result.booking.discountApplied = this.appliedDiscount;
                result.booking.totalPrice = this.ticketPriceAfterDiscount(cartItem.ticket) * cartItem.qty;
-               // Use the first booking for QR display
+               // Gunakan booking pertama untuk QR display
                if (!this.currentBooking) {
                   this.currentBooking = result.booking;
                }
             }
          }
+
+         // Generate QR untuk item pertama di cart (Logik original)
+         const firstCartItem = this.cart[0];
+         qrData = `${this.event.id}|${firstCartItem.ticket.section || 'GENERAL'}|${this.event.date}`;
+      }
+      // KASUS 3: Tidak ada item untuk diproses
+      else {
+         return;
       }
 
-      // Generate QR for the first item or use cart
-      const firstItem = itemsToProcess[0];
-      const qrData = `${this.event.id}|${firstItem.ticket.section || 'GENERAL'}|${this.event.date}`;
+      // --- REVISI END ---
+
       this.qrCodeData = qrData;
 
       if (this.currentBooking) {
@@ -246,8 +414,9 @@ export class TicketBuy implements OnInit {
       });
 
       this.showPaymentModal = false;
+      this.showSelectionSeats = false;
       this.showQRCodeDisplay = true;
-      // After successful purchase, show button to view bookings (not continue shopping)
+      // Setelah pembelian berhasil, tampilkan tombol untuk melihat booking
       this.showContinueShopping = false;
       this.message = '✓ Payment successful! Your QR code is ready';
    }

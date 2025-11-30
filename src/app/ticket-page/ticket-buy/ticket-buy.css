@@ -211,9 +211,11 @@
    margin-top: 4px;
    color: var(--text-white);
 }
+
 .remaining {
    color: var(--text-light-gray);
 }
+
 .sold-out {
    color: var(--danger);
    font-weight: 700;
@@ -291,6 +293,108 @@
    max-height: 90vh;
    overflow-y: auto;
    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.modal-content-seat {
+   background: #17171c;
+   border-radius: 12px;
+   max-width: 1000px;
+   width: 100%;
+   max-height: 90vh;
+   overflow-y: auto;
+   border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+/* 2. Modal Dialog (Kontainer Pembungkus Utama) */
+.modal-dialog {
+   position: relative;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   /* Mengisi 95% layar, bukan dibuat setengah */
+   width: 95%;
+   max-width: 95vw;
+   height: 95%;
+   max-height: 95vh;
+   margin: 0;
+   padding: 0;
+   overflow: hidden;
+}
+
+/* 4. Kontainer Peta Kursi (Tempat Scroll Bekerja) */
+.seat-map-scroll-wrapper {
+   /* Wajib: Memungkinkan kontainer mengisi sisa ruang secara fleksibel */
+   flex-grow: 1;
+   /* Wajib: Tentukan tinggi minimum untuk menghindari colapse */
+   min-height: 100px;
+
+   /* PENTING: Mengaktifkan SCROLLING KANAN-KIRI dan ATAS-BAWAH */
+   overflow: auto;
+   /* Menggantikan overflow-y: auto; */
+
+   padding: 20px;
+   /* Tambahkan padding di dalam wrapper jika diperlukan */
+}
+
+/* 5. Kontainer Peta Kursi yang Sebenarnya */
+.auditorium-map-container {
+   /* Konten di dalamnya harus tetap diatur lebarnya agar scroll horizontal terjadi */
+   /* Misalnya, bisa jadi lebih lebar dari 100% jika peta kursi sangat besar */
+   /* Tidak perlu mengatur tinggi atau lebar 100% di sini agar scroll bekerja */
+   padding-bottom: 50px;
+   /* Beri ruang agar tidak terpotong di bagian bawah */
+}
+
+/* 6. Perbaikan Tampilan Mobile */
+@media (max-width: 768px) {
+   .modal-dialog {
+      /* Di mobile, buat modal menjadi penuh */
+      width: 100%;
+      max-width: 100vw;
+      height: 100%;
+      max-height: 100vh;
+      margin: 0;
+      border-radius: 0;
+   }
+
+   .modal-content {
+      border-radius: 0;
+   }
+
+   .seat-map-scroll-wrapper {
+      /* Di mobile, pastikan padding interior tidak menyebabkan overflow yang tidak perlu */
+      padding: 10px;
+   }
+}
+
+/* Kontainer yang menampung Peta Kursi itu sendiri (jika ini yang disorot) */
+.auditorium-map-container {
+   /* Memastikan peta kursi menggunakan ruang yang tersisa */
+   flex-grow: 1;
+   overflow-y: auto;
+   /* Memungkinkan scroll hanya pada peta kursinya */
+   padding: 20px;
+   /* Tambahkan padding agar tidak menempel ke tepi */
+}
+
+/* 4. Perbaikan Tampilan Mobile (View Mobile) */
+/* Aturan ini memastikan tidak ada masalah 'menempel ke kanan' di layar kecil */
+@media (max-width: 768px) {
+   .modal-dialog {
+      /* Di mobile, buat sedikit lebih besar untuk pengalaman yang lebih baik */
+      width: 100%;
+      max-width: 100vw;
+      height: 100%;
+      max-height: 100vh;
+      /* Hapus margin agar mengisi penuh di mobile */
+      margin: 0;
+      border-radius: 0;
+      /* Hapus sudut membulat agar terlihat seperti halaman penuh */
+   }
+
+   .modal-content {
+      border-radius: 0;
+   }
 }
 
 .payment-modal {
@@ -971,6 +1075,7 @@
    .padding-description {
       padding-top: 1rem;
    }
+
    .ticket-page {
       padding-top: 100px;
       padding-left: var(--spacing-md);
@@ -1273,5 +1378,183 @@
       position: relative;
       top: 0;
       max-height: none;
+   }
+}
+
+/* seats photo */
+/* --- Pop-up Container Styling (The Outer Box) --- */
+.photo-res {
+   width: 70%;
+   height: 70%;
+}
+
+/* --- Global Container --- */
+.auditorium-map-container {
+   background-color: #000;
+   color: #fff;
+   padding: 30px;
+   width: fit-content;
+   /* Pastikan lebarnya menyesuaikan konten kursi */
+   min-width: 100%;
+   /* Memastikan ia tetap menempati 100% jika kursinya sedikit */
+   border: 1px solid #333;
+}
+
+.map-title {
+   text-align: center;
+   margin-bottom: 30px;
+   font-size: 1.8em;
+}
+
+/* --- Section Labels (LOWER FOYER / BALCONY) --- */
+.section-label {
+   text-align: center;
+   margin: 15px 0;
+   font-size: 1.1em;
+   font-weight: normal;
+}
+
+/* --- Seating Rows (Kontainer untuk LF-A/VIP/LF-C dan B-A/B-B/B-C) --- */
+.seating-row {
+   display: flex;
+   justify-content: center;
+   align-items: flex-end;
+   /* Semua blok sejajar di bagian bawah */
+   gap: 20px;
+   /* Jarak antara blok-blok utama */
+   margin-bottom: 20px;
+}
+
+.center-foyer-stack {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 10px;
+   /* Jarak antara blok VIP dan LF-B */
+}
+
+.seating-spacer {
+   height: 50px;
+   /* Jarak antara Lower Foyer dan Balcony */
+}
+
+/* --- Block Container Styling --- */
+.seat-block {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   padding: 10px;
+   border: 1px dashed transparent;
+   /* Pembatas visual per blok jika diperlukan */
+}
+
+.block-label {
+   font-size: 0.8em;
+   color: #999;
+   margin-bottom: 5px;
+}
+
+/* --- Seat Row (Baris Horizontal di dalam Blok) --- */
+.seat-row {
+   display: flex;
+   justify-content: center;
+   /* Tidak ada margin/padding agar kursi berdempet */
+}
+
+/* --- The Seat Button Styling --- */
+
+.seat-button {
+   /* Bentuk persegi panjang vertikal yang diminta */
+   width: 30px;
+   /* Lebih kecil untuk menampung banyak kursi */
+   height: 35px;
+   border-radius: 4px;
+   padding: 0;
+   margin: 1px;
+   /* Jarak kecil antar tombol (Empty space between seats) */
+   cursor: pointer;
+   box-sizing: border-box;
+   transition: background-color 0.1s, border-color 0.1s;
+   /* Teks nomor kursi */
+   font-size: 8px;
+   color: transparent;
+   /* Sembunyikan nomor di luar selected/hover jika mau */
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+/* Default Available State (Putih/Outline) */
+.seat-button.available {
+   background-color: transparent;
+   border: 1px solid #fff;
+   /* Border putih */
+   color: #fff;
+}
+
+/* Booked State (Merah) */
+.seat-button.booked {
+   background-color: #c0392b;
+   border: 1px solid #c0392b;
+   /* Border merah */
+   cursor: not-allowed;
+   color: white;
+}
+
+/* Selected State (Oranye) */
+.seat-button.selected {
+   background-color: #feb706;
+   border: 1px solid #feb706;
+   transform: none !important;
+   /* Border oranye */
+   color: black;
+}
+
+/* Hover Effect for Available Seats (Hanya Border) */
+.seat-button.available:hover {
+   border: 1px solid #feb706;
+   /* Border #feb706 saat hover */
+}
+
+/* --- Book Button Styling --- */
+.map-footer {
+   text-align: center;
+   margin-top: 30px;
+}
+
+.book-button {
+   padding: 10px 30px;
+   background-color: #feb706;
+   color: #000;
+   border: none;
+   border-radius: 5px;
+   font-weight: bold;
+   cursor: pointer;
+   transition: background-color 0.2s;
+}
+
+.book-button:disabled {
+   background-color: #555;
+   cursor: not-allowed;
+}
+
+@media (max-width: 1530px) {
+   .seat-map-scroll-wrapper {
+      overflow-x: auto;
+      width: 100%;
+      padding: 0 10px;
+      box-sizing: border-box;
+   }
+
+   .auditorium-map-container {
+      min-width: 700px;
+      width: max-content;
+      margin: 0;
+      padding: 10px;
+   }
+
+   body {
+      padding: 0 !important;
+      margin: 0 !important;
    }
 }
