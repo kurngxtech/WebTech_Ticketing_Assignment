@@ -112,9 +112,7 @@ export class AuthService {
       this.mockUsers.push(newUser);
 
       // In real app, send email here
-      console.log(
-         `Welcome email sent to ${data.email}. Username: ${username}, Default Password: ${defaultPassword}`
-      );
+      // Welcome email sent to ${data.email}
 
       return { success: true, message: 'Event organizer registered successfully', user: newUser };
    }

@@ -125,10 +125,11 @@ export class AnalyticsReports implements OnInit {
     
     let topTicket = { type: '', sold: 0, revenue: 0 };
     for (const [ticketId, data] of Object.entries(this.analytics.byTicketType)) {
-      if ((data as any).sold > topTicket.sold) {
+      const ticketData = data as {sold: number, revenue: number};
+      if (ticketData.sold > topTicket.sold) {
         const ticket = this.currentEvent?.tickets.find(t => t.id === ticketId);
         if (ticket) {
-          topTicket = { type: ticket.type, sold: (data as any).sold, revenue: (data as any).revenue };
+          topTicket = { type: ticket.type, sold: ticketData.sold, revenue: ticketData.revenue };
         }
       }
     }

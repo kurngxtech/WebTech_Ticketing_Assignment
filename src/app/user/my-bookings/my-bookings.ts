@@ -209,7 +209,6 @@ export class MyBookings implements OnInit {
    }
 
    downloadTicket(bookingId: string) {
-      console.log('Downloading ticket for booking:', bookingId);
       const bookingObj = this.dataEventService.getBookingById(bookingId);
       if (!bookingObj) {
          console.error('Booking not found');
