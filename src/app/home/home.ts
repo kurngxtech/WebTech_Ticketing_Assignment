@@ -1,5 +1,15 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
+  AfterViewInit,
+  OnInit,
+  ChangeDetectorRef,
+  inject,
+  NgZone,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { register } from 'swiper/element/bundle';
 import { Router } from '@angular/router';
 import { DataEventService } from '../data-event-service/data-event.service';
@@ -10,21 +20,41 @@ register();
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
-export class Home implements AfterViewInit {
+export class Home implements AfterViewInit, OnInit {
   activeIndex = 0;
   slides: EventItem[] = [];
+  isLoading = true;
+
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
   constructor(
     private host: ElementRef<HTMLElement>,
     private dataSrv: DataEventService,
     private router: Router
-  ) {
-    this.slides = this.dataSrv.getEvents();
+  ) {}
+
+  ngOnInit(): void {
+    // Load events from API
+    this.isLoading = true;
+    this.dataSrv.getEventsAsync().subscribe({
+      next: (events) => {
+        this.slides = events.filter((e) => e.status === 'active') || [];
+        this.isLoading = false;
+        this.zone.run(() => this.cdr.detectChanges());
+      },
+      error: (err) => {
+        console.error('Failed to load events:', err);
+        this.slides = [];
+        this.isLoading = false;
+        this.zone.run(() => this.cdr.detectChanges());
+      },
+    });
   }
 
   get sortedSlides(): any[] {

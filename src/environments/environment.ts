@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
-  // Set to true to use in-memory/dev mocks. Set to false for production builds.
-  useMocks: true,
+  // Set to false to use real backend API, true for in-memory mocks
+  useMocks: false,
+  // Backend API URL
+  apiUrl: 'http://localhost:5000/api'
 };

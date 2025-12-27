@@ -32,6 +32,49 @@
   letter-spacing: 0.5px;
 }
 
+/* ============ HEADER ACTIONS ============ */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-refresh {
+  background: rgba(254, 183, 6, 0.1);
+  color: var(--primary-yellow);
+  border: 1px solid var(--primary-yellow);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 50px;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: rgba(254, 183, 6, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 183, 6, 0.2);
+}
+
+.btn-refresh:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.spinning {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
 /* ============ SORT MENU TOGGLE BUTTON ============ */
 .sort-menu-toggle {
   width: 50px;
@@ -918,4 +961,190 @@
   .info-row {
     font-size: 0.85rem;
   }
+}
+
+/* ============ VIEW MORE / VIEW LESS BUTTONS ============ */
+.view-more-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.btn-view-more,
+.btn-view-less {
+  padding: 12px 40px;
+  background: transparent;
+  color: var(--primary-yellow);
+  border: 2px solid var(--primary-yellow);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-more:hover,
+.btn-view-less:hover {
+  background: var(--primary-yellow);
+  color: var(--dark-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(254, 183, 6, 0.3);
+}
+
+/* ============ PENDING PAYMENT SECTION ============ */
+.pending-payment-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.pending-text {
+  color: #f59e0b;
+  font-weight: 600;
+  margin: 0;
+}
+
+.btn-continue-payment {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+}
+
+.btn-continue-payment:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-continue-payment:active {
+  transform: translateY(0);
+}
+
+/* ============ PENDING CARD HIGHLIGHT ============ */
+.booking-card.pending-card {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.booking-card.pending-card:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+}
+
+/* ============ PAYMENT STATUS BANNER ============ */
+.payment-status-banner {
+  padding: 15px 20px;
+  margin: 0 0 20px 0;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payment-status-banner.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #10b981;
+}
+
+.payment-status-banner.pending {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+}
+
+.payment-status-banner.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* ============ COUNTDOWN TIMER ============ */
+.countdown-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+@keyframes pulse-gentle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.countdown-timer.expiring-soon {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  animation: pulse-urgent 1s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.countdown-icon {
+  font-size: 1.2rem;
+}
+
+.countdown-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 0.5px;
+}
+
+.countdown-text.expired {
+  color: #ef4444;
+}
+
+.countdown-timer.expiring-soon .countdown-text {
+  color: #ef4444;
 }

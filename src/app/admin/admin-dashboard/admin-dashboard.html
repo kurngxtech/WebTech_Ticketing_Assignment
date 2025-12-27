@@ -3,14 +3,14 @@
   <div class="dashboard-top-bar">
     <div class="top-bar-content">
       <h1 class="dashboard-title">Admin Dashboard</h1>
-      
+
       <div class="profile-section">
         @if (currentUser) {
         <div class="profile-info">
           <span class="profile-name">{{ currentUser.fullName }}</span>
           <span class="profile-role">{{ currentUser.role | uppercase }}</span>
         </div>
-        
+
         <button class="logout-btn" (click)="logout()" title="Logout">
           <span class="logout-icon">🚪</span>
         </button>
@@ -23,107 +23,177 @@
   <div class="dashboard-container">
     <!-- Chart Section -->
     <div class="chart-section">
-      <div class="chart-card" [class.blur]="showChartOptions">
-        <!-- Chart Header with Options -->
-        <div class="chart-header">
-          <div class="chart-title-area">
-            <p class="chart-statement">{{ getStatementText() }}</p>
-          </div>
-          <button class="menu-button" (click)="toggleChartOptions()" title="Chart options">
-            @if (!showChartOptions) {
-            <span class="icon">⋯</span>
-            } @else {
-            <span class="icon">✕</span>
-            }
-          </button>
-        </div>
-
-        <!-- Chart Display - Line Chart -->
-        <div class="chart-display" [class.blur]="showChartOptions">
-          <svg class="line-chart" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
-            <!-- Grid lines -->
-            <g class="grid">
-              @for (i of [0,1,2,3,4]; track i) {
-              <line [attr.x1]="0" [attr.y1]="i * 75" [attr.x2]="1000" [attr.y2]="i * 75" class="grid-line" />
+      <div class="chart-card">
+        <!-- Content Wrapper for Blur Effect -->
+        <div class="chart-card-content" [class.blur]="showChartOptions">
+          <!-- Chart Header with Options -->
+          <div class="chart-header">
+            <div class="chart-title-area">
+              <p class="chart-statement">{{ getStatementText() }}</p>
+            </div>
+            <button class="menu-button" (click)="toggleChartOptions()" title="Chart options">
+              @if (!showChartOptions) {
+              <span class="icon">⋯</span>
+              } @else {
+              <span class="icon">✕</span>
               }
-            </g>
-            <!-- Line path -->
-            <polyline [attr.points]="getChartLinePoints()" class="chart-line" />
-            <!-- Data points -->
-            @for (point of chartDataPoints; track $index) {
-            <circle [attr.cx]="point.x" [attr.cy]="point.y" r="6" class="data-point" />
-            }
-          </svg>
+            </button>
+          </div>
 
-          <!-- Chart Options Overlay -->
-          @if (showChartOptions) {
-          <div class="chart-options-overlay">
-            <div class="options-group">
-              <p class="options-label">Select Data Type:</p>
-              <div class="option-buttons">
-                <button
-                  class="option-btn"
-                  [class.active]="selectedChartType === 'events'"
-                  (click)="selectChartType('events')"
-                >
-                  Total Events
-                </button>
-                <button
-                  class="option-btn"
-                  [class.active]="selectedChartType === 'tickets'"
-                  (click)="selectChartType('tickets')"
-                >
-                  Tickets Sold
-                </button>
-                <button
-                  class="option-btn"
-                  [class.active]="selectedChartType === 'revenue'"
-                  (click)="selectChartType('revenue')"
-                >
-                  Total Revenue
-                </button>
+          <!-- Chart Display - Line Chart -->
+          <div class="chart-display">
+            @if (isLoadingChart) {
+            <div class="chart-loading">
+              <span class="loading-spinner"></span>
+              <p>Loading chart data...</p>
+            </div>
+            } @else if (chartData.length === 0) {
+            <div class="chart-empty">
+              <p>No data available for this period</p>
+            </div>
+            } @else {
+            <svg class="line-chart" viewBox="0 0 1000 350" preserveAspectRatio="xMidYMid meet">
+              <!-- Grid lines -->
+              <g class="grid">
+                @for (i of [0,1,2,3,4]; track i) {
+                <line
+                  [attr.x1]="50"
+                  [attr.y1]="i * 60 + 30"
+                  [attr.x2]="980"
+                  [attr.y2]="i * 60 + 30"
+                  class="grid-line"
+                />
+                }
+              </g>
+              <!-- Line path -->
+              <polyline [attr.points]="getChartLinePoints()" class="chart-line" />
+              <!-- Data points with hover -->
+              @for (point of chartDataPoints; track $index; let i = $index) {
+              <g
+                class="data-point-group"
+                (mouseenter)="onChartPointHover(chartData[i], $event, i)"
+                (mouseleave)="onChartPointLeave()"
+              >
+                <circle [attr.cx]="point.x" [attr.cy]="point.y" r="8" class="data-point" />
+                <circle
+                  [attr.cx]="point.x"
+                  [attr.cy]="point.y"
+                  r="16"
+                  class="data-point-hover-area"
+                />
+              </g>
+              }
+            </svg>
+
+            <!-- Tooltip - Fixed at top of chart for visibility -->
+            @if (hoveredPoint) {
+            <div class="chart-tooltip chart-tooltip-fixed" [style.left.px]="tooltipX">
+              <div class="tooltip-header">{{ hoveredPoint.label }}</div>
+              <div class="tooltip-content">
+                <div class="tooltip-row">
+                  <span class="tooltip-label">🎫 Tickets Sold:</span>
+                  <span class="tooltip-value">{{ hoveredPoint.ticketsSold }}</span>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-label">💰 Revenue:</span>
+                  <span class="tooltip-value">{{ formatPrice(hoveredPoint.revenue) }}</span>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-label">📋 Bookings:</span>
+                  <span class="tooltip-value">{{ hoveredPoint.bookings }}</span>
+                </div>
               </div>
             </div>
+            } }
           </div>
-          }
-        </div>
 
-        <!-- Time Period Selector -->
-        <div class="time-period-section">
-          <button class="time-toggle-btn" (click)="toggleTimePeriodMenu()" title="Time period">
-            @if (!showTimePeriodMenu) {
-            <span class="icon">⋮</span>
-            } @else {
-            <span class="icon">✕</span>
+          <!-- Time Period Selector with Legend -->
+          <div class="time-period-section">
+            <button
+              class="time-toggle-btn"
+              (click)="toggleTimePeriodMenu($event)"
+              title="Time period"
+            >
+              @if (!showTimePeriodMenu) {
+              <span class="icon">⋮</span>
+              } @else {
+              <span class="icon">✕</span>
+              }
+            </button>
+
+            @if (showTimePeriodMenu) {
+            <div class="time-period-menu">
+              <button
+                class="time-option"
+                [class.active]="selectedTimePeriod === 'daily'"
+                (click)="selectTimePeriod('daily')"
+              >
+                Daily
+              </button>
+              <button
+                class="time-option"
+                [class.active]="selectedTimePeriod === 'weekly'"
+                (click)="selectTimePeriod('weekly')"
+              >
+                Weekly
+              </button>
+              <button
+                class="time-option"
+                [class.active]="selectedTimePeriod === 'monthly'"
+                (click)="selectTimePeriod('monthly')"
+              >
+                Monthly
+              </button>
+            </div>
             }
-          </button>
 
-          @if (showTimePeriodMenu) {
-          <div class="time-period-menu">
-            <button
-              class="time-option"
-              [class.active]="selectedTimePeriod === 'daily'"
-              (click)="selectTimePeriod('daily')"
-            >
-              Daily
-            </button>
-            <button
-              class="time-option"
-              [class.active]="selectedTimePeriod === 'weekly'"
-              (click)="selectTimePeriod('weekly')"
-            >
-              Weekly
-            </button>
-            <button
-              class="time-option"
-              [class.active]="selectedTimePeriod === 'monthly'"
-              (click)="selectTimePeriod('monthly')"
-            >
-              Monthly
-            </button>
+            <!-- Chart Legend (right side) -->
+            <div class="chart-legend">
+              @for (data of chartData; track $index; let i = $index) {
+              <div
+                class="legend-item"
+                (mouseenter)="onChartPointHover(data, $event, i)"
+                (mouseleave)="onChartPointLeave()"
+              >
+                <span class="legend-dot"></span>
+                <span class="legend-label">{{ data.label }}</span>
+              </div>
+              }
+            </div>
           </div>
-          }
         </div>
+
+        <!-- Chart Options Overlay - Outside Blurred Content -->
+        @if (showChartOptions) {
+        <div class="chart-options-overlay">
+          <div class="options-group">
+            <p class="options-label">Select Data Type:</p>
+            <div class="option-buttons">
+              <button
+                class="option-btn"
+                [class.active]="selectedChartType === 'events'"
+                (click)="selectChartType('events')"
+              >
+                Total Events
+              </button>
+              <button
+                class="option-btn"
+                [class.active]="selectedChartType === 'tickets'"
+                (click)="selectChartType('tickets')"
+              >
+                Tickets Sold
+              </button>
+              <button
+                class="option-btn"
+                [class.active]="selectedChartType === 'revenue'"
+                (click)="selectChartType('revenue')"
+              >
+                Total Revenue
+              </button>
+            </div>
+          </div>
+        </div>
+        }
       </div>
     </div>
 
@@ -166,7 +236,9 @@
             <div class="event-header">
               <h3 class="event-title">{{ event.title }}</h3>
               <div class="event-meta">
-                <p class="tickets-sold"><strong>Total Tickets Sold:</strong> {{ getTotalTicketsSold(event) }}</p>
+                <p class="tickets-sold">
+                  <strong>Total Tickets Sold:</strong> {{ getTotalTicketsSold(event) }}
+                </p>
               </div>
             </div>
 
@@ -206,12 +278,16 @@
           @if (expandedEventMenuId === event.id) {
           <div class="event-action-overlay" (click)="$event.stopPropagation()">
             <!-- Close Button -->
-            <button class="overlay-close-btn" (click)="toggleEventMenu(event.id, $event)" title="Close menu">
+            <button
+              class="overlay-close-btn"
+              (click)="toggleEventMenu(event.id, $event)"
+              title="Close menu"
+            >
               ✕
             </button>
 
             <div class="action-group">
-              <div class="action-buttons" style="grid-template-columns: 1fr;">
+              <div class="action-buttons" style="grid-template-columns: 1fr">
                 <button class="action-item analysis" (click)="viewAnalytics(event)">
                   <span class="action-icon">📊</span> In-depth Analysis
                 </button>
@@ -239,9 +315,13 @@
       @if (showRegistrationForm) {
       <div class="registration-card">
         <h3>Register New Event Organizer</h3>
-        
+
         @if (registrationMessage) {
-        <div class="message-box" [class.success]="registrationSuccess" [class.error]="!registrationSuccess">
+        <div
+          class="message-box"
+          [class.success]="registrationSuccess"
+          [class.error]="!registrationSuccess"
+        >
           {{ registrationMessage }}
         </div>
         }
@@ -250,68 +330,75 @@
           <div class="form-row">
             <div class="form-group">
               <label>Full Name *</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="fullName" 
-                placeholder="e.g., John Doe">
+              <input
+                type="text"
+                class="form-control"
+                formControlName="fullName"
+                placeholder="e.g., John Doe"
+              />
             </div>
             <div class="form-group">
               <label>Email *</label>
-              <input 
-                type="email" 
-                class="form-control" 
-                formControlName="email" 
-                placeholder="e.g., john@example.com">
+              <input
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="e.g., john@example.com"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>Phone Number *</label>
-              <input 
-                type="tel" 
-                class="form-control" 
-                formControlName="phone" 
-                placeholder="e.g., 08123456789">
+              <input
+                type="tel"
+                class="form-control"
+                formControlName="phone"
+                placeholder="e.g., 08123456789"
+              />
             </div>
             <div class="form-group">
               <label>Organization Name</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="organizationName" 
-                placeholder="e.g., ABC Event Company">
+              <input
+                type="text"
+                class="form-control"
+                formControlName="organizationName"
+                placeholder="e.g., ABC Event Company"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>Username *</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="username" 
-                placeholder="e.g., johndoe">
+              <input
+                type="text"
+                class="form-control"
+                formControlName="username"
+                placeholder="e.g., johndoe"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label>Password *</label>
-              <input 
-                type="password" 
-                class="form-control" 
-                formControlName="password" 
-                placeholder="Minimum 6 characters">
+              <input
+                type="password"
+                class="form-control"
+                formControlName="password"
+                placeholder="Minimum 6 characters"
+              />
             </div>
             <div class="form-group">
               <label>Confirm Password *</label>
-              <input 
-                type="password" 
-                class="form-control" 
-                formControlName="confirmPassword" 
-                placeholder="Re-enter password">
+              <input
+                type="password"
+                class="form-control"
+                formControlName="confirmPassword"
+                placeholder="Re-enter password"
+              />
             </div>
           </div>
 
@@ -319,10 +406,11 @@
             <button type="button" class="btn btn-outline" (click)="toggleRegistrationForm()">
               Cancel
             </button>
-            <button 
-              type="submit" 
-              class="btn btn-success" 
-              [disabled]="!registrationForm.valid || isSubmitting">
+            <button
+              type="submit"
+              class="btn btn-success"
+              [disabled]="!registrationForm.valid || isSubmitting"
+            >
               @if (isSubmitting) {
               <span>Registering...</span>
               } @else {
@@ -367,7 +455,11 @@
           </div>
 
           <div class="eo-actions">
-            <button class="btn btn-danger-small" (click)="removeEventOrganizer(eo.id)" title="Remove EO">
+            <button
+              class="btn btn-danger-small"
+              (click)="removeEventOrganizer(eo.id)"
+              title="Remove EO"
+            >
               <span class="icon">🗑</span> Remove
             </button>
           </div>

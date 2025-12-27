@@ -1,558 +1,846 @@
 // src/app/ticket-page/ticket-buy/ticket-buy.ts
-import { Component, Injectable, OnInit } from '@angular/core';
+import { Component, Injectable, OnInit, ChangeDetectorRef, inject, NgZone } from '@angular/core';
+
+// Declare Midtrans Snap window object
+declare global {
+  interface Window {
+    snap: {
+      pay: (
+        token: string,
+        options: {
+          onSuccess: (result: any) => void;
+          onPending: (result: any) => void;
+          onError: (result: any) => void;
+          onClose: () => void;
+        }
+      ) => void;
+    };
+  }
+}
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
 import { PdfGeneratorService } from '../../services/pdf-generator.service';
+import { ToastService } from '../../services/toast.service';
 import { EventItem, TicketCategory, Booking } from '../../data-event-service/data-event';
 import { FormsModule } from '@angular/forms';
+import { LoadingSpinner } from '../../components/loading-spinner/loading-spinner';
 import * as QRCode from 'qrcode';
 
 interface Seat {
-   id: string;
-   status: 'available' | 'booked' | 'selected';
+  id: string;
+  status: 'available' | 'booked' | 'selected';
 }
 
 interface SeatingBlock {
-   name: string; // Contoh: 'LF-A', 'VIP', 'B-B'
-   rows: number;
-   seatsPerRow: number;
-   seatsData: Seat[][]; // Data kursi yang sebenarnya
+  name: string; // Contoh: 'LF-A', 'VIP', 'B-B'
+  rows: number;
+  seatsPerRow: number;
+  seatsData: Seat[][]; // Data kursi yang sebenarnya
+  category: string; // 'VIP', 'PREMIUM', 'GENERAL', or 'PROMO'
 }
 
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
-
 @Component({
-   selector: 'app-ticket-buy',
-   standalone: true,
-   imports: [CommonModule, FormsModule, RouterLink],
-   templateUrl: './ticket-buy.html',
-   styleUrls: ['./ticket-buy.css']
+  selector: 'app-ticket-buy',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './ticket-buy.html',
+  styleUrls: ['./ticket-buy.css'],
 })
 export class TicketBuy implements OnInit {
+  isLoading = false;
 
-   // Definisikan semua blok kursi dengan dimensi baru
-   seatingBlocks: SeatingBlock[] = [
-      // LOWER FOYER
-      { name: 'LF-A', rows: 12, seatsPerRow: 15, seatsData: [] },
-      { name: 'VIP', rows: 4, seatsPerRow: 15, seatsData: [] },
-      { name: 'LF-B', rows: 8, seatsPerRow: 15, seatsData: [] },
-      { name: 'LF-C', rows: 12, seatsPerRow: 15, seatsData: [] },
-      // BALCONY
-      { name: 'B-A', rows: 5, seatsPerRow: 11, seatsData: [] },
-      { name: 'B-B', rows: 5, seatsPerRow: 23, seatsData: [] },
-      { name: 'B-C', rows: 5, seatsPerRow: 11, seatsData: [] },
-   ];
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
-   event?: EventItem;
-   eventId!: number;
-   couponCode = '';
-   appliedDiscount = 0;
-   message = '';
-   quantities: { [ticketId: string]: number } = {};
-   currentUserId = '';
-   isAuthenticated = false;
-   showSelectionSeats = false;
+  // Definisikan semua blok kursi dengan dimensi baru
+  seatingBlocks: SeatingBlock[] = [
+    // LOWER FOYER (Generals)
+    { name: 'LF-A', rows: 12, seatsPerRow: 15, seatsData: [], category: 'GENERAL' },
+    // VIP Section
+    { name: 'VIP', rows: 4, seatsPerRow: 15, seatsData: [], category: 'VIP' },
+    // LOWER FOYER (More Generals)
+    { name: 'LF-B', rows: 8, seatsPerRow: 15, seatsData: [], category: 'GENERAL' },
+    { name: 'LF-C', rows: 12, seatsPerRow: 15, seatsData: [], category: 'GENERAL' },
+    // BALCONY (Premium?) Let's assume Balcony is Premium or General, based on typical layout
+    // For this app, let's map Balcony to PREMIUM
+    { name: 'B-A', rows: 5, seatsPerRow: 11, seatsData: [], category: 'PREMIUM' },
+    { name: 'B-B', rows: 5, seatsPerRow: 23, seatsData: [], category: 'PREMIUM' },
+    { name: 'B-C', rows: 5, seatsPerRow: 11, seatsData: [], category: 'PREMIUM' },
+  ];
 
-   // Booking state
-   bookingInProgress = false;
-   currentBooking: Booking | null = null;
-   showPaymentModal = false;
-   showQRCodeDisplay = false;
-   paymentMethod: string = '';
-   qrCodeDataUrl: string = '';
-   qrCodeData: string = '';
-   cart: Array<{ ticket: TicketCategory; qty: number }> = [];
-   showContinueShopping = false;
-   totalCartPrice = 0;
-   selectedSeats: Array<string> = [];
-   paymentMethods = [
-      { id: 'credit-card', name: 'Credit Card' },
-      { id: 'debit-card', name: 'Debit Card' },
-      { id: 'e-wallet', name: 'E-Wallet' },
-      { id: 'bank-transfer', name: 'Bank Transfer' }
-   ];
+  event?: EventItem;
+  eventId!: string;
+  couponCode = '';
+  appliedDiscount = 0;
+  message = '';
+  quantities: { [ticketId: string]: number } = {};
+  currentUserId = '';
+  isAuthenticated = false;
+  showSelectionSeats = false;
 
-   calculatePriceFromSeats(seats: Array<string>): number {
-      // ASUMSI: Harga per kursi didasarkan pada harga tiket kategori pertama (atau kategori General)
-      const firstTicket = this.event?.tickets[0];
+  // Booking state
+  bookingInProgress = false;
+  currentBooking: Booking | null = null;
+  showPaymentModal = false;
+  showQRCodeDisplay = false;
+  paymentMethod: string = '';
+  qrCodeDataUrl: string = '';
+  qrCodeData: string = '';
+  cart: Array<{ ticket: TicketCategory; qty: number }> = [];
+  showContinueShopping = false;
+  totalCartPrice = 0;
+  selectedSeats: Array<string> = [];
+  selectedTicketCategory: TicketCategory | null = null; // The ticket category user is buying
+  paymentMethods = [
+    { id: 'credit-card', name: 'Credit Card' },
+    { id: 'debit-card', name: 'Debit Card' },
+    { id: 'e-wallet', name: 'E-Wallet' },
+    { id: 'bank-transfer', name: 'Bank Transfer' },
+  ];
 
-      if (!firstTicket) {
-         // Fallback price jika tidak ada kategori tiket
-         return seats.length * 50;
-      }
+  // Max seats allowed based on cart quantity
+  get maxSeatsAllowed(): number {
+    return this.cart.reduce((total, item) => total + item.qty, 0) || 1;
+  }
 
-      const price = this.ticketPriceAfterDiscount(firstTicket);
-      return seats.length * price;
-   }
+  calculatePriceFromSeats(seats: Array<string>): number {
+    let totalPrice = 0;
 
-   startPaymentProcess(): void {
-      // 1. Dapatkan daftar kursi yang dipilih secara internal
-      const selectedSeatsArray = this.getSelectedSeats().map(seat => seat.id);
-
-      // 2. Cek validasi (sesuai logika awal Anda)
-      if (selectedSeatsArray.length === 0) {
-         this.message = 'Please select at least one seat.';
-         return;
-      }
-
-      // [Optional: Tambahkan logika otentikasi di sini jika belum ada di bookSelectedSeats()]
-      // if (!this.isAuthenticated) { ... }
-
-      // 3. Simpan data kursi
-      this.selectedSeats = selectedSeatsArray;
-
-      // 4. Hitung harga total baru
-      // Fungsi calculatePriceFromSeats() harus menerima argumen, tapi kita sudah punya
-      // selectedSeatsArray yang merupakan array<string>
-      this.totalCartPrice = this.calculatePriceFromSeats(selectedSeatsArray);
-
-      // 5. Tampilkan modal pembayaran
-      this.showPaymentModal = true;
-      this.showSelectionSeats = false;
-      this.showQRCodeDisplay = false; // Pastikan modal QR ditutup
-      this.message = ''; // Reset pesan
-   }
-
-   initializeSeats(numRows: number, seatsPerRow: number, blockName: string): Seat[][] {
-      const seats: Seat[][] = [];
-      for (let i = 0; i < numRows; i++) {
-         const row: Seat[] = [];
-         const rowLabel = this.getRowLabel(i); // Ambil label A, B, C...
-         for (let j = 0; j < seatsPerRow; j++) {
-            row.push({
-               id: `${blockName}-${rowLabel}${j + 1}`, // Contoh: LF-A-A1
-               status: 'available'
-            });
-         }
-         seats.push(row);
-      }
-      return seats;
-   }
-
-   // Fungsi Toggle yang direvisi untuk bekerja dengan struktur blok
-   toggleSeat(blockName: string, rowIndex: number, seatIndex: number): void {
-      const block = this.seatingBlocks.find(b => b.name === blockName);
+    seats.forEach((seatId) => {
+      // Find the block for this seat to get its category
+      const block = this.seatingBlocks.find((b) =>
+        b.seatsData.some((row) => row.some((s) => s.id === seatId))
+      );
       if (!block) return;
 
-      const seat = block.seatsData[rowIndex][seatIndex];
-
-      if (seat.status === 'booked') {
-         return;
-      }
-
-      // Toggle status: selected <-> available
-      seat.status = (seat.status === 'selected') ? 'available' : 'selected';
-
-      console.log(`Kursi ${seat.id} diubah menjadi ${seat.status}`);
-   }
-
-   // Getter: Mendapatkan array semua kursi yang dipilih
-   getSelectedSeats(): Seat[] {
-      return this.seatingBlocks.flatMap(block =>
-         block.seatsData.flat().filter(seat => seat.status === 'selected')
+      // Find the ticket definition for this category
+      const ticket = this.event?.tickets.find(
+        (t) => (t.section || 'GENERAL').toUpperCase() === block.category
       );
-   }
-
-   // Getter: Mengecek apakah ada kursi yang dipilih
-   get isAnySeatSelected(): boolean {
-      return this.getSelectedSeats().length > 0;
-   }
-
-   // Fungsi untuk mendapatkan label baris (A, B, C...)
-   getRowLabel(index: number): string {
-      return String.fromCharCode(65 + index);
-   }
-
-   constructor(
-      private route: ActivatedRoute,
-      private dataSrv: DataEventService,
-      private authService: AuthService,
-      private pdfGeneratorService: PdfGeneratorService,
-      private router: Router
-   ) { }
-
-   ngOnInit(): void {
-      const currentUser = this.authService.getCurrentUser();
-      if (currentUser) {
-         this.currentUserId = currentUser.id;
-         this.isAuthenticated = true;
+      if (ticket) {
+        totalPrice += this.ticketPriceAfterDiscount(ticket);
       } else {
-         this.isAuthenticated = false;
+        // Fallback if ticket not found (shouldn't happen if data is consistent)
+        // Try to find any ticket
+        const fallbackTicket = this.event?.tickets[0];
+        totalPrice += fallbackTicket ? this.ticketPriceAfterDiscount(fallbackTicket) : 50;
+      }
+    });
+
+    return totalPrice;
+  }
+
+  startPaymentProcess(): void {
+    // 1. Dapatkan daftar kursi yang dipilih secara internal
+    const selectedSeatsArray = this.getSelectedSeats().map((seat) => seat.id);
+
+    // 2. Cek validasi (sesuai logika awal Anda)
+    if (selectedSeatsArray.length === 0) {
+      this.message = 'Please select at least one seat.';
+      return;
+    }
+
+    // [Optional: Tambahkan logika otentikasi di sini jika belum ada di bookSelectedSeats()]
+    // if (!this.isAuthenticated) { ... }
+
+    // 3. Simpan data kursi
+    this.selectedSeats = selectedSeatsArray;
+
+    // 4. Hitung harga total baru
+    // Fungsi calculatePriceFromSeats() harus menerima argumen, tapi kita sudah punya
+    // selectedSeatsArray yang merupakan array<string>
+    this.totalCartPrice = this.calculatePriceFromSeats(selectedSeatsArray);
+
+    // 5. Tampilkan modal pembayaran
+    this.showPaymentModal = true;
+    this.showSelectionSeats = false;
+    this.showQRCodeDisplay = false; // Pastikan modal QR ditutup
+    this.message = ''; // Reset pesan
+  }
+
+  initializeSeats(numRows: number, seatsPerRow: number, blockName: string): Seat[][] {
+    const seats: Seat[][] = [];
+    for (let i = 0; i < numRows; i++) {
+      const row: Seat[] = [];
+      const rowLabel = this.getRowLabel(i); // Ambil label A, B, C...
+      for (let j = 0; j < seatsPerRow; j++) {
+        row.push({
+          id: `${blockName}-${rowLabel}${j + 1}`, // Contoh: LF-A-A1
+          status: 'available',
+        });
+      }
+      seats.push(row);
+    }
+    return seats;
+  }
+
+  // Fungsi Toggle dengan seat limit & category restriction
+  toggleSeat(blockName: string, rowIndex: number, seatIndex: number): void {
+    const block = this.seatingBlocks.find((b) => b.name === blockName);
+    if (!block) return;
+
+    const seat = block.seatsData[rowIndex][seatIndex];
+
+    if (seat.status === 'booked') {
+      return;
+    }
+
+    if (seat.status === 'available') {
+      // 1. Check strict max limit
+      if (this.getSelectedSeats().length >= this.maxSeatsAllowed) {
+        this.toast.warning(`Maximum ${this.maxSeatsAllowed} seat(s) allowed`);
+        return;
       }
 
-      this.route.paramMap.subscribe(params => {
-         const idStr = params.get('id');
-         if (!idStr) {
+      // 2. Check category restriction
+      // Find which cart item corresponds to this seat's category
+      // We need to count how many seats of this category are ALREADY selected
+      const currentSelectedOfThisCategory = this.getSelectedSeats().filter((s) => {
+        const sBlock = this.seatingBlocks.find((b) =>
+          b.seatsData.some((row) => row.some((cell) => cell.id === s.id))
+        );
+        return sBlock?.category === block.category;
+      }).length;
+
+      // Find cart quantity for this category
+      // Map ticket.section (from DB/Mock) to block.category
+      // Assuming ticket.section values roughly match 'VIP', 'PREMIUM', 'GENERAL'
+      const cartItemForCategory = this.cart.find(
+        (item) => (item.ticket.section || 'GENERAL').toUpperCase() === block.category
+      );
+
+      if (!cartItemForCategory) {
+        this.toast.warning(`You haven't purchased any ${block.category} tickets.`);
+        return;
+      }
+
+      if (currentSelectedOfThisCategory >= cartItemForCategory.qty) {
+        this.toast.warning(`You only have ${cartItemForCategory.qty} ${block.category} ticket(s).`);
+        return;
+      }
+
+      seat.status = 'selected';
+    } else {
+      seat.status = 'available';
+    }
+
+    this.zone.run(() => this.cdr.detectChanges());
+  }
+
+  // Close seat map modal
+  closeSeatMap(): void {
+    // Reset selected seats when closing
+    this.seatingBlocks.forEach((block) => {
+      block.seatsData.forEach((row) => {
+        row.forEach((seat) => {
+          if (seat.status === 'selected') {
+            seat.status = 'available';
+          }
+        });
+      });
+    });
+    this.showSelectionSeats = false;
+  }
+
+  // Getter: Mendapatkan array semua kursi yang dipilih
+  getSelectedSeats(): Seat[] {
+    return this.seatingBlocks.flatMap((block) =>
+      block.seatsData.flat().filter((seat) => seat.status === 'selected')
+    );
+  }
+
+  // Getter: Mengecek apakah ada kursi yang dipilih
+  get isAnySeatSelected(): boolean {
+    return this.getSelectedSeats().length > 0;
+  }
+
+  // Fungsi untuk mendapatkan label baris (A, B, C...)
+  getRowLabel(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  constructor(
+    private route: ActivatedRoute,
+    private dataSrv: DataEventService,
+    private authService: AuthService,
+    private pdfGeneratorService: PdfGeneratorService,
+    private router: Router,
+    private toast: ToastService
+  ) {}
+
+  ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.currentUserId = currentUser.id;
+      this.isAuthenticated = true;
+    } else {
+      this.isAuthenticated = false;
+    }
+
+    this.route.paramMap.subscribe((params) => {
+      const idStr = params.get('id');
+      if (!idStr) {
+        this.router.navigate(['/']);
+        return;
+      }
+      this.eventId = idStr;
+      this.isLoading = true;
+
+      // Load event from API
+      this.dataSrv.getEventByIdAsync(this.eventId).subscribe({
+        next: (event) => {
+          if (!event) {
             this.router.navigate(['/']);
             return;
-         }
-         this.eventId = Number(idStr);
-         this.event = this.dataSrv.getEventById(this.eventId);
-         if (!this.event) {
-            this.router.navigate(['/']);
-         } else {
-            // initialize quantities for each ticket category
-            for (const t of this.event.tickets) {
-               this.quantities[t.id] = 1;
-            }
-         }
+          }
+          this.event = event;
+          // initialize quantities for each ticket category
+          for (const t of this.event.tickets) {
+            this.quantities[t.id] = 1;
+          }
+          this.isLoading = false;
+          this.zone.run(() => this.cdr.detectChanges());
+        },
+        error: (err) => {
+          console.error('Failed to load event:', err);
+          this.router.navigate(['/']);
+          this.zone.run(() => this.cdr.detectChanges());
+        },
       });
+    });
 
-      // Inisialisasi data kursi untuk setiap blok
-      this.seatingBlocks.forEach(block => {
-         block.seatsData = this.initializeSeats(block.rows, block.seatsPerRow, block.name);
-      });
+    // Initialize seats for each block (all available initially)
+    this.seatingBlocks.forEach((block) => {
+      block.seatsData = this.initializeSeats(block.rows, block.seatsPerRow, block.name);
+    });
+  }
 
-      // Simulasikan beberapa kursi yang sudah di-booked (contoh)
-      this.seatingBlocks[0].seatsData[0][0].status = 'booked'; // LF-A, R1, S1
-      this.seatingBlocks[1].seatsData[1][7].status = 'booked'; // VIP, R2, S8
-   }
+  applyCoupon(): void {
+    if (!this.couponCode || !this.event) {
+      this.message = 'Please enter a coupon code';
+      return;
+    }
 
-   applyCoupon(): void {
-      this.appliedDiscount = this.dataSrv.applyCoupon(this.couponCode);
-      this.message = this.appliedDiscount > 0
-         ? `Coupon applied: ${this.appliedDiscount}% discount`
-         : 'Invalid coupon code';
-   }
+    this.dataSrv.validatePromoCodeAsync(this.eventId, this.couponCode).subscribe({
+      next: (result) => {
+        if (result.valid && result.discountPercentage) {
+          this.appliedDiscount = result.discountPercentage;
+          this.message = `Coupon applied: ${result.discountPercentage}% discount`;
+          this.updateCartTotal();
+        } else {
+          this.appliedDiscount = 0;
+          this.message = result.message || 'Invalid coupon code';
+        }
+      },
+      error: () => {
+        this.message = 'Failed to validate coupon';
+      },
+    });
+  }
 
-   incrementQuantity(ticketId: string, maxRemaining: number): void {
-      const currentQty = this.quantities[ticketId] || 1;
-      if (currentQty < maxRemaining) {
-         this.quantities[ticketId] = currentQty + 1;
-      }
-   }
+  incrementQuantity(ticketId: string, maxRemaining: number): void {
+    const currentQty = this.quantities[ticketId] || 1;
+    if (currentQty < maxRemaining) {
+      this.quantities[ticketId] = currentQty + 1;
+    }
+  }
 
-   decrementQuantity(ticketId: string): void {
-      const currentQty = this.quantities[ticketId] || 1;
-      if (currentQty > 1) {
-         this.quantities[ticketId] = currentQty - 1;
-      }
-   }
+  decrementQuantity(ticketId: string): void {
+    const currentQty = this.quantities[ticketId] || 1;
+    if (currentQty > 1) {
+      this.quantities[ticketId] = currentQty - 1;
+    }
+  }
 
-   getRemaining(t: TicketCategory): number {
-      return t.total - t.sold;
-   }
+  getRemaining(t: TicketCategory): number {
+    return t.total - t.sold;
+  }
 
-   ticketPriceAfterDiscount(t: TicketCategory): number {
-      if (!t) return 0;
-      const discount = Math.max(0, Math.min(100, this.appliedDiscount || 0));
-      return Math.round(t.price * (1 - discount / 100));
-   }
+  ticketPriceAfterDiscount(t: TicketCategory): number {
+    if (!t) return 0;
+    const discount = Math.max(0, Math.min(100, this.appliedDiscount || 0));
+    return Math.round(t.price * (1 - discount / 100));
+  }
 
-   purchase(ticket: TicketCategory, qty = 1): void {
-      // Check if user is authenticated
-      if (!this.isAuthenticated) {
-         this.message = '🔐 Please login to purchase tickets';
-         setTimeout(() => {
-            this.router.navigate(['/login']);
-         }, 2000);
-         return;
-      }
+  purchase(ticket: TicketCategory, qty = 1): void {
+    // Check if user is authenticated
+    if (!this.isAuthenticated) {
+      this.message = '🔐 Please login to purchase tickets';
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 2000);
+      return;
+    }
 
-      if (this.getRemaining(ticket) < qty) {
-         this.message = 'Not enough tickets available';
-         return;
-      }
+    if (this.getRemaining(ticket) < qty) {
+      this.message = 'Not enough tickets available';
+      return;
+    }
 
-      const result = this.dataSrv.buyTicket(this.eventId, ticket.id, qty, this.currentUserId);
-
-      if (result.success && result.booking) {
-         this.currentBooking = result.booking;
-         this.currentBooking.discountApplied = this.appliedDiscount;
-         this.currentBooking.totalPrice = this.ticketPriceAfterDiscount(ticket) * qty;
-
-         this.showPaymentModal = true;
-         this.bookingInProgress = true;
-         this.message = '';
-
-         // Refresh event data
-         this.event = this.dataSrv.getEventById(this.eventId);
-      } else {
-         this.message = result.message || 'Purchase failed';
-      }
-   }
-
-   addToCart(ticket: TicketCategory): void {
-      const qty = this.quantities[ticket.id] || 1;
-
-      if (this.getRemaining(ticket) < qty) {
-         this.message = 'Not enough tickets available';
-         return;
-      }
-
-      // Check if ticket already in cart
-      const cartItem = this.cart.find(item => item.ticket.id === ticket.id);
-      if (cartItem) {
-         cartItem.qty += qty;
-      } else {
-         this.cart.push({ ticket, qty });
-      }
-
-      // Reset quantity input
-      this.quantities[ticket.id] = 1;
-      this.updateCartTotal();
-      this.message = `✓ Added ${qty} ${ticket.type} ticket(s) to cart`;
-   }
-
-   removeFromCart(ticketId: string): void {
-      this.cart = this.cart.filter(item => item.ticket.id !== ticketId);
-      this.updateCartTotal();
-   }
-
-   updateCartTotal(): void {
-      this.totalCartPrice = this.cart.reduce((total, item) => {
-         const price = this.ticketPriceAfterDiscount(item.ticket);
-         return total + (price * item.qty);
-      }, 0);
-   }
-
-   checkoutCart(): void {
-      if (this.cart.length === 0) {
-         this.message = 'Your cart is empty';
-         return;
-      }
-
-      this.showSelectionSeats = true;
-   }
-
-   continueShopping(): void {
-      this.showContinueShopping = false;
-      this.cart = [];
-      this.totalCartPrice = 0;
-      this.quantities = {};
-      for (const t of this.event?.tickets || []) {
-         this.quantities[t.id] = 1;
-      }
-   }
-
-   processPayment(): void {
-      // Generate QR code using qrcode library
-      if (!this.event) return;
-      let qrData = '';
-      let totalBookingQty = 0;
-
-      // KASUS 1: Pengguna datang dari Pemilihan Kursi (Prioritas)
-      if (this.selectedSeats && this.selectedSeats.length > 0) {
-         totalBookingQty = this.selectedSeats.length;
-
-         // 1. Tentukan kategori tiket (Asumsi: Menggunakan kategori pertama untuk harga)
-         const ticketCategory = this.event.tickets[0];
-         if (!ticketCategory) return;
-
-         // 2. Buat Booking Baru di Data Service
-         const result = this.dataSrv.buyTicket(this.eventId, ticketCategory.id, totalBookingQty, this.currentUserId);
-
-         if (result.success && result.booking) {
+    this.isLoading = true;
+    this.dataSrv
+      .createBookingAsync({
+        eventId: this.eventId,
+        ticketCategoryId: ticket.id,
+        quantity: qty,
+        promoCode: this.couponCode || undefined,
+      })
+      .subscribe({
+        next: (result) => {
+          this.isLoading = false;
+          if (result.success && result.booking) {
             this.currentBooking = result.booking;
             this.currentBooking.discountApplied = this.appliedDiscount;
-            // ASUMSI: totalCartPrice sudah dihitung di checkoutWithSeats()
-            this.currentBooking.totalPrice = this.totalCartPrice;
+            this.currentBooking.totalPrice = this.ticketPriceAfterDiscount(ticket) * qty;
 
-            // 3. QR Data Khusus Kursi: Masukkan ID Kursi yang dipilih
-            // Format: [EventID]|[Section/Type]|SEATS:[ID1,ID2,...]|[EventDate]
-            const seatIdsString = this.selectedSeats.join(',');
-            qrData = `${this.event.id}|SEATS|SEATS:${seatIdsString}|${this.event.date}`;
-         } else {
-            // Gagal membuat booking
-            this.message = 'Error creating seat booking.';
-            return;
-         }
+            this.showPaymentModal = true;
+            this.bookingInProgress = true;
+            this.message = '';
 
-         // Kosongkan cart untuk menghindari duplikasi proses
-         this.cart = [];
-
-      }
-      // KASUS 2: Pengguna datang dari Cart Lama
-      else if (this.cart.length > 0) {
-
-         // Logic original untuk memproses cart item
-         for (const cartItem of this.cart) {
-            const result = this.dataSrv.buyTicket(this.eventId, cartItem.ticket.id, cartItem.qty, this.currentUserId);
-            if (result.success && result.booking) {
-               result.booking.discountApplied = this.appliedDiscount;
-               result.booking.totalPrice = this.ticketPriceAfterDiscount(cartItem.ticket) * cartItem.qty;
-               // Gunakan booking pertama untuk QR display
-               if (!this.currentBooking) {
-                  this.currentBooking = result.booking;
-               }
-            }
-         }
-
-         // Generate QR untuk item pertama di cart (Logik original)
-         const firstCartItem = this.cart[0];
-         qrData = `${this.event.id}|${firstCartItem.ticket.section || 'GENERAL'}|${this.event.date}`;
-      }
-      // KASUS 3: Tidak ada item untuk diproses
-      else {
-         return;
-      }
-
-      // --- REVISI END ---
-
-      this.qrCodeData = qrData;
-
-      if (this.currentBooking) {
-         this.currentBooking.qrCode = qrData;
-      }
-
-      // Generate QR code image using qrcode library
-      QRCode.toDataURL(qrData, {
-         width: 300,
-         margin: 2,
-         color: {
-            dark: '#000000',
-            light: '#ffffff'
-         }
-      }).then((url: string) => {
-         this.qrCodeDataUrl = url;
-      }).catch((err: Error) => {
-         console.error('Error generating QR code:', err);
+            // Refresh event data
+            this.dataSrv.getEventByIdAsync(this.eventId).subscribe((evt) => {
+              if (evt) this.event = evt;
+            });
+          } else {
+            this.message = result.message || 'Purchase failed';
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.message = 'Purchase failed';
+          console.error(err);
+        },
       });
+  }
 
-      this.showPaymentModal = false;
-      this.showSelectionSeats = false;
-      this.showQRCodeDisplay = true;
-      // Setelah pembelian berhasil, tampilkan tombol untuk melihat booking
-      this.showContinueShopping = false;
-      this.message = '✓ Payment successful! Your QR code is ready';
-   }
+  addToCart(ticket: TicketCategory): void {
+    const qty = this.quantities[ticket.id] || 1;
 
-   createSimpleQRVisual(data: string): string {
-      // Create a simple visual QR representation using canvas
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return '';
+    if (this.getRemaining(ticket) < qty) {
+      this.message = 'Not enough tickets available';
+      return;
+    }
 
-      canvas.width = 300;
-      canvas.height = 300;
+    // Check if ticket already in cart
+    const cartItem = this.cart.find((item) => item.ticket.id === ticket.id);
+    if (cartItem) {
+      cartItem.qty += qty;
+    } else {
+      this.cart.push({ ticket, qty });
+    }
 
-      // White background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 300, 300);
+    // Reset quantity input
+    this.quantities[ticket.id] = 1;
+    this.updateCartTotal();
+    this.message = `✓ Added ${qty} ${ticket.type} ticket(s) to cart`;
+  }
 
-      // Draw border
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(0, 0, 300, 300);
+  removeFromCart(ticketId: string): void {
+    this.cart = this.cart.filter((item) => item.ticket.id !== ticketId);
+    this.updateCartTotal();
+  }
 
-      // Draw title
-      ctx.fillStyle = '#000000';
-      ctx.font = 'bold 14px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('BOOKING QR CODE', 150, 50);
+  updateCartTotal(): void {
+    this.totalCartPrice = this.cart.reduce((total, item) => {
+      const price = this.ticketPriceAfterDiscount(item.ticket);
+      return total + price * item.qty;
+    }, 0);
+  }
 
-      // Draw booking ID as text
-      ctx.font = '11px monospace';
-      ctx.fillText(data, 150, 150);
+  checkoutCart(): void {
+    if (this.cart.length === 0) {
+      this.message = 'Your cart is empty';
+      return;
+    }
 
-      // Draw decorative QR-like pattern
-      ctx.fillStyle = '#000000';
-      const gridSize = 8;
-      for (let i = 0; i < 25; i++) {
-         for (let j = 0; j < 25; j++) {
-            if (Math.random() > 0.5) {
-               ctx.fillRect(40 + i * gridSize, 180 + j * gridSize, gridSize - 1, gridSize - 1);
+    // Load booked seats from API before showing seat map
+    this.isLoading = true;
+    this.message = 'Loading seat availability...';
+
+    this.dataSrv.getBookedSeatsAsync(this.eventId).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        this.message = '';
+
+        // Reset all seats to available first
+        this.seatingBlocks.forEach((block) => {
+          block.seatsData.forEach((row) => {
+            row.forEach((seat) => {
+              seat.status = 'available';
+            });
+          });
+        });
+
+        // Mark booked seats from API
+        if (result.success && result.bookedSeats) {
+          result.bookedSeats.forEach((seatId: string) => {
+            // Find the seat and mark as booked
+            for (const block of this.seatingBlocks) {
+              for (const row of block.seatsData) {
+                const seat = row.find((s) => s.id === seatId);
+                if (seat) {
+                  seat.status = 'booked';
+                  break;
+                }
+              }
             }
-         }
-      }
+          });
+        }
 
-      return canvas.toDataURL('image/png');
-   }
+        this.showSelectionSeats = true;
+        this.zone.run(() => this.cdr.detectChanges());
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Failed to load booked seats:', err);
+        // Still show seat map, all seats will be available
+        this.showSelectionSeats = true;
+        this.zone.run(() => this.cdr.detectChanges());
+      },
+    });
+  }
 
-   downloadQRCode(): void {
-      if (!this.qrCodeDataUrl) return;
+  continueShopping(): void {
+    this.showContinueShopping = false;
+    this.cart = [];
+    this.totalCartPrice = 0;
+    this.quantities = {};
+    for (const t of this.event?.tickets || []) {
+      this.quantities[t.id] = 1;
+    }
+  }
 
-      const link = document.createElement('a');
-      link.href = this.qrCodeDataUrl;
-      link.download = `qr_${this.currentBooking?.id}.png`;
-      link.click();
-   }
+  processPayment(): void {
+    // Create booking and then initiate Midtrans payment
+    if (!this.event || !this.isAuthenticated) {
+      this.message = 'Please login to complete purchase';
+      return;
+    }
 
-   /**
-    * Download complete ticket as PDF
-    */
-   downloadTicketPDF(): void {
-      if (!this.currentBooking || !this.event) return;
+    let ticketCategoryId = '';
+    let quantity = 0;
+    let promoCode = this.couponCode || undefined;
 
-      const ticketCategory = this.event.tickets.find(t => t.id === this.currentBooking!.ticketCategoryId);
-      if (!ticketCategory) return;
+    // Determine booking details based on source
+    if (this.selectedSeats && this.selectedSeats.length > 0) {
+      // From seat selection
+      quantity = this.selectedSeats.length;
+      ticketCategoryId = this.event.tickets[0]?.id || '';
+    } else if (this.cart.length > 0) {
+      // From cart - use first item
+      const firstItem = this.cart[0];
+      ticketCategoryId = firstItem.ticket.id;
+      quantity = firstItem.qty;
+    } else {
+      this.message = 'No items to purchase';
+      return;
+    }
 
-      const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+    this.isLoading = true;
+    this.message = 'Creating your booking...';
 
-      this.pdfGeneratorService.generateTicketPDF(
-         this.currentBooking.id,
-         this.qrCodeData,
-         this.event.title,
-         ticketCategory.type,
-         this.currentBooking.quantity,
-         this.currentBooking.totalPrice,
-         this.event.date,
-         userName
-      ).catch(error => {
-         console.error('Error generating PDF:', error);
+    // Step 1: Create booking via API
+    this.dataSrv
+      .createBookingAsync({
+        eventId: this.eventId,
+        ticketCategoryId,
+        quantity,
+        promoCode,
+        selectedSeats: this.selectedSeats,
+      })
+      .subscribe({
+        next: (result) => {
+          if (result.success && result.booking) {
+            const bookingId = result.booking.id || (result.booking as any)._id;
+
+            // Store booking info
+            this.currentBooking = {
+              id: bookingId,
+              eventId: this.event!.id,
+              userId: this.currentUserId,
+              ticketCategoryId,
+              quantity,
+              pricePerTicket: result.booking.pricePerTicket || 0,
+              totalPrice: result.booking.totalPrice || this.totalCartPrice,
+              discountApplied: result.booking.discountApplied || this.appliedDiscount,
+              status: 'pending',
+              bookingDate: new Date().toISOString(),
+              qrCode: result.booking.qrCode,
+            };
+
+            this.qrCodeData = result.booking.qrCode || '';
+
+            // Step 2: Create Midtrans payment
+            this.message = 'Preparing payment...';
+            this.initiatePayment(bookingId);
+          } else {
+            this.isLoading = false;
+            this.message = result.message || 'Booking failed';
+            this.toast.error(result.message || 'Failed to create booking');
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('Booking error:', err);
+          this.message = 'Failed to create booking. Please try again.';
+          this.toast.error('Booking failed. Please try again.');
+          this.zone.run(() => this.cdr.detectChanges());
+        },
       });
-   }
+  }
 
-   backToHome(): void {
+  paymentOrderId: string = '';
+
+  /**
+   * Initiate Midtrans payment with Snap popup
+   */
+  private initiatePayment(bookingId: string): void {
+    this.dataSrv.createPaymentAsync(bookingId).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+
+        if (response.success && response.payment) {
+          const { snapToken, orderId } = response.payment;
+          this.paymentOrderId = orderId;
+
+          // Close payment modal before opening Snap
+          this.showPaymentModal = false;
+
+          // Launch Midtrans Snap popup
+          if (window.snap) {
+            window.snap.pay(snapToken, {
+              onSuccess: (result: any) => this.onPaymentSuccess(result),
+              onPending: (result: any) => this.onPaymentPending(result),
+              onError: (result: any) => this.onPaymentError(result),
+              onClose: () => this.onPaymentClose(),
+            });
+          } else {
+            // Fallback: redirect to Snap URL if popup not available
+            window.location.href = response.payment.snapRedirectUrl;
+          }
+        } else {
+          this.message = response.message || 'Failed to create payment';
+          this.toast.error('Failed to create payment');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Payment error:', err);
+        this.message = 'Failed to create payment';
+        this.toast.error('Payment failed. Please try again.');
+      },
+    });
+  }
+
+  private onPaymentSuccess(result: any): void {
+    console.log('Payment success:', result);
+    this.toast.success('Payment successful!');
+
+    // Sync status with backend (CRITICAL for localhost/webhook failure)
+    if (this.paymentOrderId) {
+      this.dataSrv.checkPaymentStatusAsync(this.paymentOrderId).subscribe({
+        next: () => console.log('Payment status synced with backend'),
+        error: (err) => console.error('Failed to sync payment status', err),
+      });
+    }
+
+    // Generate QR code image
+    if (this.qrCodeData) {
+      QRCode.toDataURL(this.qrCodeData, {
+        width: 300,
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' },
+      })
+        .then((url: string) => {
+          this.qrCodeDataUrl = url;
+          this.zone.run(() => this.cdr.detectChanges());
+        })
+        .catch((err: Error) => console.error('QR error:', err));
+    }
+
+    // Show confirmation
+    this.showPaymentModal = false;
+    this.showSelectionSeats = false;
+    this.showQRCodeDisplay = true;
+    this.cart = [];
+    this.message = '✓ Payment successful! Your ticket is confirmed.';
+    this.zone.run(() => this.cdr.detectChanges());
+  }
+
+  private onPaymentPending(result: any): void {
+    console.log('Payment pending:', result);
+    this.toast.info('Payment pending. Please complete your payment.');
+    this.message = 'Payment pending - please complete your payment';
+    this.showPaymentModal = false;
+    this.router.navigate(['/my-bookings'], { queryParams: { payment: 'pending' } });
+  }
+
+  private onPaymentError(result: any): void {
+    console.error('Payment error:', result);
+    this.toast.error('Payment failed. Please try again.');
+    this.message = 'Payment failed';
+    this.showPaymentModal = false;
+  }
+
+  private onPaymentClose(): void {
+    console.log('Payment popup closed');
+    this.message = 'Payment cancelled';
+    this.showPaymentModal = false;
+  }
+
+  createSimpleQRVisual(data: string): string {
+    // Create a simple visual QR representation using canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    canvas.width = 300;
+    canvas.height = 300;
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 300, 300);
+
+    // Draw border
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 300, 300);
+
+    // Draw title
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('BOOKING QR CODE', 150, 50);
+
+    // Draw booking ID as text
+    ctx.font = '11px monospace';
+    ctx.fillText(data, 150, 150);
+
+    // Draw decorative QR-like pattern
+    ctx.fillStyle = '#000000';
+    const gridSize = 8;
+    for (let i = 0; i < 25; i++) {
+      for (let j = 0; j < 25; j++) {
+        if (Math.random() > 0.5) {
+          ctx.fillRect(40 + i * gridSize, 180 + j * gridSize, gridSize - 1, gridSize - 1);
+        }
+      }
+    }
+
+    return canvas.toDataURL('image/png');
+  }
+
+  downloadQRCode(): void {
+    if (!this.qrCodeDataUrl) return;
+
+    const link = document.createElement('a');
+    link.href = this.qrCodeDataUrl;
+    link.download = `qr_${this.currentBooking?.id}.png`;
+    link.click();
+  }
+
+  /**
+   * Download complete ticket as PDF
+   */
+  downloadTicketPDF(): void {
+    if (!this.currentBooking || !this.event) return;
+
+    const ticketCategory = this.event.tickets.find(
+      (t) => t.id === this.currentBooking!.ticketCategoryId
+    );
+    if (!ticketCategory) return;
+
+    const userName = this.authService.getCurrentUser()?.fullName || 'Guest';
+
+    this.pdfGeneratorService
+      .generateTicketPDF(
+        this.currentBooking.id,
+        this.qrCodeData,
+        this.event.title,
+        ticketCategory.type,
+        this.currentBooking.quantity,
+        this.currentBooking.totalPrice,
+        this.event.date,
+        userName
+      )
+      .catch((error) => {
+        console.error('Error generating PDF:', error);
+      });
+  }
+
+  backToHome(): void {
+    this.showQRCodeDisplay = false;
+    this.currentBooking = null;
+    this.qrCodeData = '';
+    this.message = '';
+    this.router.navigate(['/my-bookings']);
+  }
+
+  cancelBooking(): void {
+    this.showPaymentModal = false;
+    this.currentBooking = null;
+    this.message = 'Booking cancelled';
+  }
+
+  closeQRCodeDisplay(): void {
+    if (this.showContinueShopping) {
+      this.showQRCodeDisplay = false;
+      this.continueShopping();
+    } else {
       this.showQRCodeDisplay = false;
       this.currentBooking = null;
       this.qrCodeData = '';
       this.message = '';
+      // Redirect to my-bookings instead of home
       this.router.navigate(['/my-bookings']);
-   }
+    }
+  }
 
-   cancelBooking(): void {
-      this.showPaymentModal = false;
-      this.currentBooking = null;
-      this.message = 'Booking cancelled';
-   }
+  formattedPrice(priceNum: number): string {
+    return new Intl.NumberFormat('ms-MY', {
+      style: 'currency',
+      currency: 'MYR',
+      maximumFractionDigits: 0,
+    }).format(priceNum);
+  }
 
-   closeQRCodeDisplay(): void {
-      if (this.showContinueShopping) {
-         this.showQRCodeDisplay = false;
-         this.continueShopping();
-      } else {
-         this.showQRCodeDisplay = false;
-         this.currentBooking = null;
-         this.qrCodeData = '';
-         this.message = '';
-         // Redirect to my-bookings instead of home
-         this.router.navigate(['/my-bookings']);
-      }
-   }
+  joinWaitlist(ticket: TicketCategory): void {
+    // Check if user is authenticated
+    if (!this.isAuthenticated) {
+      this.message = '🔐 Please login to join waitlist';
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 2000);
+      return;
+    }
 
-   formattedPrice(priceNum: number): string {
-      return new Intl.NumberFormat('en-US', {
-         style: 'currency',
-         currency: 'USD',
-         maximumFractionDigits: 0
-      }).format(priceNum);
-   }
+    if (this.getRemaining(ticket) > 0) {
+      alert('Tickets still available');
+      return;
+    }
 
-   joinWaitlist(ticket: TicketCategory): void {
-      // Check if user is authenticated
-      if (!this.isAuthenticated) {
-         this.message = '🔐 Please login to join waitlist';
-         setTimeout(() => {
-            this.router.navigate(['/login']);
-         }, 2000);
-         return;
-      }
-
-      if (this.getRemaining(ticket) > 0) {
-         alert('Tickets still available');
-         return;
-      }
-
-      const result = this.dataSrv.joinWaitlist(this.eventId, ticket.id, this.currentUserId, 1);
-      if (result.success) {
-         this.message = `✓ You've been added to the waitlist for ${ticket.type}`;
-      } else {
-         this.message = result.message;
-      }
-   }
+    this.isLoading = true;
+    this.dataSrv.joinWaitlistAsync(this.eventId, ticket.id, 1).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.success) {
+          this.message = `✓ You've been added to the waitlist for ${ticket.type}`;
+          this.toast.success(`Added to waitlist for ${ticket.type}`);
+        } else {
+          this.message = result.message;
+          this.toast.error(result.message);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.message = 'Failed to join waitlist';
+        this.toast.error('Failed to join waitlist');
+      },
+    });
+  }
 }

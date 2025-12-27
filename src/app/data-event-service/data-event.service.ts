@@ -1,385 +1,429 @@
 // src/app/data-event-service/data-event.service.ts
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
-import { EventItem, TicketCategory, Booking, WaitlistEntry, PromotionalCode, EventAnalytics } from './data-event';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError, tap, distinctUntilChanged } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  EventItem,
+  TicketCategory,
+  Booking,
+  WaitlistEntry,
+  PromotionalCode,
+  EventAnalytics,
+} from './data-event';
 import { environment } from '../../environments/environment';
 
-// Try to load dev mock events when running in dev with useMocks=true
-function loadDevEvents(): EventItem[] {
-   if (!environment || !environment.useMocks) return [];
-   try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      // tslint:disable-next-line:no-var-requires
-      // @ts-ignore
-      const mock = require('../mock/mock-events');
-      return (mock && mock.MOCK_EVENTS) ? mock.MOCK_EVENTS : [];
-   } catch (e) {
-      return [];
-   }
-}
-
 @Injectable({
-   providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataEventService {
-   private data: EventItem[] = [...(loadDevEvents().length ? loadDevEvents() : [])];
-   private subject = new BehaviorSubject<EventItem[]>([...this.data]);
-   private searchQuery = new BehaviorSubject<string>('');
-   private bookings: Booking[] = [];
-   private waitlist: WaitlistEntry[] = [];
-   private nextBookingId = 1;
-   private nextWaitlistId = 1;
-   private STORAGE_BOOKINGS_KEY = 'demo_bookings_v1';
-   private STORAGE_WAITLIST_KEY = 'demo_waitlist_v1';
+  private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+  private apiUrl = environment.apiUrl;
 
-   public searchResults$: Observable<EventItem[]> = this.searchQuery.pipe(
-      distinctUntilChanged(),
-      map(q => {
-         const term = (q || '').trim().toLowerCase();
-         if (!term) return [];
-         return this.data.filter(e => e.title.toLowerCase().includes(term));
+  private data: EventItem[] = [];
+  private subject = new BehaviorSubject<EventItem[]>([]);
+  private searchQuery = new BehaviorSubject<string>('');
+
+  public searchResults$: Observable<EventItem[]> = this.searchQuery.pipe(
+    distinctUntilChanged(),
+    map((q) => {
+      const term = (q || '').trim().toLowerCase();
+      if (!term) return [];
+      return this.data.filter((e) => e.title.toLowerCase().includes(term));
+    })
+  );
+
+  public searchQuery$ = this.searchQuery.asObservable();
+
+  constructor() {
+    this.initialize();
+  }
+
+  ngOnInit(): void {
+    // noop for compatibility
+  }
+
+  private initialize() {
+    this.loadEventsFromAPI();
+  }
+
+  // Clear cached data (call this when user changes or on logout)
+  clearCache(): void {
+    this.data = [];
+    this.subject.next([]);
+  }
+
+  // Force refresh from API (call this when user logs in)
+  refreshEvents(): void {
+    this.loadEventsFromAPI();
+  }
+
+  private loadEventsFromAPI() {
+    this.http
+      .get<{ success: boolean; events: EventItem[] }>(`${this.apiUrl}/events`)
+      .pipe(
+        catchError((err) => {
+          console.error('Failed to load events from API:', err);
+          return of({ success: false, events: [] });
+        })
+      )
+      .subscribe((response) => {
+        if (response.success && response.events) {
+          this.data = response.events;
+          this.subject.next([...this.data]);
+        }
+      });
+  }
+
+  // ========== EVENT MANAGEMENT ==========
+
+  getEvents$(): Observable<EventItem[]> {
+    return this.subject.asObservable();
+  }
+
+  setSearchQuery(q: string) {
+    this.searchQuery.next(q || '');
+  }
+
+  getEventsAsync(): Observable<EventItem[]> {
+    return this.http.get<{ success: boolean; events: EventItem[] }>(`${this.apiUrl}/events`).pipe(
+      map((response) => {
+        if (response.success && response.events) {
+          this.data = response.events;
+          this.subject.next([...this.data]);
+          return response.events;
+        }
+        return [];
+      }),
+      catchError((err) => {
+        console.error('Error fetching events:', err);
+        return of([]);
       })
-   );
+    );
+  }
 
-   public searchQuery$ = this.searchQuery.asObservable();
+  getEventByIdAsync(id: string): Observable<EventItem | null> {
+    return this.http
+      .get<{ success: boolean; event: EventItem }>(`${this.apiUrl}/events/${id}`)
+      .pipe(
+        map((response) => (response.success ? response.event : null)),
+        catchError((err) => {
+          console.error('Error fetching event:', err);
+          return of(null);
+        })
+      );
+  }
 
-   constructor() { this.initialize(); }
+  getEventsByOrganizerAsync(organizerId: string): Observable<EventItem[]> {
+    return this.http
+      .get<{ success: boolean; events: EventItem[] }>(
+        `${this.apiUrl}/events/organizer/${organizerId}`
+      )
+      .pipe(
+        map((response) => (response.success ? response.events : [])),
+        catchError((err) => {
+          console.error('Error fetching organizer events:', err);
+          return of([]);
+        })
+      );
+  }
 
-   // Load saved demo state on construction
-   ngOnInit?(): void {
-      // noop for compatibility
-   }
+  createEventAsync(
+    event: Partial<EventItem>
+  ): Observable<{ success: boolean; event?: EventItem; message?: string }> {
+    return this.http
+      .post<{ success: boolean; event: EventItem; message?: string }>(
+        `${this.apiUrl}/events`,
+        event
+      )
+      .pipe(
+        tap((response) => {
+          if (response.success && response.event) {
+            this.data.push(response.event);
+            this.subject.next([...this.data]);
+          }
+        }),
+        catchError((err) => {
+          console.error('Error creating event:', err);
+          return of({ success: false, message: err.error?.message || 'Failed to create event' });
+        })
+      );
+  }
 
-   // initialize after creation
-   private initialize() {
-      this.loadState();
-   }
+  updateEventAsync(
+    id: string,
+    updates: Partial<EventItem>
+  ): Observable<{ success: boolean; event?: EventItem; message?: string }> {
+    return this.http
+      .put<{ success: boolean; event: EventItem; message?: string }>(
+        `${this.apiUrl}/events/${id}`,
+        updates
+      )
+      .pipe(
+        tap((response) => {
+          if (response.success && response.event) {
+            const idx = this.data.findIndex((e) => e.id?.toString() === id);
+            if (idx >= 0) {
+              this.data[idx] = response.event;
+              this.subject.next([...this.data]);
+            }
+          }
+        }),
+        catchError((err) => {
+          console.error('Error updating event:', err);
+          return of({ success: false, message: err.error?.message || 'Failed to update event' });
+        })
+      );
+  }
 
-   // Persist bookings and waitlist to localStorage so demo state survives reloads
-   private saveState() {
-      try {
-         localStorage.setItem(this.STORAGE_BOOKINGS_KEY, JSON.stringify(this.bookings));
-         localStorage.setItem(this.STORAGE_WAITLIST_KEY, JSON.stringify(this.waitlist));
-      } catch (e) {
-         // ignore storage errors in restricted environments
-      }
-   }
+  deleteEventAsync(id: string): Observable<{ success: boolean; message?: string }> {
+    return this.http
+      .delete<{ success: boolean; message: string }>(`${this.apiUrl}/events/${id}`)
+      .pipe(
+        tap((response) => {
+          if (response.success) {
+            const idx = this.data.findIndex((e) => e.id?.toString() === id);
+            if (idx >= 0) {
+              this.data.splice(idx, 1);
+              this.subject.next([...this.data]);
+            }
+          }
+        }),
+        catchError((err) => {
+          console.error('Error deleting event:', err);
+          return of({ success: false, message: err.error?.message || 'Failed to delete event' });
+        })
+      );
+  }
 
-   private loadState() {
-      try {
-         const rawBookings = localStorage.getItem(this.STORAGE_BOOKINGS_KEY);
-         if (rawBookings) {
-            this.bookings = JSON.parse(rawBookings) as Booking[];
-            // infer nextBookingId
-            const maxId = this.bookings.reduce((max, b) => {
-               const m = Number(b.id?.toString().replace(/^booking_/, '') || 0);
-               return isNaN(m) ? max : Math.max(max, m);
-            }, 0);
-            this.nextBookingId = maxId + 1;
-         }
+  // ========== PROMO CODES ==========
 
-         const rawWait = localStorage.getItem(this.STORAGE_WAITLIST_KEY);
-         if (rawWait) {
-            this.waitlist = JSON.parse(rawWait) as WaitlistEntry[];
-            const maxW = this.waitlist.reduce((max, w) => {
-               const m = Number(w.id?.toString().replace(/^waitlist_/, '') || 0);
-               return isNaN(m) ? max : Math.max(max, m);
-            }, 0);
-            this.nextWaitlistId = maxW + 1;
-         }
-      } catch (e) {
-         // ignore
-      }
-   }
+  validatePromoCodeAsync(
+    eventId: string,
+    code: string
+  ): Observable<{ valid: boolean; discountPercentage?: number; message: string }> {
+    return this.http
+      .post<{ success: boolean; valid: boolean; discountPercentage?: number; message: string }>(
+        `${this.apiUrl}/events/validate-promo`,
+        { eventId, code }
+      )
+      .pipe(
+        map((response) => ({
+          valid: response.valid || response.success,
+          discountPercentage: response.discountPercentage,
+          message: response.message,
+        })),
+        catchError((err) => of({ valid: false, message: 'Failed to validate code' }))
+      );
+  }
 
-   // ========== EVENT MANAGEMENT ==========
+  // ========== BOOKING ==========
 
-   getEvents$(): Observable<EventItem[]> {
-      return this.subject.asObservable();
-   }
+  createBookingAsync(data: {
+    eventId: string;
+    ticketCategoryId: string;
+    quantity: number;
+    promoCode?: string;
+    selectedSeats?: string[];
+  }): Observable<{ success: boolean; message: string; booking?: Booking; remaining?: number }> {
+    return this.http
+      .post<{ success: boolean; message: string; booking?: any; remaining?: number }>(
+        `${this.apiUrl}/bookings`,
+        data
+      )
+      .pipe(
+        catchError((err) => {
+          console.error('Error creating booking:', err);
+          return of({ success: false, message: err.error?.message || 'Booking failed' });
+        })
+      );
+  }
 
-   setSearchQuery(q: string) {
-      this.searchQuery.next(q || '');
-   }
+  // ========== MIDTRANS PAYMENT ==========
 
-   getEvents(): EventItem[] {
-      return [...this.data];
-   }
+  /**
+   * Create Midtrans payment and get Snap token
+   */
+  createPaymentAsync(bookingId: string): Observable<{
+    success: boolean;
+    message: string;
+    payment?: {
+      orderId: string;
+      snapToken: string;
+      snapRedirectUrl: string;
+      grossAmount: number;
+      clientKey: string;
+    };
+  }> {
+    return this.http.post<any>(`${this.apiUrl}/payments/create`, { bookingId }).pipe(
+      catchError((err) => {
+        console.error('Error creating payment:', err);
+        return of({
+          success: false,
+          message: err.error?.message || 'Failed to create payment',
+        });
+      })
+    );
+  }
 
-   getEventById(id: number): EventItem | undefined {
-      return this.data.find(e => e.id === id);
-   }
+  /**
+   * Check payment status from Midtrans and update booking status
+   * This calls the backend which queries Midtrans API directly and updates the booking
+   */
+  checkPaymentStatusAsync(orderId: string): Observable<{
+    success: boolean;
+    status?: {
+      transaction_status: string;
+      payment_type: string;
+      gross_amount: string;
+    };
+  }> {
+    // Use the /check endpoint which queries Midtrans directly and updates booking
+    return this.http.get<any>(`${this.apiUrl}/payments/${orderId}/check`).pipe(
+      catchError((err) => {
+        console.error('Error checking payment status:', err);
+        return of({ success: false });
+      })
+    );
+  }
 
-   getEventsByOrganizer(organizerId: string): EventItem[] {
-      return this.data.filter(e => e.organizerId === organizerId);
-   }
+  /**
+   * Get Midtrans client key for Snap initialization
+   */
+  getMidtransClientKeyAsync(): Observable<{ success: boolean; clientKey?: string }> {
+    return this.http.get<any>(`${this.apiUrl}/payments/client-key`).pipe(
+      catchError((err) => {
+        console.error('Error getting client key:', err);
+        return of({ success: false });
+      })
+    );
+  }
 
-   createEvent(event: Omit<EventItem, 'id' | 'createdAt' | 'updatedAt'>): EventItem {
-      const newId = Math.max(...this.data.map(e => e.id), -1) + 1;
-      const newEvent: EventItem = {
-         ...event,
-         id: newId,
-         createdAt: new Date().toISOString(),
-         updatedAt: new Date().toISOString(),
-      };
-      this.data.push(newEvent);
-      this.subject.next([...this.data]);
-      return newEvent;
-   }
+  /**
+   * Get booked seats for an event (for seat map display)
+   */
+  getBookedSeatsAsync(eventId: string): Observable<{ success: boolean; bookedSeats: string[] }> {
+    return this.http.get<any>(`${this.apiUrl}/bookings/seats/${eventId}`).pipe(
+      catchError((err) => {
+        console.error('Error getting booked seats:', err);
+        return of({ success: false, bookedSeats: [] });
+      })
+    );
+  }
 
-   updateEvent(id: number, updates: Partial<EventItem>): EventItem | null {
-      const event = this.data.find(e => e.id === id);
-      if (!event) return null;
-      Object.assign(event, updates, { updatedAt: new Date().toISOString() });
-      this.subject.next([...this.data]);
-      return event;
-   }
+  getBookingsByUserAsync(userId: string): Observable<Booking[]> {
+    return this.http
+      .get<{ success: boolean; bookings: Booking[] }>(`${this.apiUrl}/bookings/user/${userId}`)
+      .pipe(
+        map((response) => (response.success ? response.bookings : [])),
+        catchError((err) => {
+          console.error('Error fetching user bookings:', err);
+          return of([]);
+        })
+      );
+  }
 
-   deleteEvent(id: number): boolean {
-      const index = this.data.findIndex(e => e.id === id);
-      if (index < 0) return false;
-      this.data.splice(index, 1);
-      this.subject.next([...this.data]);
-      return true;
-   }
+  cancelBookingAsync(
+    bookingId: string,
+    reason?: string
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http
+      .post<{ success: boolean; message: string }>(`${this.apiUrl}/bookings/${bookingId}/cancel`, {
+        reason,
+      })
+      .pipe(
+        catchError((err) =>
+          of({ success: false, message: err.error?.message || 'Failed to cancel booking' })
+        )
+      );
+  }
 
-   // ========== TICKET MANAGEMENT ==========
+  // ========== WAITLIST ==========
 
-   updateTickets(eventId: number, tickets: TicketCategory[]): EventItem | null {
-      const event = this.getEventById(eventId);
-      if (!event) return null;
-      event.tickets = tickets;
-      event.updatedAt = new Date().toISOString();
-      this.subject.next([...this.data]);
-      return event;
-   }
+  joinWaitlistAsync(
+    eventId: string,
+    ticketCategoryId: string,
+    quantity: number
+  ): Observable<{ success: boolean; message: string; entry?: WaitlistEntry }> {
+    return this.http
+      .post<{ success: boolean; message: string; entry?: WaitlistEntry }>(
+        `${this.apiUrl}/waitlist`,
+        { eventId, ticketCategoryId, quantity }
+      )
+      .pipe(
+        catchError((err) =>
+          of({ success: false, message: err.error?.message || 'Failed to join waitlist' })
+        )
+      );
+  }
 
-   // ========== PROMOTIONAL CODES ==========
+  getWaitlistForUserAsync(userId: string): Observable<WaitlistEntry[]> {
+    return this.http
+      .get<{ success: boolean; waitlist: WaitlistEntry[] }>(
+        `${this.apiUrl}/waitlist/user/${userId}`
+      )
+      .pipe(
+        map((response) => (response.success ? response.waitlist : [])),
+        catchError((err) => of([]))
+      );
+  }
 
-   addPromotionalCode(eventId: number, code: PromotionalCode): EventItem | null {
-      const event = this.getEventById(eventId);
-      if (!event) return null;
-      if (!event.promotionalCodes) event.promotionalCodes = [];
-      event.promotionalCodes.push(code);
-      this.subject.next([...this.data]);
-      return event;
-   }
+  // ========== ANALYTICS ==========
 
-   applyCoupon(code: string): number {
-      if (!code) return 0;
-      const c = code.trim().toUpperCase();
-      if (c === 'SAVE20') return 20;
-      if (c === 'HALFPRICE') return 50;
-      if (c === 'DISC10') return 10;
-      return 0;
-   }
+  getEventAnalyticsAsync(eventId: string): Observable<EventAnalytics | null> {
+    return this.http
+      .get<{ success: boolean; analytics: any }>(`${this.apiUrl}/analytics/event/${eventId}`)
+      .pipe(
+        map((response) => {
+          if (response.success && response.analytics) {
+            return {
+              eventId: parseInt(eventId),
+              totalRevenue: response.analytics.summary?.totalRevenue || 0,
+              totalTicketsSold: response.analytics.summary?.totalTicketsSold || 0,
+              totalSeatsOccupied: response.analytics.summary?.totalTicketsSold || 0,
+              occupancyRate: response.analytics.summary?.occupancyRate || 0,
+              byTicketType: response.analytics.byTicketType || {},
+              bookingsByDate:
+                response.analytics.bookingsByDate?.reduce((acc: any, d: any) => {
+                  acc[d.date] = { count: d.count, revenue: d.revenue };
+                  return acc;
+                }, {}) || {},
+            } as EventAnalytics;
+          }
+          return null;
+        }),
+        catchError((err) => of(null))
+      );
+  }
 
-   // ========== TICKET BOOKING ==========
+  getAuditoriumAnalyticsAsync(
+    period?: string,
+    startDate?: string,
+    endDate?: string
+  ): Observable<any> {
+    let url = `${this.apiUrl}/analytics/auditorium`;
+    const params: string[] = [];
+    if (period) params.push(`period=${period}`);
+    if (startDate) params.push(`startDate=${startDate}`);
+    if (endDate) params.push(`endDate=${endDate}`);
+    if (params.length) url += '?' + params.join('&');
 
-   buyTicket(eventId: number, ticketId: string, qty = 1, userId = 'guest'): { success: boolean; message: string; remaining?: number; booking?: Booking } {
-      const ev = this.getEventById(eventId);
-      if (!ev) return { success: false, message: 'Event not found' };
+    return this.http.get<{ success: boolean; analytics: any }>(url).pipe(
+      map((response) => (response.success ? response.analytics : null)),
+      catchError((err) => of(null))
+    );
+  }
 
-      const t = ev.tickets.find(x => x.id === ticketId);
-      if (!t) return { success: false, message: 'Ticket category not found' };
+  // ========== UTILITY ==========
 
-      const remaining = t.total - t.sold;
-      if (remaining <= 0) return { success: false, message: 'Ticket sold out', remaining: 0 };
-      if (remaining < qty) return { success: false, message: `Only ${remaining} left`, remaining };
-
-      t.sold += qty;
-
-      // Create booking record
-      const booking: Booking = {
-         id: `booking_${this.nextBookingId++}`,
-         eventId,
-         userId,
-         ticketCategoryId: ticketId,
-         quantity: qty,
-         pricePerTicket: t.price,
-         totalPrice: t.price * qty,
-         discountApplied: 0,
-         status: 'confirmed',
-         bookingDate: new Date().toISOString(),
-         qrCode: this.generateQRCode(),
-         checkedIn: false,
-      };
-
-      this.bookings.push(booking);
-      this.saveState();
-      this.subject.next([...this.data]);
-
-      return {
-         success: true,
-         message: 'Purchase successful',
-         remaining: t.total - t.sold,
-         booking
-      };
-   }
-
-   // ========== WAITLIST MANAGEMENT ==========
-
-   joinWaitlist(eventId: number, ticketCategoryId: string, userId: string, quantity: number): { success: boolean; message: string; entryId?: string } {
-      const event = this.getEventById(eventId);
-      if (!event) return { success: false, message: 'Event not found' };
-
-      const entry: WaitlistEntry = {
-         id: `waitlist_${this.nextWaitlistId++}`,
-         eventId,
-         userId,
-         ticketCategoryId,
-         quantity,
-         registeredAt: new Date().toISOString(),
-         notified: false,
-      };
-
-      this.waitlist.push(entry);
-      this.saveState();
-      return { success: true, message: 'Added to waitlist', entryId: entry.id };
-   }
-
-   leaveWaitlist(waitlistId: string): boolean {
-      const index = this.waitlist.findIndex(w => w.id === waitlistId);
-      if (index < 0) return false;
-      this.waitlist.splice(index, 1);
-      return true;
-   }
-
-   getWaitlistForEvent(eventId: number): WaitlistEntry[] {
-      return this.waitlist.filter(w => w.eventId === eventId);
-   }
-
-   getWaitlistForUser(userId: string): WaitlistEntry[] {
-      return this.waitlist.filter(w => w.userId === userId);
-   }
-
-   // ========== BOOKING MANAGEMENT ==========
-
-   getBookingsByUser(userId: string): Booking[] {
-      return this.bookings.filter(b => b.userId === userId);
-   }
-
-   getBookingsByEvent(eventId: number): Booking[] {
-      return this.bookings.filter(b => b.eventId === eventId);
-   }
-
-   getBookingById(bookingId: string): Booking | undefined {
-      return this.bookings.find(b => b.id === bookingId);
-   }
-
-   checkInBooking(bookingId: string): { success: boolean; message: string } {
-      const booking = this.getBookingById(bookingId);
-      if (!booking) return { success: false, message: 'Booking not found' };
-      if (booking.checkedIn) return { success: false, message: 'Already checked in' };
-
-      booking.checkedIn = true;
-      booking.checkedInAt = new Date().toISOString();
-      return { success: true, message: 'Check-in successful' };
-   }
-
-   cancelBooking(bookingId: string): { success: boolean; message: string } {
-      const booking = this.getBookingById(bookingId);
-      if (!booking) return { success: false, message: 'Booking not found' };
-
-      // Only allow cancellation 7 days before event
-      const event = this.getEventById(booking.eventId);
-      if (!event) return { success: false, message: 'Event not found' };
-
-      const eventDate = new Date(event.date).getTime();
-      const now = Date.now();
-      const daysUntilEvent = (eventDate - now) / (1000 * 60 * 60 * 24);
-
-      if (daysUntilEvent < 7) {
-         return { success: false, message: 'Can only cancel 7 days before event' };
-      }
-
-      booking.status = 'cancelled';
-
-      // Refund tickets
-      const ticket = event.tickets.find(t => t.id === booking.ticketCategoryId);
-      if (ticket) {
-         ticket.sold = Math.max(0, ticket.sold - booking.quantity);
-      }
-      this.saveState();
-      this.subject.next([...this.data]);
-      return { success: true, message: 'Booking cancelled successfully' };
-   }
-
-   // ========== ANALYTICS ==========
-
-   generateEventAnalytics(eventId: number): EventAnalytics | null {
-      const event = this.getEventById(eventId);
-      if (!event) return null;
-
-      const eventBookings = this.getBookingsByEvent(eventId);
-      let totalRevenue = 0;
-      let totalTicketsSold = 0;
-
-      const byTicketType: { [key: string]: { sold: number; revenue: number } } = {};
-      const bookingsByDate: { [date: string]: { count: number; revenue: number } } = {};
-
-      for (const ticket of event.tickets) {
-         byTicketType[ticket.id] = { sold: ticket.sold, revenue: ticket.sold * ticket.price };
-         totalRevenue += ticket.sold * ticket.price;
-         totalTicketsSold += ticket.sold;
-      }
-
-      for (const booking of eventBookings) {
-         const date = new Date(booking.bookingDate).toISOString().split('T')[0];
-         if (!bookingsByDate[date]) {
-            bookingsByDate[date] = { count: 0, revenue: 0 };
-         }
-         bookingsByDate[date].count++;
-         bookingsByDate[date].revenue += booking.totalPrice;
-      }
-
-      const totalSeats = event.tickets.reduce((acc, t) => acc + t.total, 0);
-      const totalOccupied = event.tickets.reduce((acc, t) => acc + t.sold, 0);
-
-      return {
-         eventId,
-         totalRevenue,
-         totalTicketsSold,
-         totalSeatsOccupied: totalOccupied,
-         occupancyRate: totalSeats > 0 ? (totalOccupied / totalSeats) * 100 : 0,
-         byTicketType,
-         bookingsByDate,
-      };
-   }
-
-   getAuditoriumAnalytics(startDate?: string, endDate?: string): { totalBookings: number; totalRevenue: number; totalEvents: number; occupancyRate: number } {
-      const events = this.data;
-      let totalBookings = 0;
-      let totalRevenue = 0;
-      let totalSeats = 0;
-      let occupiedSeats = 0;
-
-      for (const event of events) {
-         const analytics = this.generateEventAnalytics(event.id);
-         if (analytics) {
-            totalBookings += analytics.totalTicketsSold;
-            totalRevenue += analytics.totalRevenue;
-            totalSeats += event.tickets.reduce((acc, t) => acc + t.total, 0);
-            occupiedSeats += analytics.totalSeatsOccupied;
-         }
-      }
-
-      return {
-         totalBookings,
-         totalRevenue,
-         totalEvents: events.length,
-         occupancyRate: totalSeats > 0 ? (occupiedSeats / totalSeats) * 100 : 0,
-      };
-   }
-
-   // ========== UTILITY ==========
-
-   private generateQRCode(): string {
-      return `QR_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-   }
-
-   formatPrice(price: number): string {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
-   }
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('ms-MY', {
+      style: 'currency',
+      currency: 'MYR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  }
 }

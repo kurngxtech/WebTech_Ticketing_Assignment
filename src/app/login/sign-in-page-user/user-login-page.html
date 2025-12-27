@@ -1,82 +1,400 @@
-<div class="default-font container-fluid min-vh-100 bg-black">
-   <div class="row vh-100">
-      <div class="col-lg-8 d-none d-lg-block p-0">
-         <img src="/login-image/orchestra-blue.jpeg" alt="bgLoginUser"
-            class="img-fluid h-100 w-100 object-fit-cover rounded-end-4">
-      </div>
-      <!-- Form -->
+<div
+  class="default-font container-fluid min-vh-100 bg-login d-flex align-items-center justify-content-center p-0"
+>
+  <!-- Full Screen Flex Container -->
+
+  <div
+    class="glass-container rounded-4 shadow-lg overflow-hidden d-flex flex-column flex-lg-row"
+    style="width: 90%; max-width: 1000px; min-height: 600px"
+  >
+    <!-- Left Side Image (Hidden on mobile) -->
+    <div class="col-lg-6 d-none d-lg-block p-0 position-relative">
       <div
-         class="col-lg-4 col-sm-12 d-flex align-items-center justify-content-center bg-black shadow-lg border-0 rounded-end-5">
-         <div style="width: 55%;">
-            <div class="w-100 text-center">
-               <h1 class="fw-bold text-white">Sign In</h1>
-               <p class="mb-5 text-white">Enter your credentials to access your account</p>
-            </div>
+        class="position-absolute w-100 h-100"
+        style="
+          background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+          z-index: 1;
+        "
+      ></div>
+      <img
+        src="/login-image/orchestra-blue.jpeg"
+        alt="bgLoginUser"
+        class="img-fluid h-100 w-100 object-fit-cover"
+      />
+    </div>
 
-            <!-- Error Message -->
-            @if (errorMessage) {
-               <div class="alert alert-danger alert-dismissible fade show" role="alert" style="animation: slideIn 0.3s ease-in;">
-                  <strong>Error!</strong> {{ errorMessage }}
-                  <button type="button" class="btn-close" (click)="clearError()"></button>
-               </div>
+    <!-- Right Side Form -->
+    <div
+      class="col-lg-6 col-12 p-4 p-md-5 d-flex align-items-center justify-content-center position-relative"
+    >
+      <div class="form-wrapper w-100" style="max-width: 400px">
+        <!-- Login View -->
+        @if (viewMode === 'login') {
+        <div class="text-center mb-5">
+          <h1 class="fw-bold mb-2 display-6">Welcome Back</h1>
+          <p class="text-white-50 small">Sign in to continue to your dashboard</p>
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage) {
+        <div
+          class="alert alert-danger d-flex align-items-center py-2 px-3 mb-4 rounded-3 border-0 bg-danger bg-opacity-10 text-danger"
+          role="alert"
+          style="animation: slideIn 0.3s ease-in"
+        >
+          <span class="flex-grow-1 small">{{ errorMessage }}</span>
+          <button
+            type="button"
+            class="btn-close btn-close-white small ms-2"
+            (click)="clearError()"
+          ></button>
+        </div>
+        }
+
+        <form (ngSubmit)="login()">
+          <div class="mb-4">
+            <label for="username" class="form-label small mb-1">Username or Email</label>
+            <input
+              type="text"
+              id="username"
+              class="form-control premium-input"
+              [(ngModel)]="username"
+              name="username"
+              placeholder="Enter your username"
+              [disabled]="isLoading"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label small mb-1">Password</label>
+            <div class="input-group">
+              <input
+                [type]="showLoginPassword ? 'text' : 'password'"
+                id="password"
+                class="form-control premium-input"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Enter password"
+                [disabled]="isLoading"
+              />
+              <button
+                type="button"
+                class="btn input-group-text-btn"
+                (click)="toggleLoginPasswordVisibility()"
+                [disabled]="isLoading"
+              >
+                <img
+                  [src]="showLoginPassword ? '/icons/eye-slash.svg' : '/icons/eye.svg'"
+                  alt="Toggle"
+                  class="password-icon"
+                />
+              </button>
+            </div>
+          </div>
+
+          <div class="form-check custom-checkbox mb-4">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="remember"
+              [(ngModel)]="rememberMe"
+              name="rememberMe"
+              [disabled]="isLoading"
+            />
+            <label class="form-check-label text-white-50 small user-select-none" for="remember">
+              Remember me
+            </label>
+          </div>
+
+          <div class="d-grid mb-4">
+            <button type="submit" class="btn-premium-primary" [disabled]="isLoading">
+              {{ isLoading ? 'Signing In...' : 'Sign In' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="text-center">
+          <p class="text-white-50 small mb-3">New to Ticket App?</p>
+          <button
+            class="btn-premium-outline w-100"
+            (click)="toggleView('register')"
+            [disabled]="isLoading"
+          >
+            Create Account
+          </button>
+        </div>
+        }
+
+        <!-- Registration View -->
+        @if (viewMode === 'register') {
+        <div class="text-center mb-4">
+          <h1 class="fw-bold mb-2 display-6">Create Account</h1>
+          <p class="text-white-50 small">Join us to book exclusive events</p>
+        </div>
+
+        <!-- Messages -->
+        @if (errorMessage) {
+        <div
+          class="alert alert-danger d-flex align-items-center py-2 px-3 mb-4 rounded-3 border-0 bg-danger bg-opacity-10 text-danger"
+          role="alert"
+          style="animation: slideIn 0.3s ease-in"
+        >
+          <span class="flex-grow-1 small">{{ errorMessage }}</span>
+          <button
+            type="button"
+            class="btn-close btn-close-white small ms-2"
+            (click)="clearError()"
+          ></button>
+        </div>
+        } @if (successMessage) {
+        <div
+          class="alert alert-success py-2 px-3 mb-4 rounded-3 border-0 bg-success bg-opacity-10 text-success"
+          role="alert"
+          style="animation: slideIn 0.3s ease-in"
+        >
+          {{ successMessage }}
+        </div>
+        }
+
+        <form (ngSubmit)="register()">
+          <!-- Name Row -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label for="regFirstName" class="form-label small mb-1">
+                First Name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="regFirstName"
+                class="form-control premium-input"
+                [ngClass]="{
+                  'is-valid': touched.firstName && isFirstNameValid,
+                  'is-invalid': touched.firstName && !isFirstNameValid
+                }"
+                [(ngModel)]="regFirstName"
+                name="regFirstName"
+                placeholder="John"
+                (blur)="markTouched('firstName')"
+                [disabled]="isLoading"
+              />
+            </div>
+            <div class="col-6">
+              <label for="regLastName" class="form-label small mb-1">
+                Last Name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="regLastName"
+                class="form-control premium-input"
+                [ngClass]="{
+                  'is-valid': touched.lastName && isLastNameValid,
+                  'is-invalid': touched.lastName && !isLastNameValid
+                }"
+                [(ngModel)]="regLastName"
+                name="regLastName"
+                placeholder="Doe"
+                (blur)="markTouched('lastName')"
+                [disabled]="isLoading"
+              />
+            </div>
+          </div>
+
+          <!-- Username -->
+          <div class="mb-3">
+            <label for="regUsername" class="form-label small mb-1">
+              Username <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="regUsername"
+              class="form-control premium-input"
+              [ngClass]="{
+                'is-valid': touched.username && isUsernameValid && usernameAvailable === true,
+                'is-invalid': touched.username && (!isUsernameValid || usernameAvailable === false)
+              }"
+              [(ngModel)]="regUsername"
+              name="regUsername"
+              placeholder="johndoe123"
+              (blur)="markTouched('username')"
+              (input)="onUsernameInput()"
+              [disabled]="isLoading"
+            />
+            @if (isCheckingUsername) {
+            <div class="text-muted small mt-1" style="font-size: 0.75rem">
+              <span class="spinner-border spinner-border-sm me-1"></span> Checking availability...
+            </div>
+            } @if (!isCheckingUsername && usernameAvailable === false) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">
+              ❌ {{ usernameCheckMessage || 'Username is already taken' }}
+            </div>
+            } @if (!isCheckingUsername && usernameAvailable === true && isUsernameValid) {
+            <div class="text-success small mt-1" style="font-size: 0.75rem">
+              ✅ Username is available
+            </div>
+            } @if (touched.username && !isUsernameValid) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">
+              3-20 characters, alphanumeric and underscores only
+            </div>
             }
+          </div>
 
-            <form (ngSubmit)="login()">
-               <div class="mb-3">
-                  <label for="username" class="form-label text-white">Username or Email</label>
-                  <input 
-                     type="text" 
-                     id="username" 
-                     class="form-control form-control-sm bg-dark border-dark text-white"
-                     [(ngModel)]="username"
-                     name="username"
-                     placeholder="john_user or jane_eo or admin"
-                     [disabled]="isLoading" />
-               </div>
-
-               <div class="mb-2">
-                  <label for="password" class="form-label text-white">Password</label>
-                  <input 
-                     type="password" 
-                     id="password" 
-                     class="form-control form-control-sm bg-dark border-dark text-white"
-                     [(ngModel)]="password"
-                     name="password"
-                     placeholder="Enter your password"
-                     [disabled]="isLoading" />
-               </div>
-
-               <div class="form-check custom-checkbox" style="margin-bottom: 2rem;">
-                  <input 
-                     class="form-check-input p-0 me-2" 
-                     type="checkbox" 
-                     id="remember"
-                     [(ngModel)]="rememberMe"
-                     name="rememberMe"
-                     [disabled]="isLoading"/>
-                  <label class="form-check-label text-white m-auto fw-light fst-italic" for="remember">Remember
-                     me</label>
-               </div>
-
-               <div class="d-flex justify-content-center w-100 mb-3">
-                  <button 
-                     type="submit"
-                     class="btn bg-opacity-75 w-100" 
-                     style="background-color: #feb706; color: black"
-                     [disabled]="isLoading">
-                     {{ isLoading ? 'Signing In...' : 'Sign In' }}
-                  </button>
-               </div>
-            </form>
-
-            <!-- Demo Credentials -->
-            <div class="mt-4 p-3 bg-dark rounded text-white-50 small">
-               <strong class="text-white">Demo Credentials:</strong>
-               <div>👤 User: john_user / password123</div>
-               <div>👤 EO: jane_eo / eopass123</div>
-               <div>👤 Admin: admin / adminpass123</div>
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="regEmail" class="form-label small mb-1">
+              Email <span class="text-danger">*</span>
+            </label>
+            <input
+              type="email"
+              id="regEmail"
+              class="form-control premium-input"
+              [ngClass]="{
+                'is-valid': touched.email && isEmailValid && emailAvailable === true,
+                'is-invalid': touched.email && (!isEmailValid || emailAvailable === false)
+              }"
+              [(ngModel)]="regEmail"
+              name="regEmail"
+              placeholder="john@example.com"
+              (blur)="markTouched('email')"
+              (input)="onEmailInput()"
+              [disabled]="isLoading"
+            />
+            @if (isCheckingEmail) {
+            <div class="text-muted small mt-1" style="font-size: 0.75rem">
+              <span class="spinner-border spinner-border-sm me-1"></span> Checking availability...
             </div>
-         </div>
+            } @if (!isCheckingEmail && emailAvailable === false) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">
+              ❌ {{ emailCheckMessage || 'Email is already registered' }}
+            </div>
+            } @if (!isCheckingEmail && emailAvailable === true && isEmailValid) {
+            <div class="text-success small mt-1" style="font-size: 0.75rem">
+              ✅ Email is available
+            </div>
+            } @if (touched.email && !isEmailValid) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">
+              Invalid email format
+            </div>
+            }
+          </div>
+
+          <!-- Phone -->
+          <div class="mb-3">
+            <label for="regPhone" class="form-label small mb-1">Phone</label>
+            <input
+              type="tel"
+              id="regPhone"
+              class="form-control premium-input"
+              [ngClass]="{
+                'is-valid': touched.phone && regPhone && isPhoneValid,
+                'is-invalid': touched.phone && regPhone && !isPhoneValid
+              }"
+              [(ngModel)]="regPhone"
+              name="regPhone"
+              placeholder="+1 234 567 8900"
+              (blur)="markTouched('phone')"
+              [disabled]="isLoading"
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="mb-3">
+            <label for="regPassword" class="form-label small mb-1">
+              Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input
+                [type]="showRegPassword ? 'text' : 'password'"
+                id="regPassword"
+                class="form-control premium-input"
+                [ngClass]="{
+                  'is-valid': touched.password && isPasswordValid,
+                  'is-invalid': touched.password && !isPasswordValid
+                }"
+                [(ngModel)]="regPassword"
+                name="regPassword"
+                placeholder="Min 6 characters"
+                (blur)="markTouched('password')"
+                [disabled]="isLoading"
+              />
+              <button
+                type="button"
+                class="btn input-group-text-btn"
+                (click)="toggleRegPasswordVisibility()"
+                [disabled]="isLoading"
+              >
+                <img
+                  [src]="showRegPassword ? '/icons/eye-slash.svg' : '/icons/eye.svg'"
+                  alt="Toggle"
+                  class="password-icon"
+                />
+              </button>
+            </div>
+            @if (touched.password && !isPasswordValid) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">Password too short</div>
+            }
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="mb-4">
+            <label for="regConfirmPassword" class="form-label small mb-1">
+              Confirm Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <input
+                [type]="showRegConfirmPassword ? 'text' : 'password'"
+                id="regConfirmPassword"
+                class="form-control premium-input"
+                [ngClass]="{
+                  'is-valid': touched.confirmPassword && isConfirmPasswordValid,
+                  'is-invalid': touched.confirmPassword && !isConfirmPasswordValid
+                }"
+                [(ngModel)]="regConfirmPassword"
+                name="regConfirmPassword"
+                placeholder="Repeat password"
+                (blur)="markTouched('confirmPassword')"
+                [disabled]="isLoading"
+              />
+              <button
+                type="button"
+                class="btn input-group-text-btn"
+                (click)="toggleRegConfirmPasswordVisibility()"
+                [disabled]="isLoading"
+              >
+                <img
+                  [src]="showRegConfirmPassword ? '/icons/eye-slash.svg' : '/icons/eye.svg'"
+                  alt="Toggle"
+                  class="password-icon"
+                />
+              </button>
+            </div>
+            @if (touched.confirmPassword && !isConfirmPasswordValid) {
+            <div class="text-danger small mt-1" style="font-size: 0.75rem">
+              Passwords must match
+            </div>
+            }
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn-premium-primary" [disabled]="isLoading">
+              {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Back to Sign In Link -->
+        <div class="text-center mt-3">
+          <p class="text-white-50 small mb-2">Already have an account?</p>
+          <button
+            class="btn-premium-outline w-100"
+            (click)="toggleView('login')"
+            [disabled]="isLoading"
+          >
+            Sign In
+          </button>
+        </div>
+        }
       </div>
-   </div>
+    </div>
+  </div>
 </div>

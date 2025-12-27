@@ -9,7 +9,7 @@
     <div class="event-header animate-fade-in-up" style="animation-delay: 0.1s">
       <h1>{{ currentEvent.title }}</h1>
       @if (currentEvent.img) {
-      <img [src]="currentEvent.img" [alt]="currentEvent.title" class="event-image">
+      <img [src]="currentEvent.img" [alt]="currentEvent.title" class="event-image" />
       } @else {
       <div class="event-image-placeholder">Event Image</div>
       }
@@ -39,37 +39,85 @@
           <p class="chart-statement">{{ getStatementText() }}</p>
           <p class="chart-value">{{ getStatementValue() }}</p>
         </div>
-        <button class="time-toggle-btn" (click)="toggleTimePeriodMenu()" title="Time period">
+        <button class="time-toggle-btn" (click)="toggleTimePeriodMenu($event)" title="Time period">
+          @if (!showTimePeriodMenu) {
           <span class="icon">⋮</span>
+          } @else {
+          <span class="icon">✕</span>
+          }
         </button>
       </div>
 
       <!-- Chart Display with Blur Effect -->
       <div class="chart-display" [class.blur]="showTimePeriodMenu">
+        @if (isLoadingChart) {
+        <div class="chart-loading">
+          <span class="loading-spinner"></span>
+          <p>Loading chart data...</p>
+        </div>
+        } @else if (chartDataPoints.length === 0) {
+        <div class="chart-empty">
+          <p>No data available for this period</p>
+        </div>
+        } @else {
         <svg class="line-chart" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet">
           <!-- Grid Lines -->
           <g class="grid">
             @for (i of [0,1,2,3,4]; track i) {
-            <line [attr.x1]="0" [attr.y1]="i * 75" [attr.x2]="1000" [attr.y2]="i * 75" class="grid-line" />
+            <line
+              [attr.x1]="40"
+              [attr.y1]="i * 60 + 30"
+              [attr.x2]="960"
+              [attr.y2]="i * 60 + 30"
+              class="grid-line"
+            />
             }
           </g>
-          
+
           <!-- Chart Line -->
-          @if (chartDataPoints.length > 0) {
           <polyline [attr.points]="getLinePoints()" class="chart-line" />
-          
-          <!-- Data Points -->
-          @for (point of chartDataPoints; track $index) {
-          <circle [attr.cx]="point.x" [attr.cy]="point.y" r="6" class="data-point" />
-          }
+
+          <!-- Data Points with Hover -->
+          @for (point of chartDataPoints; track $index; let i = $index) {
+          <g
+            class="data-point-group"
+            (mouseenter)="onChartPointHover(point, $event, i)"
+            (mouseleave)="onChartPointLeave()"
+          >
+            <circle [attr.cx]="point.x" [attr.cy]="point.y" r="8" class="data-point" />
+            <circle [attr.cx]="point.x" [attr.cy]="point.y" r="16" class="data-point-hover-area" />
+          </g>
           }
         </svg>
+
+        <!-- Tooltip - Fixed at top of chart for visibility -->
+        @if (hoveredPoint) {
+        <div class="chart-tooltip chart-tooltip-fixed" [style.left.px]="tooltipX">
+          <div class="tooltip-header">{{ hoveredPoint.label }}</div>
+          <div class="tooltip-content">
+            <div class="tooltip-row">
+              <span class="tooltip-label">🎫 Tickets Sold:</span>
+              <span class="tooltip-value">{{ hoveredPoint.ticketsSold }}</span>
+            </div>
+            <div class="tooltip-row">
+              <span class="tooltip-label">💰 Revenue:</span>
+              <span class="tooltip-value">{{ formatPrice(hoveredPoint.revenue) }}</span>
+            </div>
+            <div class="tooltip-row">
+              <span class="tooltip-label">📋 Bookings:</span>
+              <span class="tooltip-value">{{ hoveredPoint.bookings }}</span>
+            </div>
+          </div>
+        </div>
+        } }
 
         <!-- Time Period Menu Overlay - Center -->
         @if (showTimePeriodMenu) {
         <div class="time-period-overlay">
           <div class="overlay-content">
-            <button class="overlay-close-btn" (click)="closeTimePeriodMenu()" title="Close">✕</button>
+            <button class="overlay-close-btn" (click)="closeTimePeriodMenu()" title="Close">
+              ✕
+            </button>
             <p class="overlay-label">Select Time Period</p>
             <div class="period-buttons">
               <button
@@ -99,8 +147,23 @@
         }
       </div>
 
-      <!-- Occupancy Box -->
-      <div class="occupancy-section">
+      <!-- Legend and Occupancy Section -->
+      <div class="chart-footer">
+        <!-- Chart Legend (left side) -->
+        <div class="chart-legend">
+          @for (point of chartDataPoints; track $index; let i = $index) {
+          <div
+            class="legend-item"
+            (mouseenter)="onChartPointHover(point, $event, i)"
+            (mouseleave)="onChartPointLeave()"
+          >
+            <span class="legend-dot"></span>
+            <span class="legend-label">{{ point.label }}</span>
+          </div>
+          }
+        </div>
+
+        <!-- Occupancy Box -->
         <div class="occupancy-box">
           <p class="occupancy-label">Occupancy Rate</p>
           <p class="occupancy-value">{{ getOccupancyPercentage() }}%</p>

@@ -15,7 +15,21 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"],
+            "allowedCommonJsDependencies": [
+              "core-js",
+              "canvg",
+              "rgbcolor",
+              "stackblur-canvas",
+              "css-line-break",
+              "xhr2",
+              "raf",
+              "qrcode"
+            ],
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/swiper/swiper-bundle.min.css",
+              "src/styles.css"
+            ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"],
             "assets": [
               {
@@ -23,11 +37,6 @@
                 "input": "public"
               }
             ],
-<<<<<<< HEAD
-=======
-            "styles": ["src/styles.css",
-          "node_modules/bootstrap/dist/css/bootstrap.min.css"],
->>>>>>> origin/adri/pages/home
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -39,13 +48,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "32kB",
+                  "maximumError": "64kB"
                 }
               ],
               "outputHashing": "all"

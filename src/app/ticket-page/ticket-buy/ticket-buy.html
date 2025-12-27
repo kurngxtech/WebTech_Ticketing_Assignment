@@ -1,434 +1,553 @@
 <div class="default-bg-color">
-   @if (!isAuthenticated) {
-   <section class="ticket-page container-fluid px-4 py-4">
-      <div class="auth-required-message">
-         <div class="message-box">
-            <h2>🔐 Login Required</h2>
-            <p>You need to login or sign up to purchase tickets</p>
-            <div class="button-group">
-               <button type="button" class="btn btn-login" routerLink="/login">Login</button>
-               <button type="button" class="btn btn-signup" routerLink="/sign-up">Sign Up</button>
-            </div>
-         </div>
+  @if (!isAuthenticated) {
+  <section class="ticket-page container-fluid px-4 py-4">
+    <div class="auth-required-message">
+      <div class="message-box">
+        <h2>🔐 Login Required</h2>
+        <p>You need to login or sign up to purchase tickets</p>
+        <div class="button-group">
+          <button type="button" class="btn btn-login" routerLink="/login">Login</button>
+          <button type="button" class="btn btn-signup" routerLink="/sign-up">Sign Up</button>
+        </div>
       </div>
-   </section>
-   } @else if (event) {
-   <section class="ticket-page container-fluid px-4 py-4 w-75">
-      <div class=" row h-100">
-         <!-- Left column: scaled image (50%) -->
-         <div class="col-lg-6 col-md-12 my-3">
-            <aside class="left">
-               <div class="frame">
-                  <img [src]="event.img" [alt]="event.title" />
-               </div>
-            </aside>
-         </div>
-
-         <!-- Right column: event details (50%) -->
-         <div class="col-lg-6 col-md-12">
-            <main class="right">
-               <h2 class="title fw-bold">{{ event.title }}</h2>
-
-               <!-- Description fills the space -->
-               <p class="desc">{{ event.description }}</p>
-
-               <!-- Metadata at bottom of right pane -->
-               <div class="meta">
-                  <div><strong>Date:</strong> {{ event.date }}</div>
-                  <div><strong>Time:</strong> {{ event.time }}</div>
-                  <div><strong>Location:</strong> {{ event.location }}</div>
-                  <div><strong>Organizer:</strong> {{ event.organizer }}</div>
-               </div>
-
-               <!-- Coupon section at the bottom -->
-               <div class="coupon mt-auto">
-                  <input name="coupon" [(ngModel)]="couponCode" placeholder="Enter coupon code (e.g SAVE20)"
-                     aria-label="Coupon code" />
-                  <button type="button" (click)="applyCoupon()">Apply</button>
-                  @if (message) {
-                  <div class="coupon-msg" [class.success]="message.includes('✓')">{{ message }}</div>
-                  }
-               </div>
-            </main>
-         </div>
+    </div>
+  </section>
+  } @else if (event) {
+  <section class="ticket-page container-fluid px-4 py-4 w-75">
+    <div class="row h-100">
+      <!-- Left column: scaled image (50%) -->
+      <div class="col-lg-6 col-md-12 my-3">
+        <aside class="left">
+          <div class="frame">
+            <img [src]="event.img" [alt]="event.title" />
+          </div>
+        </aside>
       </div>
 
-      <!-- Full width: ticket purchase section with cart -->
-      <div class="row my-3">
-         <!-- Left: Available Tickets -->
-         <div class="col-lg-12 p-0">
-            <div class="tickets-list">
-               <h3>Available Tickets</h3>
-               @if (event.tickets.length) {
-               <ul class="tickets-grid">
-                  @for (t of event.tickets; track t.id) {
-                  <li class="ticket-card">
-                     <div class="ticket-row">
-                        <div class="ticket-info">
-                           <div class="type">{{ t.type }}</div>
-                           <div class="section-info">{{ t.section }}</div>
-                           <div class="price">
-                              @if (appliedDiscount > 0) {
-                              <span class="orig-price">{{ formattedPrice(t.price) }}</span>
-                              }
-                              <span class="discounted">{{ formattedPrice(ticketPriceAfterDiscount(t)) }}</span>
-                           </div>
-                           <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
-                              {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
-                           </div>
-                        </div>
+      <!-- Right column: event details (50%) -->
+      <div class="col-lg-6 col-md-12">
+        <main class="right">
+          <h2 class="title fw-bold">{{ event.title }}</h2>
 
-                        <div class="ticket-actions">
-                           @if (getRemaining(t) > 0) {
-                           <div class="qty-wrap">
-                              <input type="number" name="qty-{{ t.id }}" [(ngModel)]="quantities[t.id]" min="1"
-                                 [max]="getRemaining(t)" step="1" aria-label="Quantity for {{ t.type }}" />
-                           </div>
-                           <button type="button" (click)="addToCart(t)" class="btn-add-cart"
-                              title="Add to cart to buy multiple categories">
-                              🛒 Add to Cart
-                           </button>
-                           } @else {
-                           <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
-                              Join Waitlist
-                           </button>
-                           }
-                        </div>
-                     </div>
-                  </li>
-                  }
-               </ul>
-               }
-            </div>
-         </div>
-      </div>
+          <!-- Description fills the space -->
+          <p class="desc">{{ event.description }}</p>
 
-      <!-- Right: Shopping Cart -->
-      <div class="col-lg-12 text-white">
-         <div class="shopping-cart-section w-50">
-            <h3 class="text-white">🛒 Shopping Cart</h3>
-            @if (cart.length > 0) {
-            <div class="cart-items">
-               @for (item of cart; track item.ticket.id) {
-               <div class="cart-item">
-                  <div class="item-details">
-                     <div class="item-type">{{ item.ticket.type }}</div>
-                     <div class="item-qty">Qty: {{ item.qty }}</div>
-                  </div>
-                  <div class="item-price">
-                     {{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}
-                  </div>
-                  <button type="button" class="btn-remove" (click)="removeFromCart(item.ticket.id)"
-                     title="Remove from cart">
-                     ✕
-                  </button>
-               </div>
-               }
-            </div>
+          <!-- Metadata at bottom of right pane -->
+          <div class="meta">
+            <div><strong>Date:</strong> {{ event.date }}</div>
+            <div><strong>Time:</strong> {{ event.time }}</div>
+            <div><strong>Location:</strong> {{ event.location }}</div>
+            <div><strong>Organizer:</strong> {{ event.organizer }}</div>
+          </div>
 
-            <div class="cart-summary">
-               <div class="summary-row">
-                  <span>Subtotal:</span>
-                  <span>{{ formattedPrice(totalCartPrice) }}</span>
-               </div>
-               @if (appliedDiscount > 0) {
-               <div class="summary-row discount">
-                  <span>Discount ({{ appliedDiscount }}%):</span>
-                  <span>-{{ formattedPrice(totalCartPrice * appliedDiscount / 100) }}</span>
-               </div>
-               }
-               <div class="summary-row total">
-                  <span>Total:</span>
-                  <span>{{ formattedPrice(totalCartPrice * (1 - appliedDiscount / 100)) }}</span>
-               </div>
-            </div>
-
-            <button type="button" class="btn btn-checkout" (click)="checkoutCart()">
-               🛍️ Proceed to Checkout
-            </button>
-            } @else {
-            <div class="empty-cart">
-               <p class="pb-3">Your cart is empty</p>
-               <p class="hint">Add tickets from the left to get started</p>
-            </div>
+          <!-- Coupon section at the bottom -->
+          <div class="coupon mt-auto">
+            <input
+              name="coupon"
+              [(ngModel)]="couponCode"
+              placeholder="Enter coupon code (e.g SAVE20)"
+              aria-label="Coupon code"
+            />
+            <button type="button" (click)="applyCoupon()">Apply</button>
+            @if (message) {
+            <div class="coupon-msg" [class.success]="message.includes('✓')">{{ message }}</div>
             }
-         </div>
+          </div>
+        </main>
       </div>
-   </section>
-   }
+    </div>
 
-   @if (showSelectionSeats) {
-   <!-- Selection Seats -->
-   <div class="modal-overlay">
-      <!-- <div class="modal-dialog"> -->
-      <div class="modal-content-seat">
-         <div class="seat-map-scroll-wrapper default-bg-color font">
-            <!-- Auditorium Custom Seat -->
-            <div class="auditorium-map-container">
-               <div class="map-title-bar">
-                  <h2 class="map-title">Auditorium Seating Map</h2>
-               </div>
-
-               <div class="seating-section lower-foyer">
-                  <h3 class="section-label">LOWER FOYER</h3>
-
-                  <div class="seating-row upper-row">
-
-                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:0:1">
-                        <div class="block-label">{{ block.name }}</div>
-                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                           <button *ngFor="let seat of row; let j = index" class="seat-button"
-                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                              [attr.aria-label]="'Kursi ' + seat.id">
-                              <span class="seat-number">{{ j + 1 }}</span>
-                           </button>
-                        </div>
-                     </div>
-
-                     <div class="center-foyer-stack">
-                        <div class="seat-block vip-block" *ngFor="let block of seatingBlocks | slice:1:2">
-                           <div class="block-label">{{ block.name }}</div>
-                           <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                              <button *ngFor="let seat of row; let j = index" class="seat-button vip-seat"
-                                 [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                                 [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                                 [attr.aria-label]="'Kursi ' + seat.id">
-                                 <span class="seat-number">{{ j + 1 }}</span>
-                              </button>
-                           </div>
-                        </div>
-
-                        <div class="seat-block" *ngFor="let block of seatingBlocks | slice:2:3">
-                           <div class="block-label">{{ block.name }}</div>
-                           <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                              <button *ngFor="let seat of row; let j = index" class="seat-button"
-                                 [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                                 [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                                 [attr.aria-label]="'Kursi ' + seat.id">
-                                 <span class="seat-number">{{ j + 1 }}</span>
-                              </button>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:3:4">
-                        <div class="block-label">{{ block.name }}</div>
-                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                           <button *ngFor="let seat of row; let j = index" class="seat-button"
-                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                              [attr.aria-label]="'Kursi ' + seat.id">
-                              <span class="seat-number">{{ j + 1 }}</span>
-                           </button>
-                        </div>
-                     </div>
+    <!-- Full width: ticket purchase section with cart -->
+    <div class="row my-3">
+      <!-- Left: Available Tickets -->
+      <div class="col-lg-12 p-0">
+        <div class="tickets-list">
+          <h3>Available Tickets</h3>
+          @if (event.tickets.length) {
+          <ul class="tickets-grid">
+            @for (t of event.tickets; track t.id) {
+            <li class="ticket-card">
+              <div class="ticket-row">
+                <div class="ticket-info">
+                  <div class="type">{{ t.type }}</div>
+                  <div class="section-info">{{ t.section }}</div>
+                  <div class="price">
+                    @if (appliedDiscount > 0) {
+                    <span class="orig-price">{{ formattedPrice(t.price) }}</span>
+                    }
+                    <span class="discounted">{{
+                      formattedPrice(ticketPriceAfterDiscount(t))
+                    }}</span>
                   </div>
-               </div>
-
-               <div class="seating-spacer"></div>
-
-               <div class="seating-section balcony-level">
-                  <h3 class="section-label">BALCONY</h3>
-
-                  <div class="seating-row lower-row">
-
-                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:4:5">
-                        <div class="block-label">{{ block.name }}</div>
-                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                           <button *ngFor="let seat of row; let j = index" class="seat-button"
-                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                              [attr.aria-label]="'Kursi ' + seat.id">
-                              <span class="seat-number">{{ j + 1 }}</span>
-                           </button>
-                        </div>
-                     </div>
-
-                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:5:6">
-                        <div class="block-label">{{ block.name }}</div>
-                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                           <button *ngFor="let seat of row; let j = index" class="seat-button"
-                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                              [attr.aria-label]="'Kursi ' + seat.id">
-                              <span class="seat-number">{{ j + 1 }}</span>
-                           </button>
-                        </div>
-                     </div>
-
-                     <div class="seat-block" *ngFor="let block of seatingBlocks | slice:6:7">
-                        <div class="block-label">{{ block.name }}</div>
-                        <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                           <button *ngFor="let seat of row; let j = index" class="seat-button"
-                              [ngClass]="{'available': seat.status === 'available', 'booked': seat.status === 'booked', 'selected': seat.status === 'selected'}"
-                              [disabled]="seat.status === 'booked'" (click)="toggleSeat(block.name, i, j)"
-                              [attr.aria-label]="'Kursi ' + seat.id">
-                              <span class="seat-number">{{ j + 1 }}</span>
-                           </button>
-                        </div>
-                     </div>
+                  <div class="remaining" [class.sold-out]="getRemaining(t) === 0">
+                    {{ getRemaining(t) === 0 ? 'SOLD OUT' : getRemaining(t) + ' left' }}
                   </div>
-               </div>
+                </div>
 
-               <div class="map-footer">
-                  <button class="book-button" [disabled]="!isAnySeatSelected" (click)="startPaymentProcess()">Book
-                     Selected
-                     Seats
-                     ({{ getSelectedSeats().length
-                     }})</button>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-   }
-
-   <!-- Payment Modal -->
-   @if (showPaymentModal) {
-   <div class="modal-overlay">
-      <div class="modal-content payment-modal bg-dark text-white">
-         <div class="modal-header">
-            <h2>Complete Payment</h2>
-            <button class="close-btn" (click)="cancelBooking()">×</button>
-         </div>
-
-         <div class="modal-body">
-            <!-- Order Summary -->
-            <div class="order-summary">
-               <h3>Order Summary</h3>
-               @if (event) {
-               <div class="summary-item">
-                  <span>Event:</span>
-                  <strong>{{ event.title }}</strong>
-               </div>
-               }
-
-               @if (selectedSeats.length > 0) {
-               <div class="seats-summary my-2">
-                  <strong>Selected Seats ({{ selectedSeats.length }}):</strong>
-                  <p class="seat-ids">{{ selectedSeats.join(', ') }}</p>
-               </div>
-               <div class="summary-item">
-                  <span>Ticket Type:</span>
-                  <strong>Seat Selection (Custom)</strong>
-               </div>
-               }
-
-               @if (cart.length > 0) {
-               <div class="cart-items-summary">
-                  @for (item of cart; track item.ticket.id) {
-                  <div class="summary-item">
-                     <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
-                     <strong>{{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}</strong>
+                <div class="ticket-actions">
+                  @if (getRemaining(t) > 0) {
+                  <div class="qty-wrap">
+                    <input
+                      type="number"
+                      name="qty-{{ t.id }}"
+                      [(ngModel)]="quantities[t.id]"
+                      min="1"
+                      [max]="getRemaining(t)"
+                      step="1"
+                      aria-label="Quantity for {{ t.type }}"
+                    />
                   </div>
-                  }
-               </div>
-               } @else if (currentBooking) {
-               <div class="summary-item">
-                  <span>Booking ID:</span>
-                  <strong>{{ currentBooking.id }}</strong>
-               </div>
-               <div class="summary-item">
-                  <span>Price per Ticket:</span>
-                  <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
-               </div>
-               <div class="summary-item">
-                  <span>Quantity:</span>
-                  <strong>{{ currentBooking.quantity }}</strong>
-               </div>
-               }
-               @if (appliedDiscount > 0) {
-               <div class="summary-item discount">
-                  <span>Discount ({{ appliedDiscount }}%):</span>
-                  <strong>-{{ formattedPrice((totalCartPrice > 0 ? totalCartPrice : (currentBooking?.totalPrice || 0)) *
-                     appliedDiscount / 100) }}</strong>
-               </div>
-               }
-               <div class="summary-item total">
-                  <span>Total Amount:</span>
-                  <strong>{{ formattedPrice(totalCartPrice > 0 ? totalCartPrice * (1 - appliedDiscount / 100) :
-                     (currentBooking?.totalPrice || 0)) }}</strong>
-               </div>
-            </div>
-
-            <!-- Payment Method Selection -->
-            <div class="payment-methods">
-               <h3>Select Payment Method</h3>
-               <div class="methods-grid">
-                  @for (method of paymentMethods; track method.id) {
-                  <button type="button" class="method-btn" [class.active]="paymentMethod === method.id"
-                     (click)="paymentMethod = method.id">
-                     {{ method.name }}
+                  <button
+                    type="button"
+                    (click)="addToCart(t)"
+                    class="btn-add-cart"
+                    title="Add to cart to buy multiple categories"
+                  >
+                    🛒 Add to Cart
+                  </button>
+                  } @else {
+                  <button type="button" (click)="joinWaitlist(t)" class="btn-waitlist">
+                    Join Waitlist
                   </button>
                   }
-               </div>
-            </div>
-         </div>
-
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="cancelBooking()">
-               Cancel
-            </button>
-            <button type="button" class="btn btn-primary" (click)="processPayment()" [disabled]="!paymentMethod">
-               Complete Payment
-            </button>
-         </div>
-      </div>
-   </div>
-   }
-
-   <!-- QR Code Display Modal -->
-   @if (showQRCodeDisplay) {
-   <div class="modal-overlay">
-      <div class="modal-content qr-display-modal bg-dark text-white">
-         <div class="modal-header">
-            <h2>✓ Your Booking Confirmed!</h2>
-            <button class="close-btn" (click)="closeQRCodeDisplay()">×</button>
-         </div>
-
-         <div class="modal-body">
-            <div class="confirmation-message">
-               <p>Your booking has been confirmed. Please save or screenshot the QR code below for check-in.</p>
-            </div>
-
-            <!-- QR Code Display -->
-            <div class="qr-display-container">
-               <div class="qr-code-visual">
-                  <img [src]="qrCodeDataUrl" alt="QR Code for check-in" />
-               </div>
-               <div class="booking-details">
-                  @if (currentBooking) {
-                  <p><strong>Booking ID:</strong> {{ currentBooking.id }}</p>
-                  <p><strong>Tickets:</strong> {{ currentBooking.quantity }}</p>
-                  }
-                  @if (event) {
-                  <p><strong>Event:</strong> {{ event.title }}</p>
-                  }
-                  <p><strong>QR Data:</strong> {{ qrCodeData }}</p>
-               </div>
-            </div>
-
-            <div class="confirmation-note">
-               <p>A confirmation email with the QR code has been sent to your registered email address.</p>
-            </div>
-         </div>
-
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="downloadQRCode()">
-               📥 Download QR Code
-            </button>
-            @if (showContinueShopping) {
-            <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
-               Continue Shopping
-            </button>
-            } @else {
-            <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
-               View My Bookings
-            </button>
+                </div>
+              </div>
+            </li>
             }
-         </div>
+          </ul>
+          }
+        </div>
       </div>
-   </div>
-   }
+    </div>
+
+    <!-- Right: Shopping Cart -->
+    <div class="col-lg-12 text-white">
+      <div class="shopping-cart-section w-50">
+        <h3 class="text-white">🛒 Shopping Cart</h3>
+        @if (cart.length > 0) {
+        <div class="cart-items">
+          @for (item of cart; track item.ticket.id) {
+          <div class="cart-item">
+            <div class="item-details">
+              <div class="item-type">{{ item.ticket.type }}</div>
+              <div class="item-qty">Qty: {{ item.qty }}</div>
+            </div>
+            <div class="item-price">
+              {{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}
+            </div>
+            <button
+              type="button"
+              class="btn-remove"
+              (click)="removeFromCart(item.ticket.id)"
+              title="Remove from cart"
+              [attr.aria-label]="'Remove ' + item.ticket.type + ' from cart'"
+            >
+              ✕
+            </button>
+          </div>
+          }
+        </div>
+
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>{{ formattedPrice(totalCartPrice) }}</span>
+          </div>
+          @if (appliedDiscount > 0) {
+          <div class="summary-row discount">
+            <span>Discount ({{ appliedDiscount }}%):</span>
+            <span>-{{ formattedPrice((totalCartPrice * appliedDiscount) / 100) }}</span>
+          </div>
+          }
+          <div class="summary-row total">
+            <span>Total:</span>
+            <span>{{ formattedPrice(totalCartPrice * (1 - appliedDiscount / 100)) }}</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-checkout" (click)="checkoutCart()">
+          🛍️ Proceed to Checkout
+        </button>
+        } @else {
+        <div class="empty-cart">
+          <p class="pb-3">Your cart is empty</p>
+          <p class="hint">Add tickets from the left to get started</p>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+  } @if (showSelectionSeats) {
+  <!-- Selection Seats -->
+  <div class="modal-overlay">
+    <!-- <div class="modal-dialog"> -->
+    <div class="modal-content-seat">
+      <div class="seat-map-scroll-wrapper default-bg-color font">
+        <!-- Close Button -->
+        <button class="seat-map-close-btn" (click)="closeSeatMap()" aria-label="Close Seat Map">
+          ×
+        </button>
+
+        <!-- Auditorium Custom Seat -->
+        <div class="auditorium-map-container">
+          <div class="map-title-bar">
+            <h2 class="map-title">Auditorium Seating Map</h2>
+            <div class="seat-selection-info">
+              <span class="selected-count"
+                >Selected: {{ getSelectedSeats().length }} / {{ maxSeatsAllowed }}</span
+              >
+              @if (getSelectedSeats().length >= maxSeatsAllowed) {
+              <span class="limit-reached">Max seats reached</span>
+              }
+            </div>
+          </div>
+
+          <!-- Seat Legend -->
+          <div class="seat-legend">
+            <div class="legend-item"><span class="legend-seat available"></span> Available</div>
+            <div class="legend-item"><span class="legend-seat selected"></span> Selected</div>
+            <div class="legend-item"><span class="legend-seat booked"></span> Booked</div>
+            <div class="legend-item"><span class="legend-seat vip"></span> VIP</div>
+            <div class="legend-item"><span class="legend-seat premium"></span> Premium</div>
+            <div class="legend-item"><span class="legend-seat general"></span> General</div>
+          </div>
+
+          <div class="seating-section lower-foyer">
+            <h3 class="section-label">LOWER FOYER</h3>
+
+            <div class="seating-row upper-row">
+              <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 0 : 1">
+                <div class="block-label">{{ block.name }}</div>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                  <button
+                    *ngFor="let seat of row; let j = index"
+                    class="seat-button"
+                    [ngClass]="{
+                      available: seat.status === 'available',
+                      booked: seat.status === 'booked',
+                      selected: seat.status === 'selected'
+                    }"
+                    [disabled]="seat.status === 'booked'"
+                    (click)="toggleSeat(block.name, i, j)"
+                    [attr.aria-label]="'Kursi ' + seat.id"
+                  >
+                    <span class="seat-number">{{ j + 1 }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="center-foyer-stack">
+                <div
+                  class="seat-block vip-block"
+                  *ngFor="let block of seatingBlocks | slice : 1 : 2"
+                >
+                  <div class="block-label">{{ block.name }}</div>
+                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button vip-seat"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Kursi ' + seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 2 : 3">
+                  <div class="block-label">{{ block.name }}</div>
+                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Kursi ' + seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 3 : 4">
+                <div class="block-label">{{ block.name }}</div>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                  <button
+                    *ngFor="let seat of row; let j = index"
+                    class="seat-button"
+                    [ngClass]="{
+                      available: seat.status === 'available',
+                      booked: seat.status === 'booked',
+                      selected: seat.status === 'selected'
+                    }"
+                    [disabled]="seat.status === 'booked'"
+                    (click)="toggleSeat(block.name, i, j)"
+                    [attr.aria-label]="'Kursi ' + seat.id"
+                  >
+                    <span class="seat-number">{{ j + 1 }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="seating-spacer"></div>
+
+          <div class="seating-section balcony-level">
+            <h3 class="section-label">BALCONY</h3>
+
+            <div class="seating-row lower-row">
+              <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 4 : 5">
+                <div class="block-label">{{ block.name }}</div>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                  <button
+                    *ngFor="let seat of row; let j = index"
+                    class="seat-button"
+                    [ngClass]="{
+                      available: seat.status === 'available',
+                      booked: seat.status === 'booked',
+                      selected: seat.status === 'selected'
+                    }"
+                    [disabled]="seat.status === 'booked'"
+                    (click)="toggleSeat(block.name, i, j)"
+                    [attr.aria-label]="'Kursi ' + seat.id"
+                  >
+                    <span class="seat-number">{{ j + 1 }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 5 : 6">
+                <div class="block-label">{{ block.name }}</div>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                  <button
+                    *ngFor="let seat of row; let j = index"
+                    class="seat-button"
+                    [ngClass]="{
+                      available: seat.status === 'available',
+                      booked: seat.status === 'booked',
+                      selected: seat.status === 'selected'
+                    }"
+                    [disabled]="seat.status === 'booked'"
+                    (click)="toggleSeat(block.name, i, j)"
+                    [attr.aria-label]="'Kursi ' + seat.id"
+                  >
+                    <span class="seat-number">{{ j + 1 }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 6 : 7">
+                <div class="block-label">{{ block.name }}</div>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                  <button
+                    *ngFor="let seat of row; let j = index"
+                    class="seat-button"
+                    [ngClass]="{
+                      available: seat.status === 'available',
+                      booked: seat.status === 'booked',
+                      selected: seat.status === 'selected'
+                    }"
+                    [disabled]="seat.status === 'booked'"
+                    (click)="toggleSeat(block.name, i, j)"
+                    [attr.aria-label]="'Kursi ' + seat.id"
+                  >
+                    <span class="seat-number">{{ j + 1 }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="map-footer">
+            <button
+              class="book-button"
+              [disabled]="!isAnySeatSelected"
+              (click)="startPaymentProcess()"
+            >
+              Book Selected Seats ({{ getSelectedSeats().length }})
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Payment Modal -->
+  @if (showPaymentModal) {
+  <div class="modal-overlay">
+    <div class="modal-content payment-modal bg-dark text-white">
+      <div class="modal-header">
+        <h2>Complete Payment</h2>
+        <button class="close-btn" (click)="cancelBooking()" aria-label="Close Payment Modal">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          @if (event) {
+          <div class="summary-item">
+            <span>Event:</span>
+            <strong>{{ event.title }}</strong>
+          </div>
+          } @if (selectedSeats.length > 0) {
+          <div class="seats-summary my-2">
+            <strong>Selected Seats ({{ selectedSeats.length }}):</strong>
+            <p class="seat-ids">{{ selectedSeats.join(', ') }}</p>
+          </div>
+          <div class="summary-item">
+            <span>Ticket Type:</span>
+            <strong>Seat Selection (Custom)</strong>
+          </div>
+          } @if (cart.length > 0) {
+          <div class="cart-items-summary">
+            @for (item of cart; track item.ticket.id) {
+            <div class="summary-item">
+              <span>{{ item.ticket.type }} (x{{ item.qty }}):</span>
+              <strong>{{
+                formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty)
+              }}</strong>
+            </div>
+            }
+          </div>
+          } @else if (currentBooking) {
+          <div class="summary-item">
+            <span>Booking ID:</span>
+            <strong>{{ currentBooking.id }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Price per Ticket:</span>
+            <strong>{{ formattedPrice(currentBooking.pricePerTicket) }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Quantity:</span>
+            <strong>{{ currentBooking.quantity }}</strong>
+          </div>
+          } @if (appliedDiscount > 0) {
+          <div class="summary-item discount">
+            <span>Discount ({{ appliedDiscount }}%):</span>
+            <strong
+              >-{{
+                formattedPrice(
+                  ((totalCartPrice > 0 ? totalCartPrice : currentBooking?.totalPrice || 0) *
+                    appliedDiscount) /
+                    100
+                )
+              }}</strong
+            >
+          </div>
+          }
+          <div class="summary-item total">
+            <span>Total Amount:</span>
+            <strong>{{
+              formattedPrice(
+                totalCartPrice > 0
+                  ? totalCartPrice * (1 - appliedDiscount / 100)
+                  : currentBooking?.totalPrice || 0
+              )
+            }}</strong>
+          </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="payment-methods">
+          <h3>Payment</h3>
+          <p class="payment-info-text">
+            Click the button below to complete your payment via Midtrans secure payment gateway.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelBooking()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="processPayment()">
+          💳 Pay Now with Midtrans
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- QR Code Display Modal -->
+  @if (showQRCodeDisplay) {
+  <div class="modal-overlay">
+    <div class="modal-content qr-display-modal bg-dark text-white">
+      <div class="modal-header">
+        <h2>✓ Your Booking Confirmed!</h2>
+        <button
+          class="close-btn"
+          (click)="closeQRCodeDisplay()"
+          aria-label="Close Confirmation Modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- QR Code Display with all details inside -->
+        <div class="qr-display-container">
+          <div class="confirmation-message">
+            <p>
+              Your booking has been confirmed. Please save or screenshot the QR code below for
+              check-in.
+            </p>
+          </div>
+
+          <div class="qr-code-visual">
+            <img [src]="qrCodeDataUrl" alt="QR Code for check-in" />
+          </div>
+
+          <div class="booking-details-box">
+            @if (currentBooking) {
+            <p><strong>Booking ID:</strong> {{ currentBooking.id }}</p>
+            <p><strong>Tickets:</strong> {{ currentBooking.quantity }}</p>
+            } @if (event) {
+            <p><strong>Event:</strong> {{ event.title }}</p>
+            }
+            <p class="qr-data-text">
+              <strong>QR Data:</strong><br /><small>{{ qrCodeData }}</small>
+            </p>
+          </div>
+
+          <div class="confirmation-note">
+            <p>
+              A confirmation email with the QR code has been sent to your registered email address.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="downloadQRCode()">
+          📥 Download QR Code
+        </button>
+        @if (showContinueShopping) {
+        <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
+          Continue Shopping
+        </button>
+        } @else {
+        <button type="button" class="btn btn-primary" (click)="closeQRCodeDisplay()">
+          View My Bookings
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+  }
 </div>

@@ -399,6 +399,163 @@
   margin: 0;
 }
 
+/* Chart Footer - Legend and Occupancy */
+.chart-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(254, 183, 6, 0.1);
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(254, 183, 6, 0.05);
+  transition: var(--trans-light);
+}
+
+.legend-item:hover {
+  background: rgba(254, 183, 6, 0.15);
+  transform: translateY(-2px);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary-yellow);
+  box-shadow: 0 0 8px rgba(254, 183, 6, 0.5);
+}
+
+.legend-label {
+  font-size: 0.85rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(15, 15, 15, 0.98) 0%, rgba(30, 30, 30, 0.98) 100%);
+  border: 2px solid var(--primary-yellow);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  z-index: 100;
+  pointer-events: none;
+  min-width: 180px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(254, 183, 6, 0.2);
+  transform: translateX(-50%);
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+/* Fixed tooltip - always at top of chart area for visibility */
+.chart-tooltip-fixed {
+  top: 10px;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tooltip-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-yellow);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(254, 183, 6, 0.2);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.tooltip-label {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.tooltip-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Data Point Hover Area */
+.data-point-group {
+  cursor: pointer;
+}
+
+.data-point-hover-area {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.data-point-group:hover .data-point {
+  fill: var(--primary-yellow);
+  r: 10;
+  filter: drop-shadow(0 0 10px rgba(254, 183, 6, 0.8));
+}
+
+/* Chart Loading and Empty States */
+.chart-loading,
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  color: #888;
+  min-height: 250px;
+  width: 100%;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(254, 183, 6, 0.2);
+  border-top-color: var(--primary-yellow);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;

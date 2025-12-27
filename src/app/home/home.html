@@ -14,12 +14,12 @@
       >
         @for (slide of swiperSlides; track slide) {
         <swiper-slide>
-          <a [href]="slide.link" target="_blank" class="slide-link">
+          <a [routerLink]="['/ticket', slide.id]" class="slide-link">
             <div
               class="slide-bg"
               [style.backgroundImage]="'url(' + slide.img + ')'"
               role="img"
-              aria-label="carousel slide"
+              [attr.aria-label]="'Event slide ' + ($index + 1)"
             ></div>
           </a>
         </swiper-slide>

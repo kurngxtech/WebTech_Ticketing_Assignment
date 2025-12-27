@@ -1,17 +1,20 @@
 <main>
-   @if (!hideLayout) {
-      <header>
-         <app-header></app-header>
-      </header>
-   }
+  @if (!hideLayout) {
+  <header>
+    <app-header></app-header>
+  </header>
+  }
 
-   <div class="router-container">
-      <router-outlet (activate)="onActivate()" />
-   </div>
+  <div class="router-container">
+    <router-outlet (activate)="onActivate()" />
+  </div>
 
-   @if (!hideLayout) {
-      <footer>
-         <app-footer></app-footer>
-      </footer>
-   }
+  @if (!hideLayout) {
+  <footer>
+    <app-footer></app-footer>
+  </footer>
+  }
 </main>
+
+<!-- Global Toast Notifications -->
+<app-toast-container></app-toast-container>

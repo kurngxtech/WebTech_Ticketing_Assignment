@@ -1,45 +1,69 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { EventItem, TicketCategory } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-create-event',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './create-event.html',
-  styleUrls: ['./create-event.css']
+  styleUrls: ['./create-event.css'],
 })
 export class CreateEvent implements OnInit {
   currentUser: User | null = null;
   currentStep: 'basic' | 'tickets' | 'seating' | 'promo' | 'review' = 'basic';
   isEditMode = false;
-  eventId: number | null = null;
+  eventId: string | null = null;
+  isLoading = false;
   event: EventItem | null = null;
+
+  private cdr = inject(ChangeDetectorRef);
 
   basicForm!: FormGroup;
   ticketForm!: FormGroup;
   promoForm!: FormGroup;
 
   ticketCategories: TicketCategory[] = [];
-  sections = ['VIP', 'PREMIUM', 'GENERAL', 'PROMO'];
+
+  // Auditorium seating sections with max capacity
+  sectionConfig = [
+    { id: 'LF-A', name: 'LF-A (General)', category: 'Lower Foyer', maxSeats: 90, order: 1 },
+    { id: 'VIP', name: 'VIP', category: 'Lower Foyer', maxSeats: 60, order: 2 },
+    { id: 'LF-B', name: 'LF-B (General)', category: 'Lower Foyer', maxSeats: 90, order: 3 },
+    { id: 'LF-C', name: 'LF-C (Premium)', category: 'Lower Foyer', maxSeats: 120, order: 4 },
+    { id: 'B-A', name: 'B-A (General)', category: 'Balcony', maxSeats: 69, order: 5 },
+    { id: 'B-B', name: 'B-B (General)', category: 'Balcony', maxSeats: 69, order: 6 },
+    { id: 'B-C', name: 'B-C (General)', category: 'Balcony', maxSeats: 69, order: 7 },
+  ];
+
+  sections = this.sectionConfig.map((s) => s.name);
   promotionalCodes: any[] = [];
+  showSeatMapPreview = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private eventService: DataEventService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    
+
     if (!this.currentUser || this.currentUser.role !== 'eo') {
       this.router.navigate(['/login']);
       return;
@@ -61,9 +85,9 @@ export class CreateEvent implements OnInit {
 
     this.ticketForm = this.fb.group({
       ticketType: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(1000)]],
+      price: ['', [Validators.required, Validators.min(1)]],
       quantity: ['', [Validators.required, Validators.min(1)]],
-      section: ['GENERAL', Validators.required],
+      section: ['LF-A (General)', Validators.required],
     });
 
     this.promoForm = this.fb.group({
@@ -74,22 +98,36 @@ export class CreateEvent implements OnInit {
   }
 
   checkEditMode(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       if (params['id']) {
         this.isEditMode = true;
-        this.eventId = parseInt(params['id']);
-        const existingEvent = this.eventService.getEventById(this.eventId);
-        if (existingEvent) {
-          this.event = { ...existingEvent };
-          this.loadEventData();
-        }
+        this.eventId = params['id'];
+        this.isLoading = true;
+
+        // Load event from API
+        this.eventService.getEventByIdAsync(this.eventId!).subscribe({
+          next: (existingEvent) => {
+            if (existingEvent) {
+              this.event = { ...existingEvent };
+              this.loadEventData();
+            }
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Failed to load event:', err);
+            this.isLoading = false;
+            this.cdr.detectChanges();
+            this.router.navigate(['/eo']);
+          },
+        });
       }
     });
   }
 
   loadEventData(): void {
     if (!this.event) return;
-    
+
     this.basicForm.patchValue({
       title: this.event.title,
       description: this.event.description,
@@ -107,7 +145,7 @@ export class CreateEvent implements OnInit {
 
   goToStep(step: 'basic' | 'tickets' | 'seating' | 'promo' | 'review'): void {
     // Validate current step before moving to next
-    switch(step) {
+    switch (step) {
       case 'basic':
         this.currentStep = step;
         break;
@@ -132,6 +170,23 @@ export class CreateEvent implements OnInit {
       return;
     }
 
+    const sectionName = this.ticketForm.value.section;
+    const requestedSeats = this.ticketForm.value.quantity;
+
+    // Validate seat capacity
+    const sectionInfo = this.sectionConfig.find((s) => s.name === sectionName);
+    if (sectionInfo) {
+      const usedSeats = this.getUsedSeatsInSection(sectionName);
+      const availableSeats = sectionInfo.maxSeats - usedSeats;
+
+      if (requestedSeats > availableSeats) {
+        this.toast.warning(
+          `Section "${sectionName}" only has ${availableSeats} seats available (max: ${sectionInfo.maxSeats}, used: ${usedSeats})`
+        );
+        return;
+      }
+    }
+
     const newTicket: TicketCategory = {
       id: `ticket_${Date.now()}`,
       type: this.ticketForm.value.ticketType,
@@ -141,13 +196,60 @@ export class CreateEvent implements OnInit {
       section: this.ticketForm.value.section,
     };
 
-    if (this.ticketCategories.find(t => t.type === newTicket.type)) {
-      alert('Ticket type already exists');
+    if (this.ticketCategories.find((t) => t.type === newTicket.type)) {
+      this.toast.warning('Ticket type already exists');
       return;
     }
 
     this.ticketCategories.push(newTicket);
-    this.ticketForm.reset({ section: 'GENERAL' });
+    this.ticketForm.reset({ section: 'LF-A (General)' });
+  }
+
+  // Get seats already used in a section
+  getUsedSeatsInSection(sectionName: string): number {
+    return this.ticketCategories
+      .filter((t) => t.section === sectionName)
+      .reduce((sum, t) => sum + t.total, 0);
+  }
+
+  // Get max seats for a section
+  getMaxSeatsForSection(sectionName: string): number {
+    return this.sectionConfig.find((s) => s.name === sectionName)?.maxSeats || 0;
+  }
+
+  // Get available seats for selected section
+  getAvailableSeatsForSelectedSection(): number {
+    const section = this.ticketForm.value.section;
+    if (!section) return 0;
+    return this.getMaxSeatsForSection(section) - this.getUsedSeatsInSection(section);
+  }
+
+  // Toggle seat map preview
+  toggleSeatMapPreview(): void {
+    this.showSeatMapPreview = !this.showSeatMapPreview;
+  }
+
+  // Get sections grouped by category
+  getSectionsByCategory(): {
+    category: string;
+    sections: { id: string; name: string; category: string; maxSeats: number; order: number }[];
+  }[] {
+    const groups: {
+      [key: string]: {
+        id: string;
+        name: string;
+        category: string;
+        maxSeats: number;
+        order: number;
+      }[];
+    } = {};
+    for (const section of this.sectionConfig) {
+      if (!groups[section.category]) {
+        groups[section.category] = [];
+      }
+      groups[section.category].push(section);
+    }
+    return Object.keys(groups).map((cat) => ({ category: cat, sections: groups[cat] }));
   }
 
   removeTicketCategory(index: number): void {
@@ -179,16 +281,16 @@ export class CreateEvent implements OnInit {
 
   saveEvent(): void {
     if (!this.basicForm.valid || this.ticketCategories.length === 0) {
-      alert('Please complete all required fields');
+      this.toast.error('Please complete all required fields');
       return;
     }
 
-    const eventData: Omit<EventItem, 'id' | 'createdAt' | 'updatedAt'> = {
+    const eventData: Partial<EventItem> = {
       img: this.basicForm.value.img,
       title: this.basicForm.value.title,
       description: this.basicForm.value.description,
       date: this.basicForm.value.date,
-      price: Math.min(...this.ticketCategories.map(t => t.price)),
+      price: Math.min(...this.ticketCategories.map((t) => t.price)),
       organizer: this.currentUser!.fullName,
       organizerId: this.currentUser!.id,
       time: this.basicForm.value.time,
@@ -198,18 +300,40 @@ export class CreateEvent implements OnInit {
       status: 'active',
     };
 
+    this.isLoading = true;
+
     if (this.isEditMode && this.eventId !== null) {
-      const updated = this.eventService.updateEvent(this.eventId, eventData);
-      if (updated) {
-        alert('Event updated successfully!');
-        this.router.navigate(['/eo']);
-      }
+      this.eventService.updateEventAsync(this.eventId, eventData).subscribe({
+        next: (result) => {
+          this.isLoading = false;
+          if (result.success) {
+            this.toast.success('Event updated successfully!');
+            this.router.navigate(['/eo']);
+          } else {
+            this.toast.error(result.message || 'Failed to update event');
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+          this.toast.error('Failed to update event');
+        },
+      });
     } else {
-      const created = this.eventService.createEvent(eventData);
-      if (created) {
-        alert('Event created successfully!');
-        this.router.navigate(['/eo']);
-      }
+      this.eventService.createEventAsync(eventData).subscribe({
+        next: (result) => {
+          this.isLoading = false;
+          if (result.success) {
+            this.toast.success('Event created successfully!');
+            this.router.navigate(['/eo']);
+          } else {
+            this.toast.error(result.message || 'Failed to create event');
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+          this.toast.error('Failed to create event');
+        },
+      });
     }
   }
 
@@ -219,8 +343,8 @@ export class CreateEvent implements OnInit {
 
   private getInvalidFields(form: FormGroup): string[] {
     const invalidFields: string[] = [];
-    
-    Object.keys(form.controls).forEach(key => {
+
+    Object.keys(form.controls).forEach((key) => {
       const control = form.get(key);
       if (control && control.invalid) {
         invalidFields.push(this.getFieldLabel(key));
@@ -232,27 +356,27 @@ export class CreateEvent implements OnInit {
 
   private getFieldLabel(fieldName: string): string {
     const fieldLabels: { [key: string]: string } = {
-      'title': 'Event Title',
-      'description': 'Description',
-      'date': 'Date',
-      'time': 'Time',
-      'location': 'Location',
-      'img': 'Event Image URL',
-      'ticketType': 'Ticket Type',
-      'price': 'Price',
-      'quantity': 'Total Seats',
-      'section': 'Seating Section',
-      'code': 'Promo Code',
-      'discount': 'Discount (%)',
-      'expiryDate': 'Expiry Date'
+      title: 'Event Title',
+      description: 'Description',
+      date: 'Date',
+      time: 'Time',
+      location: 'Location',
+      img: 'Event Image URL',
+      ticketType: 'Ticket Type',
+      price: 'Price',
+      quantity: 'Total Seats',
+      section: 'Seating Section',
+      code: 'Promo Code',
+      discount: 'Discount (%)',
+      expiryDate: 'Expiry Date',
     };
-    
+
     return fieldLabels[fieldName] || fieldName;
   }
 
   private showValidationError(formName: string, form: FormGroup): void {
     const invalidFields = this.getInvalidFields(form);
-    
+
     if (invalidFields.length > 0) {
       const fieldsText = invalidFields.join(', ');
       alert(`Please fill all ${formName} fields:\n\n${fieldsText}`);

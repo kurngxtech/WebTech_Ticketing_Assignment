@@ -1,0 +1,330 @@
+/**
+ * Waitlist Controller
+ * Handles waitlist management for sold-out events
+ */
+
+const Waitlist = require('../models/Waitlist');
+const Event = require('../models/Event');
+const User = require('../models/User');
+const { sendWaitlistNotification, sendWaitlistJoinConfirmation } = require('../utils/emailService');
+
+/**
+ * Join waitlist
+ * POST /api/waitlist
+ */
+exports.joinWaitlist = async (req, res) => {
+  try {
+    const { eventId, ticketCategoryId, quantity = 1 } = req.body;
+    const userId = req.userId;
+
+    // Validate event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found',
+      });
+    }
+
+    // Check if ticket category exists
+    const ticket = event.tickets.find((t) => t.id === ticketCategoryId);
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: 'Ticket category not found',
+      });
+    }
+
+    // Check if tickets are actually sold out
+    const remaining = ticket.total - ticket.sold;
+    if (remaining > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tickets still available, no need to join waitlist',
+      });
+    }
+
+    // Check for existing waitlist entry
+    const existingEntry = await Waitlist.findOne({
+      eventId,
+      userId,
+      ticketCategoryId,
+      status: 'waiting',
+    });
+
+    if (existingEntry) {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already on the waitlist for this ticket type',
+      });
+    }
+
+    // Create waitlist entry
+    const entry = new Waitlist({
+      eventId,
+      userId,
+      ticketCategoryId,
+      quantity: Math.min(quantity, 10), // Max 10 per entry
+    });
+
+    await entry.save();
+
+    // Send confirmation email
+    const user = await User.findById(userId);
+    if (user) {
+      const eventDate = new Date(event.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      sendWaitlistJoinConfirmation(
+        user.email,
+        user.fullName,
+        { title: event.title, date: eventDate },
+        ticket.type
+      ).catch((err) => console.error('Failed to send waitlist email:', err));
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Added to waitlist successfully',
+      entry: {
+        id: entry._id,
+        eventId: entry.eventId,
+        ticketCategoryId: entry.ticketCategoryId,
+        quantity: entry.quantity,
+        registeredAt: entry.registeredAt,
+      },
+    });
+  } catch (error) {
+    console.error('Join waitlist error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to join waitlist',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Leave waitlist
+ * DELETE /api/waitlist/:id
+ */
+exports.leaveWaitlist = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const entry = await Waitlist.findById(id);
+
+    if (!entry) {
+      return res.status(404).json({
+        success: false,
+        message: 'Waitlist entry not found',
+      });
+    }
+
+    // Check authorization
+    if (entry.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to remove this entry',
+      });
+    }
+
+    entry.status = 'removed';
+    await entry.save();
+
+    res.json({
+      success: true,
+      message: 'Removed from waitlist',
+    });
+  } catch (error) {
+    console.error('Leave waitlist error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to leave waitlist',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get waitlist for event (EO/Admin)
+ * GET /api/waitlist/event/:eventId
+ */
+exports.getWaitlistByEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found',
+      });
+    }
+
+    // Check authorization
+    if (req.userRole !== 'admin' && event.organizerId.toString() !== req.userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this waitlist',
+      });
+    }
+
+    const entries = await Waitlist.getByEvent(eventId);
+
+    // Group by ticket category
+    const grouped = {};
+    for (const entry of entries) {
+      const catId = entry.ticketCategoryId;
+      if (!grouped[catId]) {
+        const ticket = event.tickets.find((t) => t.id === catId);
+        grouped[catId] = {
+          ticketCategoryId: catId,
+          ticketType: ticket?.type || 'Unknown',
+          entries: [],
+        };
+      }
+      grouped[catId].entries.push({
+        id: entry._id,
+        user: entry.userId,
+        quantity: entry.quantity,
+        registeredAt: entry.registeredAt,
+      });
+    }
+
+    res.json({
+      success: true,
+      waitlist: Object.values(grouped),
+      totalEntries: entries.length,
+    });
+  } catch (error) {
+    console.error('Get event waitlist error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get waitlist',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get user's waitlist entries
+ * GET /api/waitlist/user/:userId
+ */
+exports.getWaitlistByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Check authorization
+    if (req.userId.toString() !== userId && req.userRole !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized',
+      });
+    }
+
+    const entries = await Waitlist.getByUser(userId);
+
+    // Enhance with event details
+    const enhancedEntries = entries.map((entry) => {
+      const event = entry.eventId;
+      const ticketType =
+        event?.tickets?.find((t) => t.id === entry.ticketCategoryId)?.type || 'Standard';
+
+      return {
+        id: entry._id,
+        eventId: event?._id,
+        eventTitle: event?.title,
+        eventDate: event?.date,
+        eventImg: event?.img,
+        ticketCategoryId: entry.ticketCategoryId,
+        ticketType,
+        quantity: entry.quantity,
+        status: entry.status,
+        registeredAt: entry.registeredAt,
+        notified: entry.notified,
+        notifiedAt: entry.notifiedAt,
+      };
+    });
+
+    res.json({
+      success: true,
+      waitlist: enhancedEntries,
+    });
+  } catch (error) {
+    console.error('Get user waitlist error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get waitlist',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Notify waitlist entries when tickets available (EO/Admin)
+ * POST /api/waitlist/notify/:eventId
+ */
+exports.notifyWaitlist = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { ticketCategoryId, limit = 10 } = req.body;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found',
+      });
+    }
+
+    // Check authorization
+    if (req.userRole !== 'admin' && event.organizerId.toString() !== req.userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized',
+      });
+    }
+
+    // Get entries to notify
+    const entries = await Waitlist.getNextInLine(eventId, ticketCategoryId, limit);
+    const ticketType = event.tickets.find((t) => t.id === ticketCategoryId)?.type || 'Standard';
+
+    let notifiedCount = 0;
+    for (const entry of entries) {
+      try {
+        await entry.markNotified();
+
+        const user = await User.findById(entry.userId);
+        if (user) {
+          await sendWaitlistNotification(
+            user.email,
+            user.fullName,
+            { id: event._id, title: event.title, date: event.date },
+            ticketType
+          );
+          notifiedCount++;
+        }
+      } catch (err) {
+        console.error('Failed to notify waitlist entry:', err);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Notified ${notifiedCount} waitlist entries`,
+      notifiedCount,
+    });
+  } catch (error) {
+    console.error('Notify waitlist error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to notify waitlist',
+      error: error.message,
+    });
+  }
+};

@@ -11,12 +11,20 @@
       <p>Basic Info</p>
     </div>
     <div class="stepper-line"></div>
-    <div class="stepper-item" [class.active]="currentStep === 'tickets'" (click)="goToStep('tickets')">
+    <div
+      class="stepper-item"
+      [class.active]="currentStep === 'tickets'"
+      (click)="goToStep('tickets')"
+    >
       <div class="stepper-number">2</div>
       <p>Tickets</p>
     </div>
     <div class="stepper-line"></div>
-    <div class="stepper-item" [class.active]="currentStep === 'seating'" (click)="goToStep('seating')">
+    <div
+      class="stepper-item"
+      [class.active]="currentStep === 'seating'"
+      (click)="goToStep('seating')"
+    >
       <div class="stepper-number">3</div>
       <p>Seating</p>
     </div>
@@ -26,7 +34,11 @@
       <p>Promo</p>
     </div>
     <div class="stepper-line"></div>
-    <div class="stepper-item" [class.active]="currentStep === 'review'" (click)="goToStep('review')">
+    <div
+      class="stepper-item"
+      [class.active]="currentStep === 'review'"
+      (click)="goToStep('review')"
+    >
       <div class="stepper-number">5</div>
       <p>Review</p>
     </div>
@@ -39,66 +51,77 @@
     <form [formGroup]="basicForm">
       <div class="form-group">
         <label>Event Title *</label>
-        <input type="text" class="form-control" formControlName="title" placeholder="Enter event title">
+        <input
+          type="text"
+          class="form-control"
+          formControlName="title"
+          placeholder="Enter event title"
+        />
         @if (basicForm.get('title')?.invalid && basicForm.get('title')?.touched) {
-        <small class="error">
-          Title is required (min 3 characters)
-        </small>
+        <small class="error"> Title is required (min 3 characters) </small>
         }
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Date *</label>
-          <input type="date" class="form-control" formControlName="date">
+          <input type="date" class="form-control" formControlName="date" />
           @if (basicForm.get('date')?.invalid && basicForm.get('date')?.touched) {
-          <small class="error">
-            Date is required
-          </small>
+          <small class="error"> Date is required </small>
           }
         </div>
         <div class="form-group">
           <label>Time *</label>
-          <input type="time" class="form-control" formControlName="time">
+          <input type="time" class="form-control" formControlName="time" />
           @if (basicForm.get('time')?.invalid && basicForm.get('time')?.touched) {
-          <small class="error">
-            Time is required
-          </small>
+          <small class="error"> Time is required </small>
           }
         </div>
       </div>
 
       <div class="form-group">
         <label>Description *</label>
-        <textarea class="form-control" formControlName="description" placeholder="Enter event description" rows="4"></textarea>
+        <textarea
+          class="form-control"
+          formControlName="description"
+          placeholder="Enter event description"
+          rows="4"
+        ></textarea>
         @if (basicForm.get('description')?.invalid && basicForm.get('description')?.touched) {
-        <small class="error">
-          Description is required
-        </small>
+        <small class="error"> Description is required </small>
         }
       </div>
 
       <div class="form-group">
         <label>Location *</label>
-        <input type="text" class="form-control" formControlName="location" placeholder="Enter event location">
+        <input
+          type="text"
+          class="form-control"
+          formControlName="location"
+          placeholder="Enter event location"
+        />
         @if (basicForm.get('location')?.invalid && basicForm.get('location')?.touched) {
-        <small class="error">
-          Location is required
-        </small>
+        <small class="error"> Location is required </small>
         }
       </div>
 
       <div class="form-group">
         <label>Event Image URL *</label>
-        <input type="url" class="form-control" formControlName="img" placeholder="https://example.com/image.jpg">
+        <input
+          type="url"
+          class="form-control"
+          formControlName="img"
+          placeholder="https://example.com/image.jpg"
+        />
         @if (basicForm.get('img')?.invalid && basicForm.get('img')?.touched) {
-        <small class="error">
-          Image URL is required
-        </small>
-        }
-        @if (basicForm.get('img')?.value) {
+        <small class="error"> Image URL is required </small>
+        } @if (basicForm.get('img')?.value) {
         <div class="image-preview">
-          <img [src]="basicForm.get('img')?.value" alt="Preview" onerror="this.src='https://via.placeholder.com/200'">
+          <img
+            [src]="basicForm.get('img')?.value"
+            alt="Preview"
+            onerror="this.src='https://via.placeholder.com/200'"
+          />
         </div>
         }
       </div>
@@ -116,29 +139,65 @@
   @if (currentStep === 'tickets') {
   <div class="form-section">
     <h2>Define Ticket Categories</h2>
-    
+
+    <div class="seat-map-action">
+      <button type="button" class="btn btn-outline-small" (click)="toggleSeatMapPreview()">
+        🗺️ View Seat Map Layout
+      </button>
+    </div>
+
     <form [formGroup]="ticketForm" class="ticket-form">
       <div class="form-row">
         <div class="form-group">
           <label>Ticket Type *</label>
-          <input type="text" class="form-control" formControlName="ticketType" placeholder="e.g., VIP, Regular">
+          <input
+            type="text"
+            class="form-control"
+            formControlName="ticketType"
+            placeholder="e.g., VIP, Regular"
+          />
         </div>
         <div class="form-group">
-          <label>Price (USD) *</label>
-          <input type="number" class="form-control" formControlName="price" placeholder="e.g., 350">
+          <label>Price (RM) *</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="price"
+            placeholder="e.g., 350"
+          />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label>Total Seats *</label>
-          <input type="number" class="form-control" formControlName="quantity" placeholder="e.g., 100">
+          <label
+            >Total Seats *
+            <span class="seats-hint"
+              >(Max: {{ getAvailableSeatsForSelectedSection() }} available)</span
+            ></label
+          >
+          <input
+            type="number"
+            class="form-control"
+            formControlName="quantity"
+            placeholder="e.g., 100"
+            [max]="getAvailableSeatsForSelectedSection()"
+          />
         </div>
         <div class="form-group">
           <label>Seating Section *</label>
           <select class="form-control" formControlName="section">
-            @for (sec of sections; track sec) {
-            <option [value]="sec">{{ sec }}</option>
+            @for (group of getSectionsByCategory(); track group.category) {
+            <optgroup [label]="group.category">
+              @for (sec of group.sections; track sec.id) {
+              <option [value]="sec.name">
+                {{ sec.name }} ({{ sec.maxSeats - getUsedSeatsInSection(sec.name) }}/{{
+                  sec.maxSeats
+                }}
+                avail)
+              </option>
+              }
+            </optgroup>
             }
           </select>
         </div>
@@ -156,10 +215,17 @@
       @for (ticket of ticketCategories; track ticket.id) {
       <div class="ticket-item">
         <div class="ticket-info">
-          <p><strong>{{ ticket.type }}</strong></p>
+          <p>
+            <strong>{{ ticket.type }}</strong>
+          </p>
           <p>{{ formatPrice(ticket.price) }} × {{ ticket.total }} seats ({{ ticket.section }})</p>
         </div>
-        <button class="btn-icon-small btn-danger" (click)="removeTicketCategory(ticketCategories.indexOf(ticket))">🗑️</button>
+        <button
+          class="btn-icon-small btn-danger"
+          (click)="removeTicketCategory(ticketCategories.indexOf(ticket))"
+        >
+          🗑️
+        </button>
       </div>
       }
     </div>
@@ -167,7 +233,11 @@
 
     <div class="button-group">
       <button class="btn btn-outline" (click)="goToStep('basic')">← Back</button>
-      <button class="btn btn-primary" (click)="goToStep('seating')" [disabled]="ticketCategories.length === 0">
+      <button
+        class="btn btn-primary"
+        (click)="goToStep('seating')"
+        [disabled]="ticketCategories.length === 0"
+      >
         Next: Seating →
       </button>
     </div>
@@ -178,7 +248,9 @@
   @if (currentStep === 'seating') {
   <div class="form-section">
     <h2>Seating Layout Configuration</h2>
-    <p class="info-text">Tickets have been assigned to seating sections based on their configuration.</p>
+    <p class="info-text">
+      Tickets have been assigned to seating sections based on their configuration.
+    </p>
 
     <div class="seating-grid">
       @for (ticket of ticketCategories; track ticket.section) {
@@ -193,9 +265,7 @@
 
     <div class="button-group">
       <button class="btn btn-outline" (click)="goToStep('tickets')">← Back</button>
-      <button class="btn btn-primary" (click)="goToStep('promo')">
-        Next: Promotions →
-      </button>
+      <button class="btn btn-primary" (click)="goToStep('promo')">Next: Promotions →</button>
     </div>
   </div>
   }
@@ -204,20 +274,32 @@
   @if (currentStep === 'promo') {
   <div class="form-section">
     <h2>Add Promotional Codes (Optional)</h2>
-    
+
     <form [formGroup]="promoForm">
       <div class="form-row">
         <div class="form-group">
           <label>Promo Code</label>
-          <input type="text" class="form-control" formControlName="code" placeholder="e.g., SAVE20">
+          <input
+            type="text"
+            class="form-control"
+            formControlName="code"
+            placeholder="e.g., SAVE20"
+          />
         </div>
         <div class="form-group">
           <label>Discount (%)</label>
-          <input type="number" class="form-control" formControlName="discount" placeholder="e.g., 20" min="1" max="100">
+          <input
+            type="number"
+            class="form-control"
+            formControlName="discount"
+            placeholder="e.g., 20"
+            min="1"
+            max="100"
+          />
         </div>
         <div class="form-group">
           <label>Expiry Date</label>
-          <input type="date" class="form-control" formControlName="expiryDate">
+          <input type="date" class="form-control" formControlName="expiryDate" />
         </div>
       </div>
 
@@ -233,10 +315,17 @@
       @for (promo of promotionalCodes; track promo.code) {
       <div class="promo-item">
         <div class="promo-info">
-          <p><strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off</p>
+          <p>
+            <strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off
+          </p>
           <p>Expires: {{ promo.expiryDate }}</p>
         </div>
-        <button class="btn-icon-small btn-danger" (click)="removePromo(promotionalCodes.indexOf(promo))">🗑️</button>
+        <button
+          class="btn-icon-small btn-danger"
+          (click)="removePromo(promotionalCodes.indexOf(promo))"
+        >
+          🗑️
+        </button>
       </div>
       }
     </div>
@@ -244,9 +333,7 @@
 
     <div class="button-group">
       <button class="btn btn-outline" (click)="goToStep('seating')">← Back</button>
-      <button class="btn btn-primary" (click)="goToStep('review')">
-        Next: Review →
-      </button>
+      <button class="btn btn-primary" (click)="goToStep('review')">Next: Review →</button>
     </div>
   </div>
   }
@@ -258,25 +345,20 @@
 
     <div class="review-section">
       <h3>Event Details</h3>
-      <div class="review-item">
-        <strong>Title:</strong> {{ basicForm.value.title }}
-      </div>
+      <div class="review-item"><strong>Title:</strong> {{ basicForm.value.title }}</div>
       <div class="review-item">
         <strong>Date & Time:</strong> {{ basicForm.value.date }} at {{ basicForm.value.time }}
       </div>
-      <div class="review-item">
-        <strong>Location:</strong> {{ basicForm.value.location }}
-      </div>
-      <div class="review-item">
-        <strong>Description:</strong> {{ basicForm.value.description }}
-      </div>
+      <div class="review-item"><strong>Location:</strong> {{ basicForm.value.location }}</div>
+      <div class="review-item"><strong>Description:</strong> {{ basicForm.value.description }}</div>
     </div>
 
     <div class="review-section">
       <h3>Ticket Categories ({{ ticketCategories.length }})</h3>
       @for (ticket of ticketCategories; track ticket.type) {
       <div class="review-item">
-        <strong>{{ ticket.type }}</strong> ({{ ticket.section }}) - {{ formatPrice(ticket.price) }} × {{ ticket.total }} seats
+        <strong>{{ ticket.type }}</strong> ({{ ticket.section }}) -
+        {{ formatPrice(ticket.price) }} × {{ ticket.total }} seats
       </div>
       }
     </div>
@@ -286,7 +368,8 @@
       <h3>Promotional Codes ({{ promotionalCodes.length }})</h3>
       @for (promo of promotionalCodes; track promo.code) {
       <div class="review-item">
-        <strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off (expires {{ promo.expiryDate }})
+        <strong>{{ promo.code }}</strong> - {{ promo.discountPercentage }}% off (expires
+        {{ promo.expiryDate }})
       </div>
       }
     </div>
@@ -297,6 +380,121 @@
       <button class="btn btn-success" (click)="saveEvent()">
         {{ isEditMode ? '✓ Update Event' : '✓ Create Event' }}
       </button>
+    </div>
+  </div>
+  }
+
+  <!-- Seat Map Preview Modal -->
+  @if (showSeatMapPreview) {
+  <div class="modal-overlay" (click)="toggleSeatMapPreview()">
+    <div class="seat-map-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🗺️ Auditorium Seating Layout</h3>
+        <button class="close-btn" (click)="toggleSeatMapPreview()">×</button>
+      </div>
+      <div class="seat-map-content">
+        <!-- STAGE at top -->
+        <div class="stage-area-top">STAGE</div>
+
+        <!-- Legend -->
+        <div class="seat-legend-preview">
+          <span class="legend-item"><span class="legend-box available"></span> Available</span>
+          <span class="legend-item"><span class="legend-box vip-color"></span> VIP</span>
+          <span class="legend-item"><span class="legend-box premium-color"></span> Premium</span>
+          <span class="legend-item"><span class="legend-box general-color"></span> General</span>
+        </div>
+
+        <!-- LOWER FOYER -->
+        <div class="section-area lower-foyer">
+          <h4>LOWER FOYER</h4>
+          <div class="auditorium-layout">
+            <!-- Left block: LF-A -->
+            <div class="seat-block-preview general">
+              <div class="block-header">LF-A</div>
+              <div class="seat-grid-preview">
+                @for (row of [0,1,2,3,4,5]; track row) {
+                <div class="seat-row-preview">
+                  @for (seat of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; track seat) {
+                  <span class="mini-seat"></span>
+                  }
+                </div>
+                }
+              </div>
+              <div class="block-info">90 seats</div>
+            </div>
+
+            <!-- Center: VIP + LF-B stacked -->
+            <div class="center-stack">
+              <div class="seat-block-preview vip">
+                <div class="block-header">VIP</div>
+                <div class="seat-grid-preview">
+                  @for (row of [0,1,2,3]; track row) {
+                  <div class="seat-row-preview">
+                    @for (seat of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; track seat) {
+                    <span class="mini-seat vip-seat"></span>
+                    }
+                  </div>
+                  }
+                </div>
+                <div class="block-info">60 seats</div>
+              </div>
+              <div class="seat-block-preview general">
+                <div class="block-header">LF-B</div>
+                <div class="seat-grid-preview">
+                  @for (row of [0,1,2,3,4,5]; track row) {
+                  <div class="seat-row-preview">
+                    @for (seat of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; track seat) {
+                    <span class="mini-seat"></span>
+                    }
+                  </div>
+                  }
+                </div>
+                <div class="block-info">90 seats</div>
+              </div>
+            </div>
+
+            <!-- Right block: LF-C (Premium) -->
+            <div class="seat-block-preview premium">
+              <div class="block-header">LF-C</div>
+              <div class="seat-grid-preview">
+                @for (row of [0,1,2,3,4,5,6,7]; track row) {
+                <div class="seat-row-preview">
+                  @for (seat of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; track seat) {
+                  <span class="mini-seat premium-seat"></span>
+                  }
+                </div>
+                }
+              </div>
+              <div class="block-info">120 seats</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BALCONY -->
+        <div class="section-area balcony">
+          <h4>BALCONY</h4>
+          <div class="balcony-layout">
+            @for (sec of [{id:'B-A', seats:69}, {id:'B-B', seats:69}, {id:'B-C', seats:69}]; track
+            sec.id) {
+            <div class="seat-block-preview">
+              <div class="block-header">{{ sec.id }}</div>
+              <div class="seat-grid-preview compact">
+                @for (row of [0,1,2,3,4]; track row) {
+                <div class="seat-row-preview">
+                  @for (seat of [1,2,3,4,5,6,7,8,9,10,11,12,13,14]; track seat) {
+                  <span class="mini-seat"></span>
+                  }
+                </div>
+                }
+              </div>
+              <div class="block-info">{{ sec.seats }} seats</div>
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="control-room-label">CONTROL ROOM</div>
+      </div>
     </div>
   </div>
   }

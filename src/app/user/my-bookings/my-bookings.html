@@ -1,179 +1,266 @@
 <div class="my-bookings-page default-bg-color" [class.sort-menu-open]="isSortMenuOpen">
-   <div class="container-fluid">
-      <!-- Header dengan Sort Menu -->
-      <div class="page-header">
-         <h1 class="page-title">My Bookings</h1>
-         <button class="sort-menu-toggle" (click)="toggleSortMenu()" [class.open]="isSortMenuOpen">
-            <span class="hamburger-icon" *ngIf="!isSortMenuOpen">☰</span>
-            <span class="close-icon" *ngIf="isSortMenuOpen">✕</span>
-         </button>
+  <div class="container-fluid">
+    <!-- Header dengan Sort Menu -->
+    <div class="page-header">
+      <h1 class="page-title">My Bookings</h1>
+      <div class="header-actions">
+        <button
+          class="btn-refresh me-3"
+          (click)="loadBookings(true)"
+          [disabled]="isLoading || isCheckingPayment"
+          title="Refresh Bookings"
+        >
+          <span [class.spinning]="isLoading || isCheckingPayment">↻</span> Refresh
+        </button>
+        <button
+          class="sort-menu-toggle"
+          (click)="toggleSortMenu()"
+          [class.open]="isSortMenuOpen"
+          aria-label="Toggle Filter Menu"
+        >
+          <span class="hamburger-icon" *ngIf="!isSortMenuOpen" aria-hidden="true">☰</span>
+          <span class="close-icon" *ngIf="isSortMenuOpen" aria-hidden="true">✕</span>
+        </button>
       </div>
+    </div>
 
-      <!-- Backdrop blur effect -->
-      <div class="sort-menu-backdrop" [class.active]="isSortMenuOpen" (click)="closeSortMenu()"></div>
+    <!-- Payment Status Message -->
+    @if (paymentStatusMessage) {
+    <div
+      class="payment-status-banner"
+      [class.success]="paymentStatusMessage.includes('successful')"
+      [class.pending]="paymentStatusMessage.includes('pending')"
+      [class.error]="paymentStatusMessage.includes('failed')"
+    >
+      <span class="status-icon">
+        @if (isCheckingPayment) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+      </span>
+      {{ paymentStatusMessage }}
+    </div>
+    }
 
-      <!-- Sort Menu Overlay -->
-      <div class="sort-menu" [class.open]="isSortMenuOpen">
-         <div class="sort-menu-content">
-            <h3>Filter Bookings</h3>
-            
-            <button 
-               class="sort-item"
-               [class.active]="filterStatus === 'all'"
-               (click)="setFilter('all')">
-               <span class="sort-label">All Bookings</span>
-               <span class="sort-count">{{ getTotalBookings() }}</span>
-            </button>
+    <!-- Backdrop blur effect -->
+    <div class="sort-menu-backdrop" [class.active]="isSortMenuOpen" (click)="closeSortMenu()"></div>
 
-            <button 
-               class="sort-item confirmed"
-               [class.active]="filterStatus === 'confirmed'"
-               (click)="setFilter('confirmed')">
-               <span class="sort-label">✓ Confirmed</span>
-               <span class="sort-count">{{ getConfirmedCount() }}</span>
-            </button>
+    <!-- Sort Menu Overlay -->
+    <div class="sort-menu" [class.open]="isSortMenuOpen">
+      <div class="sort-menu-content">
+        <h3>Filter Bookings</h3>
 
-            <button 
-               class="sort-item pending"
-               [class.active]="filterStatus === 'pending'"
-               (click)="setFilter('pending')">
-               <span class="sort-label">⏳ Pending</span>
-               <span class="sort-count">{{ getPendingCount() }}</span>
-            </button>
+        <button
+          class="sort-item"
+          [class.active]="filterStatus === 'all'"
+          (click)="setFilter('all')"
+          aria-label="Show All Bookings"
+        >
+          <span class="sort-label">All Bookings</span>
+          <span class="sort-count">{{ getTotalBookings() }}</span>
+        </button>
 
-            <button 
-               class="sort-item cancelled"
-               [class.active]="filterStatus === 'cancelled'"
-               (click)="setFilter('cancelled')">
-               <span class="sort-label">✕ Cancelled</span>
-               <span class="sort-count">{{ getCancelledCount() }}</span>
-            </button>
+        <button
+          class="sort-item confirmed"
+          [class.active]="filterStatus === 'confirmed'"
+          (click)="setFilter('confirmed')"
+        >
+          <span class="sort-label">✓ Confirmed</span>
+          <span class="sort-count">{{ getConfirmedCount() }}</span>
+        </button>
 
-            <button 
-               class="sort-item waitlist"
-               [class.active]="filterStatus === 'waitlist'"
-               (click)="setFilter('waitlist')">
-               <span class="sort-label">⭐ Waitlist</span>
-               <span class="sort-count">{{ getWaitlistCount() }}</span>
-            </button>
-         </div>
+        <button
+          class="sort-item pending"
+          [class.active]="filterStatus === 'pending'"
+          (click)="setFilter('pending')"
+        >
+          <span class="sort-label">⏳ Pending</span>
+          <span class="sort-count">{{ getPendingCount() }}</span>
+        </button>
+
+        <button
+          class="sort-item cancelled"
+          [class.active]="filterStatus === 'cancelled'"
+          (click)="setFilter('cancelled')"
+        >
+          <span class="sort-label">✕ Cancelled</span>
+          <span class="sort-count">{{ getCancelledCount() }}</span>
+        </button>
+
+        <button
+          class="sort-item waitlist"
+          [class.active]="filterStatus === 'waitlist'"
+          (click)="setFilter('waitlist')"
+        >
+          <span class="sort-label">⭐ Waitlist</span>
+          <span class="sort-count">{{ getWaitlistCount() }}</span>
+        </button>
       </div>
+    </div>
 
-      <!-- Main Content -->
-      @if (isLoading) {
-         <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <p>Loading your bookings...</p>
-         </div>
-      } @else {
-         <!-- Bookings Grid -->
-         @if (filterStatus !== 'waitlist') {
-            @if (filteredBookings.length === 0) {
-               <div class="no-bookings-message">
-                  <p>No bookings found for this filter</p>
-                  <button class="btn-reset" (click)="setFilter('all')">View All Bookings</button>
-               </div>
+    <!-- Main Content -->
+    @if (isLoading) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading your bookings...</p>
+    </div>
+    } @else {
+    <!-- Bookings Grid -->
+    @if (filterStatus !== 'waitlist') { @if (filteredBookings.length === 0) {
+    <div class="no-bookings-message">
+      <p>No bookings found for this filter</p>
+      <button class="btn-reset" (click)="setFilter('all')">View All Bookings</button>
+    </div>
+    }
+
+    <div class="bookings-grid">
+      @for (booking of displayedBookings; track booking.id) {
+      <div
+        class="booking-card"
+        [class.active]="selectedBookingId === booking.id"
+        [class.pending-card]="booking.status === 'pending'"
+        (click)="selectBooking(booking.id)"
+      >
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="card-title-section">
+            <h3 class="event-title">{{ booking.eventTitle }}</h3>
+            <span class="status-badge" [class]="getStatusBadgeClass(booking.status)">{{
+              booking.status
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Card Content -->
+        <div class="card-content">
+          <div class="content-left">
+            <div class="booking-info">
+              <div class="info-row">
+                <span class="info-label">Date:</span>
+                <span class="info-value">{{ booking.eventDate | date : 'MMM dd, yyyy' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Ticket Type:</span>
+                <span class="info-value">{{ booking.ticketType }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Quantity:</span>
+                <span class="info-value">{{ booking.quantity }} ticket(s)</span>
+              </div>
+              <div class="info-row price">
+                <span class="info-label">Total:</span>
+                <span class="info-value">{{ booking.totalPrice | number }}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="card-actions">
+              <button
+                class="btn btn-download"
+                (click)="downloadTicket(booking.id); $event.stopPropagation()"
+                title="Download as PDF"
+              >
+                📥 Download PDF
+              </button>
+              @if (canCancelSelectedBooking && selectedBookingId === booking.id) {
+              <button
+                class="btn btn-cancel"
+                (click)="cancelBooking(booking.id); $event.stopPropagation()"
+                title="Cancel Booking"
+                [attr.aria-label]="'Cancel booking for ' + booking.eventTitle"
+              >
+                ✕ Cancel
+              </button>
+              }
+            </div>
+          </div>
+
+          <!-- QR Code Section -->
+          <div class="qr-section">
+            @if (booking.status === 'confirmed' && bookingQrDataUrls.get(booking.id)) {
+            <div class="qr-code-container">
+              <img
+                [src]="bookingQrDataUrls.get(booking.id)"
+                [alt]="'QR Code for ' + booking.eventTitle"
+                class="qr-code"
+                (click)="downloadTicket(booking.id); $event.stopPropagation()"
+                title="Click to download as PDF"
+              />
+            </div>
+            } @else if (booking.status === 'pending') {
+            <div class="pending-payment-section">
+              <div
+                class="countdown-timer"
+                [class.expiring-soon]="isExpiringSoon(booking.expiresAt)"
+              >
+                @if (!isExpired(booking.expiresAt)) {
+                <span class="countdown-icon">⏱️</span>
+                <span class="countdown-text">{{ getCountdownText(booking.expiresAt) }}</span>
+                } @else {
+                <span class="countdown-icon">⚠️</span>
+                <span class="countdown-text expired">Payment Expired</span>
+                }
+              </div>
+              <p class="pending-text">Complete payment to confirm booking</p>
+              @if (!isExpired(booking.expiresAt)) {
+              <button
+                class="btn btn-continue-payment"
+                (click)="continuePayment(booking.id); $event.stopPropagation()"
+                title="Complete your payment"
+              >
+                💳 Complete Payment
+              </button>
+              }
+            </div>
+            } @else {
+            <div class="qr-placeholder">
+              <p>QR not available</p>
+            </div>
             }
-
-            <div class="bookings-grid">
-               @for (booking of filteredBookings; track booking.id) {
-                  <div class="booking-card" [class.active]="selectedBookingId === booking.id" (click)="selectBooking(booking.id)">
-                     <!-- Card Header -->
-                     <div class="card-header">
-                        <div class="card-title-section">
-                           <h3 class="event-title">{{ booking.eventTitle }}</h3>
-                           <span class="status-badge" [class]="getStatusBadgeClass(booking.status)">{{ booking.status }}</span>
-                        </div>
-                     </div>
-
-                     <!-- Card Content -->
-                     <div class="card-content">
-                        <div class="content-left">
-                           <div class="booking-info">
-                              <div class="info-row">
-                                 <span class="info-label">Date:</span>
-                                 <span class="info-value">{{ booking.eventDate | date: 'MMM dd, yyyy' }}</span>
-                              </div>
-                              <div class="info-row">
-                                 <span class="info-label">Ticket Type:</span>
-                                 <span class="info-value">{{ booking.ticketType }}</span>
-                              </div>
-                              <div class="info-row">
-                                 <span class="info-label">Quantity:</span>
-                                 <span class="info-value">{{ booking.quantity }} ticket(s)</span>
-                              </div>
-                              <div class="info-row price">
-                                 <span class="info-label">Total:</span>
-                                 <span class="info-value">{{ booking.totalPrice | number }}</span>
-                              </div>
-                           </div>
-
-                           <!-- Action Buttons -->
-                           <div class="card-actions">
-                              <button class="btn btn-download" (click)="downloadTicket(booking.id); $event.stopPropagation()" title="Download as PDF">
-                                 📥 Download PDF
-                              </button>
-                              @if (canCancelSelectedBooking && selectedBookingId === booking.id) {
-                                 <button class="btn btn-cancel" (click)="cancelBooking(booking.id); $event.stopPropagation()" title="Cancel Booking">
-                                    ✕ Cancel
-                                 </button>
-                              }
-                           </div>
-                        </div>
-
-                        <!-- QR Code Section -->
-                        <div class="qr-section">
-                           @if (bookingQrDataUrls.get(booking.id)) {
-                              <div class="qr-code-container">
-                                 <img 
-                                    [src]="bookingQrDataUrls.get(booking.id)" 
-                                    alt="QR Code" 
-                                    class="qr-code"
-                                    (click)="downloadTicket(booking.id); $event.stopPropagation()"
-                                    title="Click to download as PDF"
-                                 />
-                              </div>
-                           } @else {
-                              <div class="qr-placeholder">
-                                 <p>Generating QR...</p>
-                              </div>
-                           }
-                        </div>
-                     </div>
-                  </div>
-               }
-            </div>
-         }
-
-         <!-- Waitlist Section -->
-         @if (filterStatus === 'waitlist' || filterStatus === 'all') {
-            <div class="waitlist-section">
-               <h3 class="waitlist-title">⭐ Waitlist Entries ({{ getWaitlistCount() }})</h3>
-               
-               @if (waitlistEntries.length === 0) {
-                  <div class="no-items-message">
-                     <p>No waitlist entries</p>
-                  </div>
-               }
-
-               @if (waitlistEntries.length > 0) {
-                  <div class="waitlist-grid">
-                     @for (entry of waitlistEntries; track entry.id) {
-                        <div class="waitlist-card">
-                           <div class="waitlist-header">
-                              <h4>{{ dataEventService.getEventById(entry.eventId)?.title || 'Unknown Event' }}</h4>
-                              <span class="badge-waitlist">Waiting...</span>
-                           </div>
-                           <div class="waitlist-info">
-                              <p><strong>Ticket Type:</strong> {{ entry.ticketCategoryId }}</p>
-                              <p><strong>Quantity:</strong> {{ entry.quantity }}</p>
-                           </div>
-                        </div>
-                     }
-                  </div>
-               }
-            </div>
-         }
+          </div>
+        </div>
+      </div>
       }
-   </div>
+    </div>
+
+    <!-- View More Button -->
+    @if (hasMoreBookings) {
+    <div class="view-more-container">
+      <button class="btn btn-view-more" (click)="toggleViewMore()">
+        View More ({{ filteredBookings.length - displayLimit }} more)
+      </button>
+    </div>
+    } @if (showAllBookings && filteredBookings.length > displayLimit) {
+    <div class="view-more-container">
+      <button class="btn btn-view-less" (click)="toggleViewMore()">Show Less</button>
+    </div>
+    } }
+
+    <!-- Waitlist Section -->
+    @if (filterStatus === 'waitlist' || filterStatus === 'all') {
+    <div class="waitlist-section">
+      <h3 class="waitlist-title">⭐ Waitlist Entries ({{ getWaitlistCount() }})</h3>
+
+      @if (waitlistEntries.length === 0) {
+      <div class="no-items-message">
+        <p>No waitlist entries</p>
+      </div>
+      } @if (waitlistEntries.length > 0) {
+      <div class="waitlist-grid">
+        @for (entry of waitlistEntries; track entry.id) {
+        <div class="waitlist-card">
+          <div class="waitlist-header">
+            <h4>{{ getEventTitle(entry.eventId) }}</h4>
+            <span class="badge-waitlist">Waiting...</span>
+          </div>
+          <div class="waitlist-info">
+            <p><strong>Ticket Type:</strong> {{ entry.ticketCategoryId }}</p>
+            <p><strong>Quantity:</strong> {{ entry.quantity }}</p>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    } }
+  </div>
 </div>
