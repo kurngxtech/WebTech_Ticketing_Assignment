@@ -579,3 +579,104 @@ exports.getBookedSeats = async (req, res) => {
     });
   }
 };
+
+/**
+ * Delete booking completely (frees up seats)
+ * DELETE /api/bookings/:id
+ */
+exports.deleteBooking = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { id } = req.params;
+
+    const booking = await Booking.findById(id).session(session);
+
+    if (!booking) {
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found',
+      });
+    }
+
+    // Check authorization - user can only delete their own bookings
+    if (req.userRole !== 'admin' && booking.userId.toString() !== req.userId.toString()) {
+      await session.abortTransaction();
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this booking',
+      });
+    }
+
+    // Only allow deletion of cancelled or pending bookings
+    if (booking.status === 'confirmed') {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete confirmed bookings. Please cancel first.',
+      });
+    }
+
+    // If pending, refund tickets back to event pool
+    if (booking.status === 'pending') {
+      const event = await Event.findById(booking.eventId).session(session);
+      if (event) {
+        const ticketIndex = event.tickets.findIndex((t) => t.id === booking.ticketCategoryId);
+        if (ticketIndex !== -1) {
+          event.tickets[ticketIndex].sold = Math.max(
+            0,
+            event.tickets[ticketIndex].sold - booking.quantity
+          );
+          await event.save({ session });
+
+          // Notify waitlist that seats are available
+          const waitlistEntries = await Waitlist.getNextInLine(
+            event._id,
+            booking.ticketCategoryId,
+            1
+          );
+
+          for (const entry of waitlistEntries) {
+            await entry.markNotified();
+            const entryUser = await User.findById(entry.userId);
+            if (entryUser) {
+              const ticketType = event.tickets[ticketIndex]?.type || 'Standard';
+              await sendWaitlistNotification(
+                entryUser.email,
+                entryUser.fullName,
+                { id: event._id, title: event.title, date: event.date },
+                ticketType
+              );
+            }
+          }
+        }
+      }
+    }
+
+    // Delete associated payment if exists
+    const Payment = require('../models/Payment');
+    await Payment.deleteMany({ bookingId: booking._id }).session(session);
+
+    // Delete the booking
+    await Booking.findByIdAndDelete(id).session(session);
+
+    await session.commitTransaction();
+
+    res.json({
+      success: true,
+      message: 'Booking removed successfully',
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Delete booking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete booking',
+      error: error.message,
+    });
+  } finally {
+    session.endSession();
+  }
+};

@@ -371,6 +371,27 @@ export class DataEventService {
       );
   }
 
+  leaveWaitlistAsync(entryId: string): Observable<{ success: boolean; message?: string }> {
+    return this.http
+      .delete<{ success: boolean; message: string }>(`${this.apiUrl}/waitlist/${entryId}`)
+      .pipe(
+        catchError((err) =>
+          of({ success: false, message: err.error?.message || 'Failed to leave waitlist' })
+        )
+      );
+  }
+
+  // Remove a booking completely (frees up seats for other users)
+  removeBookingAsync(bookingId: string): Observable<{ success: boolean; message?: string }> {
+    return this.http
+      .delete<{ success: boolean; message: string }>(`${this.apiUrl}/bookings/${bookingId}`)
+      .pipe(
+        catchError((err) =>
+          of({ success: false, message: err.error?.message || 'Failed to remove booking' })
+        )
+      );
+  }
+
   // ========== ANALYTICS ==========
 
   getEventAnalyticsAsync(eventId: string): Observable<EventAnalytics | null> {

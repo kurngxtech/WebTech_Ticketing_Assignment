@@ -119,6 +119,12 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Event image URL is required'],
     },
+    slug: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     date: {
       type: String,
       required: [true, 'Event date is required'],
@@ -150,6 +156,11 @@ const eventSchema = new mongoose.Schema(
       enum: ['draft', 'active', 'completed', 'cancelled'],
       default: 'draft',
     },
+    maxWaitlistSize: {
+      type: Number,
+      default: 10,
+      min: [0, 'Waitlist size cannot be negative'],
+    },
     tickets: [ticketCategorySchema],
     seatingLayout: [seatingLayoutSchema],
     promotionalCodes: [promotionalCodeSchema],
@@ -180,6 +191,35 @@ eventSchema.index({ organizerId: 1 });
 eventSchema.index({ status: 1 });
 eventSchema.index({ date: 1 });
 eventSchema.index({ 'tickets.id': 1 });
+eventSchema.index({ slug: 1 });
+
+// Pre-save hook to generate slug from title
+eventSchema.pre('save', async function (next) {
+  if (this.isModified('title') || !this.slug) {
+    // Generate base slug from title
+    let baseSlug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+
+    // Ensure uniqueness by checking existing slugs
+    let slug = baseSlug;
+    let counter = 1;
+    const Event = this.constructor;
+
+    while (true) {
+      const existing = await Event.findOne({ slug, _id: { $ne: this._id } });
+      if (!existing) break;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    this.slug = slug;
+  }
+  next();
+});
 
 // Virtual for total tickets available
 eventSchema.virtual('totalAvailable').get(function () {

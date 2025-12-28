@@ -34,4 +34,7 @@ router.post('/:id/checkin', authorize('eo', 'admin'), bookingController.checkIn)
 // Validate QR code
 router.post('/validate-qr', authorize('eo', 'admin'), bookingController.validateQRCode);
 
+// Delete booking completely (frees up seats)
+router.delete('/:id', bookingController.deleteBooking);
+
 module.exports = router;

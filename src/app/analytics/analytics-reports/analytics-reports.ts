@@ -6,8 +6,9 @@ import {
   NgZone,
   HostListener,
   AfterViewInit,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
@@ -40,6 +41,7 @@ export class AnalyticsReports implements OnInit, AfterViewInit {
   selectedTimePeriod: TimePeriod = 'daily';
   isLoading = false;
   isLoadingChart = false;
+  isGeneratingPDF = false;
 
   currentEvent: EventItem | null = null;
   analytics: EventAnalytics | null = null;
@@ -53,6 +55,8 @@ export class AnalyticsReports implements OnInit, AfterViewInit {
 
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   constructor(
     private eventService: DataEventService,
@@ -384,7 +388,145 @@ export class AnalyticsReports implements OnInit, AfterViewInit {
   }
 
   printPDF(): void {
-    window.print();
+    if (!this.isBrowser || !this.currentEvent || !this.analytics) {
+      return;
+    }
+
+    this.isGeneratingPDF = true;
+    this.zone.run(() => this.cdr.detectChanges());
+
+    // Dynamic import jspdf to avoid SSR issues
+    import('jspdf')
+      .then(({ jsPDF }) => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // Header
+        doc.setFillColor(18, 18, 18);
+        doc.rect(0, 0, pageWidth, 50, 'F');
+
+        doc.setFontSize(24);
+        doc.setTextColor(255, 215, 0);
+        doc.text('Analytics Report', pageWidth / 2, 25, { align: 'center' });
+
+        doc.setFontSize(12);
+        doc.setTextColor(200, 200, 200);
+        doc.text(`Event: ${this.currentEvent!.title}`, pageWidth / 2, 38, { align: 'center' });
+
+        // Date generated
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 45, {
+          align: 'center',
+        });
+
+        // Summary Section
+        let yPos = 65;
+        doc.setFontSize(16);
+        doc.setTextColor(255, 215, 0);
+        doc.text('Summary', 15, yPos);
+
+        yPos += 10;
+        doc.setFontSize(11);
+        doc.setTextColor(50, 50, 50);
+
+        const summary = [
+          ['Total Revenue', this.formatPrice(this.analytics!.totalRevenue)],
+          ['Total Tickets Sold', this.analytics!.totalTicketsSold.toString()],
+          ['Seat Occupancy', `${this.getOccupancyPercentage()}%`],
+        ];
+
+        for (const [label, value] of summary) {
+          doc.setTextColor(100, 100, 100);
+          doc.text(label + ':', 15, yPos);
+          doc.setTextColor(30, 30, 30);
+          doc.text(value, 80, yPos);
+          yPos += 8;
+        }
+
+        // Ticket Breakdown Section
+        yPos += 10;
+        doc.setFontSize(16);
+        doc.setTextColor(255, 215, 0);
+        doc.text('Ticket Breakdown', 15, yPos);
+
+        yPos += 10;
+        doc.setFontSize(10);
+
+        // Table header
+        doc.setFillColor(45, 45, 45);
+        doc.rect(15, yPos - 5, pageWidth - 30, 8, 'F');
+        doc.setTextColor(255, 215, 0);
+        doc.text('Ticket Type', 20, yPos);
+        doc.text('Sold', 100, yPos);
+        doc.text('Available', 130, yPos);
+        doc.text('Revenue', 165, yPos);
+
+        yPos += 10;
+        doc.setTextColor(50, 50, 50);
+
+        for (const ticket of this.currentEvent!.tickets) {
+          const ticketData = this.analytics!.byTicketType[ticket.id] as
+            | { sold: number; revenue: number }
+            | undefined;
+          const sold = ticketData?.sold || 0;
+          const revenue = ticketData?.revenue || 0;
+
+          doc.text(ticket.type, 20, yPos);
+          doc.text(sold.toString(), 100, yPos);
+          doc.text((ticket.total - sold).toString(), 130, yPos);
+          doc.text(this.formatPrice(revenue), 165, yPos);
+          yPos += 8;
+        }
+
+        // Event Details Section
+        yPos += 15;
+        doc.setFontSize(16);
+        doc.setTextColor(255, 215, 0);
+        doc.text('Event Details', 15, yPos);
+
+        yPos += 10;
+        doc.setFontSize(11);
+        doc.setTextColor(50, 50, 50);
+
+        const eventDetails = [
+          ['Date', this.currentEvent!.date],
+          ['Time', this.currentEvent!.time],
+          ['Location', this.currentEvent!.location],
+          [
+            'Status',
+            this.currentEvent!.status.charAt(0).toUpperCase() + this.currentEvent!.status.slice(1),
+          ],
+        ];
+
+        for (const [label, value] of eventDetails) {
+          doc.setTextColor(100, 100, 100);
+          doc.text(label + ':', 15, yPos);
+          doc.setTextColor(30, 30, 30);
+          doc.text(value, 50, yPos);
+          yPos += 8;
+        }
+
+        // Footer
+        const footerY = doc.internal.pageSize.getHeight() - 15;
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('EMS - Event Management System', pageWidth / 2, footerY, { align: 'center' });
+
+        // Save PDF
+        const filename = `analytics_${this.currentEvent!.title.replace(/\s+/g, '_')}_${
+          new Date().toISOString().split('T')[0]
+        }.pdf`;
+        doc.save(filename);
+
+        this.isGeneratingPDF = false;
+        this.zone.run(() => this.cdr.detectChanges());
+      })
+      .catch((err) => {
+        console.error('Failed to generate PDF:', err);
+        this.isGeneratingPDF = false;
+        this.zone.run(() => this.cdr.detectChanges());
+      });
   }
 
   formatPrice(price: number): string {

@@ -1,60 +1,75 @@
-<div class="default-font bg-login min-vh-100 container-fluid d-flex align-items-center justify-content-center">
-   <!-- form -->
-   <div class="bg-black backdrop-blur-xl bg-opacity-75 py-5 px-3 rounded-5 d-flex justify-content-center"
-      style="width: 25%; height: auto; min-height: 420px;">
-
-      <div class="w-75 text-white">
-         <!-- title -->
-         <div class="mb-4 text-center">
-            <h2>Login</h2>
-            <p class="text-white fw-light">Use the credentials given below.</p>
-         </div>
-
-         <form (ngSubmit)="login()">
-            <div class="mb-3">
-               <label for="username" class="form-label">Username</label>
-               <input 
-                  type="text" 
-                  id="username"
-                  class="form-control form-control-sm bg-dark border-dark text-white"
-                  [(ngModel)]="username"
-                  name="username"
-                  [disabled]="isLoading">
-            </div>
-
-            <div class="mb-5">
-               <label for="password" class="form-label">Password</label>
-               <input 
-                  type="password" 
-                  id="password"
-                  class="form-control form-control-sm bg-dark border-dark text-white"
-                  [(ngModel)]="password"
-                  name="password"
-                  [disabled]="isLoading">
-            </div>
-
-            @if (errorMessage) {
-               <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert" style="animation: slideIn 0.3s ease-in;">
-                  <strong>Error!</strong> {{ errorMessage }}
-                  <button type="button" class="btn-close" (click)="clearError()"></button>
-               </div>
-            }
-
-            <div class="d-flex justify-content-center w-100 mb-3">
-               <button 
-                  type="submit"
-                  [disabled]="isLoading" 
-                  class="btn bg-opacity-75 w-100" 
-                  style="background-color: #feb706; color: black">
-                  @if (!isLoading) {
-                     <span>Sign In</span>
-                  }
-                  @if (isLoading) {
-                     <span>Signing in...</span>
-                  }
-               </button>
-            </div>
-         </form>
+<div
+  class="default-font bg-login min-vh-100 container-fluid d-flex align-items-center justify-content-center"
+>
+  <!-- form -->
+  <div
+    class="bg-black backdrop-blur-xl bg-opacity-75 py-5 px-3 rounded-5 d-flex justify-content-center"
+    style="width: 25%; height: auto; min-height: 420px"
+  >
+    <div class="w-75 text-white">
+      <!-- title -->
+      <div class="mb-4 text-center">
+        <h2>Login</h2>
+        <p class="text-white fw-light">Use the credentials given below.</p>
       </div>
-   </div>
+
+      <form (ngSubmit)="login()">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input
+            type="text"
+            id="username"
+            class="form-control form-control-sm bg-dark border-dark text-white"
+            [(ngModel)]="username"
+            name="username"
+            [disabled]="isLoading"
+          />
+        </div>
+
+        <div class="mb-5">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            class="form-control form-control-sm bg-dark border-dark text-white"
+            [(ngModel)]="password"
+            name="password"
+            [disabled]="isLoading"
+          />
+        </div>
+
+        @if (errorMessage) {
+        <div
+          class="alert alert-danger alert-dismissible fade show mb-3"
+          role="alert"
+          style="animation: slideIn 0.3s ease-in"
+        >
+          <strong>Error!</strong> {{ errorMessage }}
+          <button type="button" class="btn-close" (click)="clearError()"></button>
+        </div>
+        }
+
+        <div class="d-flex justify-content-center w-100 mb-3">
+          <button
+            type="submit"
+            [disabled]="isLoading"
+            class="btn bg-opacity-75 w-100"
+            style="background-color: #feb706; color: black"
+          >
+            @if (!isLoading) {
+            <span>Sign In</span>
+            } @if (isLoading) {
+            <span>Signing in...</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- First Login Password Change Modal -->
+@if (showPasswordChangeModal && loggedInUser) {
+<app-change-password-modal [userId]="loggedInUser.id" (passwordChanged)="onPasswordChanged()">
+</app-change-password-modal>
+}

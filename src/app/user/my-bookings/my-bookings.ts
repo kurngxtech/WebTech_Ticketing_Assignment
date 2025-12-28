@@ -636,4 +636,62 @@ export class MyBookings implements OnInit {
     // Less than 1 hour remaining
     return diff > 0 && diff < 60 * 60 * 1000;
   }
+
+  // Waitlist cancel with confirmation
+  waitlistCancelConfirmId: string | null = null;
+  bookingRemoveConfirmId: string | null = null;
+
+  showWaitlistCancelConfirm(entryId: string): void {
+    this.waitlistCancelConfirmId = entryId;
+  }
+
+  hideWaitlistCancelConfirm(): void {
+    this.waitlistCancelConfirmId = null;
+  }
+
+  confirmCancelWaitlist(): void {
+    if (!this.waitlistCancelConfirmId) return;
+
+    this.dataEventService.leaveWaitlistAsync(this.waitlistCancelConfirmId).subscribe({
+      next: (res: { success: boolean; message?: string }) => {
+        if (res.success) {
+          this.waitlistEntries = this.waitlistEntries.filter(
+            (e) => e.id !== this.waitlistCancelConfirmId
+          );
+          this.zone.run(() => this.cdr.detectChanges());
+        }
+        this.waitlistCancelConfirmId = null;
+      },
+      error: (err: any) => {
+        console.error('Failed to cancel waitlist:', err);
+        this.waitlistCancelConfirmId = null;
+      },
+    });
+  }
+
+  // Remove booking (for cancelled/pending) to free up seats
+  showRemoveBookingConfirm(bookingId: string): void {
+    this.bookingRemoveConfirmId = bookingId;
+  }
+
+  hideRemoveBookingConfirm(): void {
+    this.bookingRemoveConfirmId = null;
+  }
+
+  confirmRemoveBooking(): void {
+    if (!this.bookingRemoveConfirmId) return;
+
+    this.dataEventService.removeBookingAsync(this.bookingRemoveConfirmId).subscribe({
+      next: (res: { success: boolean; message?: string }) => {
+        if (res.success) {
+          this.loadBookings(false);
+        }
+        this.bookingRemoveConfirmId = null;
+      },
+      error: (err: any) => {
+        console.error('Failed to remove booking:', err);
+        this.bookingRemoveConfirmId = null;
+      },
+    });
+  }
 }

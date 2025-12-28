@@ -25,4 +25,7 @@ router.get('/user/:userId', waitlistController.getWaitlistByUser);
 // Notify waitlist (EO/Admin)
 router.post('/notify/:eventId', authorize('eo', 'admin'), waitlistController.notifyWaitlist);
 
+// Notify approaching events - Admin only (for scheduled job)
+router.post('/notify-approaching', authorize('admin'), waitlistController.notifyApproachingEvents);
+
 module.exports = router;

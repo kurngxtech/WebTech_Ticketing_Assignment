@@ -59,6 +59,22 @@ exports.joinWaitlist = async (req, res) => {
       });
     }
 
+    // Check waitlist capacity
+    const currentWaitlistCount = await Waitlist.countDocuments({
+      eventId,
+      ticketCategoryId,
+      status: 'waiting',
+    });
+
+    const maxWaitlistSize = event.maxWaitlistSize || 10;
+    if (currentWaitlistCount >= maxWaitlistSize) {
+      return res.status(400).json({
+        success: false,
+        message: `Waitlist is full (maximum ${maxWaitlistSize} entries)`,
+        waitlistFull: true,
+      });
+    }
+
     // Create waitlist entry
     const entry = new Waitlist({
       eventId,
@@ -324,6 +340,94 @@ exports.notifyWaitlist = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to notify waitlist',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Notify waitlisted users for events approaching (within 3 days)
+ * POST /api/waitlist/notify-approaching
+ */
+exports.notifyApproachingEvents = async (req, res) => {
+  const { sendEventDateApproachingNotification } = require('../utils/emailService');
+
+  try {
+    const { daysThreshold = 3 } = req.body;
+
+    // Calculate date range
+    const now = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(now.getDate() + daysThreshold);
+
+    // Find events in the approaching window
+    const events = await Event.find({
+      status: 'active',
+      date: {
+        $gte: now.toISOString().split('T')[0],
+        $lte: futureDate.toISOString().split('T')[0],
+      },
+    });
+
+    let totalNotified = 0;
+    const eventsSummary = [];
+
+    for (const event of events) {
+      // Get waitlist entries for this event that haven't been notified about approaching date
+      const waitlistEntries = await Waitlist.find({
+        eventId: event._id,
+        status: 'waiting',
+      }).populate('userId', 'email fullName');
+
+      const eventDate = new Date(event.date);
+      const daysUntilEvent = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
+
+      let eventNotified = 0;
+      for (const entry of waitlistEntries) {
+        if (entry.userId && entry.userId.email) {
+          try {
+            await sendEventDateApproachingNotification(
+              entry.userId.email,
+              entry.userId.fullName,
+              {
+                id: event._id,
+                title: event.title,
+                date: event.date,
+                time: event.time,
+                location: event.location,
+              },
+              daysUntilEvent
+            );
+            eventNotified++;
+            totalNotified++;
+          } catch (err) {
+            console.error('Failed to send approaching notification:', err);
+          }
+        }
+      }
+
+      if (eventNotified > 0) {
+        eventsSummary.push({
+          eventId: event._id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          daysUntil: daysUntilEvent,
+          waitlistNotified: eventNotified,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Notified ${totalNotified} waitlisted users for ${eventsSummary.length} approaching events`,
+      totalNotified,
+      events: eventsSummary,
+    });
+  } catch (error) {
+    console.error('Notify approaching events error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to notify approaching events',
       error: error.message,
     });
   }

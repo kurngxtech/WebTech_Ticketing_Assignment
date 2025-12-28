@@ -9,6 +9,7 @@ export interface User {
   fullName: string;
   phone?: string;
   organizationName?: string; // for EO
+  isFirstLogin?: boolean; // for first-login password change flow
   createdAt: string;
 }
 

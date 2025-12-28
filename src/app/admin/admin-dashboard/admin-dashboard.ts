@@ -530,6 +530,8 @@ export class AdminDashboard implements OnInit, AfterViewInit {
         email: formData.email,
         phone: formData.phone,
         organizationName: formData.organizationName || 'N/A',
+        username: formData.username,
+        password: formData.password,
       })
       .subscribe({
         next: (result) => {

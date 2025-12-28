@@ -157,13 +157,30 @@ export class AuthService {
   }
 
   registerEventOrganizerAsync(
-    data: { fullName: string; email: string; phone: string; organizationName: string },
+    data: {
+      fullName: string;
+      email: string;
+      phone: string;
+      organizationName: string;
+      username?: string;
+      password?: string;
+    },
     ms = 300
   ): Observable<{ success: boolean; message: string; user?: User }> {
+    // IMPORTANT: Only execute API calls in browser context to prevent SSR duplicate requests
+    // SSR was causing emails to be sent twice (once from server, once from client hydration)
+    if (!this.isBrowser) {
+      return of({
+        success: false,
+        message: 'Cannot register on server side',
+      });
+    }
+
     // Use real API when mocks are disabled
     if (!environment.useMocks) {
-      const username = data.email.split('@')[0];
-      const password = `TempPass_${Math.random().toString(36).substring(7)}`;
+      // Use provided username/password or generate defaults
+      const username = data.username || data.email.split('@')[0];
+      const password = data.password || `TempPass_${Math.random().toString(36).substring(7)}`;
 
       return this.http
         .post<{ success: boolean; message: string; user?: User }>(

@@ -417,7 +417,7 @@ const sendPaymentReceipt = async (
   // Generate QR code URL
   const qrData = encodeURIComponent(bookingDetails.qrCode || bookingDetails.id);
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrData}&bgcolor=ffffff&color=000000`;
-  const myBookingsUrl = `${process.env.FRONTEND_URL}/my-bookings`;
+  const signInUrl = `${process.env.FRONTEND_URL}/login`;
 
   const mailOptions = {
     from: `"EMS - Event Management System" <${process.env.GMAIL_USER}>`,
@@ -506,7 +506,7 @@ const sendPaymentReceipt = async (
             </div>
             
             <center>
-              <a href="${myBookingsUrl}" class="btn">View My Bookings</a>
+              <a href="${signInUrl}" class="btn">Sign In to View Bookings</a>
             </center>
             
             <div class="footer">
@@ -717,6 +717,98 @@ const sendPendingPaymentNotification = async (
   }
 };
 
+/**
+ * Send event date approaching notification to waitlisted users
+ */
+const sendEventDateApproachingNotification = async (
+  email,
+  fullName,
+  eventDetails,
+  daysUntilEvent
+) => {
+  const transporter = createTransporter();
+  if (!transporter) {
+    console.log('📧 [MOCK] Event approaching notification would be sent to:', email);
+    return { success: true, mock: true };
+  }
+
+  const mailOptions = {
+    from: `"EMS - Event Management System" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: `⏰ Event Reminder - ${eventDetails.title} is in ${daysUntilEvent} day(s)!`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: ${THEME.styles.font}; background-color: ${
+      THEME.colors.bg
+    }; margin: 0; padding: 0; }
+          .container { ${THEME.styles.container} }
+          .header { background: #000000; color: #ff9800; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; border-bottom: 2px solid #ff9800; }
+          .content { ${THEME.styles.content} }
+          .alert-box { ${THEME.styles.card} border-left: 4px solid #ff9800; background: #2d2d2d; }
+          .btn { ${THEME.styles.button} background: #ff9800; }
+          .footer { ${THEME.styles.footer} }
+          h1, h2, h3 { color: #ff9800; }
+          p { color: ${THEME.colors.text}; }
+          strong { color: #ff9800; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>⏰ Event Reminder</h1>
+            <p style="color: #fff;">The event is approaching!</p>
+          </div>
+          <div class="content">
+            <h2>Hello, ${fullName}!</h2>
+            <p>This is a reminder that <strong>${
+              eventDetails.title
+            }</strong> is happening in <strong>${daysUntilEvent} day(s)</strong>!</p>
+            
+            <div class="alert-box">
+              <p style="margin: 0;">📋 <strong>You are on the waitlist</strong> for this event. Tickets may become available if other attendees cancel their bookings.</p>
+            </div>
+            
+            <div style="background: #000; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 5px 0;"><strong>Event:</strong> ${eventDetails.title}</p>
+              <p style="margin: 5px 0;"><strong>Date:</strong> ${eventDetails.date}</p>
+              <p style="margin: 5px 0;"><strong>Time:</strong> ${eventDetails.time || 'TBA'}</p>
+              <p style="margin: 5px 0;"><strong>Location:</strong> ${
+                eventDetails.location || 'TBA'
+              }</p>
+            </div>
+            
+            <p>We recommend checking the event page regularly for ticket availability. If tickets become available, you will be notified immediately!</p>
+            
+            <center>
+              <a href="${process.env.FRONTEND_URL}/ticket/${
+      eventDetails.id
+    }" class="btn">Check Availability</a>
+            </center>
+            
+            <div class="footer">
+              <p>You received this because you are on the waitlist for this event.</p>
+              <p>This email was sent by EMS - Event Management System</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Event approaching notification sent to:', email);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Failed to send event approaching notification:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendWelcomeEmail,
   sendBookingConfirmation,
@@ -725,4 +817,5 @@ module.exports = {
   sendPaymentReceipt,
   sendCancellationConfirmation,
   sendPendingPaymentNotification,
+  sendEventDateApproachingNotification,
 };
