@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef, inject, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
 import { PdfGeneratorService } from '../../services/pdf-generator.service';
 import { Booking, EventItem, WaitlistEntry } from '../../data-event-service/data-event';
+import { Subscription, interval } from 'rxjs';
 import * as QRCode from 'qrcode';
 
 interface BookingDisplay {
@@ -27,7 +28,7 @@ interface BookingDisplay {
   templateUrl: './my-bookings.html',
   styleUrl: './my-bookings.css',
 })
-export class MyBookings implements OnInit {
+export class MyBookings implements OnInit, OnDestroy {
   bookings: BookingDisplay[] = [];
   filteredBookings: BookingDisplay[] = [];
   filterStatus: 'all' | 'confirmed' | 'pending' | 'cancelled' | 'waitlist' = 'all';
@@ -56,6 +57,10 @@ export class MyBookings implements OnInit {
   // Cache events for waitlist display
   private eventCache: Map<string, EventItem> = new Map();
 
+  // Auto-refresh subscription
+  private refreshSubscription?: Subscription;
+  private readonly REFRESH_INTERVAL_MS = 30000; // 30 seconds
+
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
   private route = inject(ActivatedRoute);
@@ -78,10 +83,36 @@ export class MyBookings implements OnInit {
       if (state.isAuthenticated && state.currentUser) {
         this.currentUserId = state.currentUser.id || 'user_' + Date.now();
         this.loadBookings();
+        // Start auto-refresh when authenticated
+        this.startAutoRefresh();
       } else {
         this.isLoading = false;
+        this.stopAutoRefresh();
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.stopAutoRefresh();
+  }
+
+  // Start auto-refresh interval
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh(); // Clear any existing subscription
+    this.refreshSubscription = interval(this.REFRESH_INTERVAL_MS).subscribe(() => {
+      // Only refresh if not currently loading or checking payment
+      if (!this.isLoading && !this.isCheckingPayment) {
+        this.loadBookings(false); // Silent refresh (no auto-payment-check)
+      }
+    });
+  }
+
+  // Stop auto-refresh interval
+  private stopAutoRefresh(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = undefined;
+    }
   }
 
   // Handle return from Midtrans payment

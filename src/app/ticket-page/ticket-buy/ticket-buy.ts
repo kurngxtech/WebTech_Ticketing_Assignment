@@ -322,7 +322,7 @@ export class TicketBuy implements OnInit {
 
   applyCoupon(): void {
     if (!this.couponCode || !this.event) {
-      this.message = 'Please enter a coupon code';
+      this.toast.warning('Please enter a coupon code');
       return;
     }
 
@@ -330,15 +330,15 @@ export class TicketBuy implements OnInit {
       next: (result) => {
         if (result.valid && result.discountPercentage) {
           this.appliedDiscount = result.discountPercentage;
-          this.message = `Coupon applied: ${result.discountPercentage}% discount`;
+          this.toast.success(`Coupon applied: ${result.discountPercentage}% discount`);
           this.updateCartTotal();
         } else {
           this.appliedDiscount = 0;
-          this.message = result.message || 'Invalid coupon code';
+          this.toast.error(result.message || 'Invalid coupon code');
         }
       },
       error: () => {
-        this.message = 'Failed to validate coupon';
+        this.toast.error('Failed to validate coupon');
       },
     });
   }
@@ -370,7 +370,7 @@ export class TicketBuy implements OnInit {
   purchase(ticket: TicketCategory, qty = 1): void {
     // Check if user is authenticated
     if (!this.isAuthenticated) {
-      this.message = '🔐 Please login to purchase tickets';
+      this.toast.warning('Please login to purchase tickets');
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 2000);
@@ -378,7 +378,7 @@ export class TicketBuy implements OnInit {
     }
 
     if (this.getRemaining(ticket) < qty) {
-      this.message = 'Not enough tickets available';
+      this.toast.error('Not enough tickets available');
       return;
     }
 
@@ -400,19 +400,18 @@ export class TicketBuy implements OnInit {
 
             this.showPaymentModal = true;
             this.bookingInProgress = true;
-            this.message = '';
 
             // Refresh event data
             this.dataSrv.getEventByIdAsync(this.eventId).subscribe((evt) => {
               if (evt) this.event = evt;
             });
           } else {
-            this.message = result.message || 'Purchase failed';
+            this.toast.error(result.message || 'Purchase failed');
           }
         },
         error: (err) => {
           this.isLoading = false;
-          this.message = 'Purchase failed';
+          this.toast.error('Purchase failed');
           console.error(err);
         },
       });
@@ -422,7 +421,7 @@ export class TicketBuy implements OnInit {
     const qty = this.quantities[ticket.id] || 1;
 
     if (this.getRemaining(ticket) < qty) {
-      this.message = 'Not enough tickets available';
+      this.toast.error('Not enough tickets available');
       return;
     }
 
@@ -437,7 +436,7 @@ export class TicketBuy implements OnInit {
     // Reset quantity input
     this.quantities[ticket.id] = 1;
     this.updateCartTotal();
-    this.message = `✓ Added ${qty} ${ticket.type} ticket(s) to cart`;
+    this.toast.success(`Added ${qty} ${ticket.type} ticket(s) to cart`);
   }
 
   removeFromCart(ticketId: string): void {

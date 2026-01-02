@@ -4,6 +4,7 @@ import {
   ElementRef,
   AfterViewInit,
   OnInit,
+  OnDestroy,
   ChangeDetectorRef,
   inject,
   NgZone,
@@ -14,21 +15,27 @@ import { register } from 'swiper/element/bundle';
 import { Router } from '@angular/router';
 import { DataEventService } from '../data-event-service/data-event.service';
 import { EventItem } from '../data-event-service/data-event';
+import { LoadingSpinner } from '../components/loading-spinner/loading-spinner';
+import { Subscription, interval } from 'rxjs';
 
 register();
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LoadingSpinner],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
-export class Home implements AfterViewInit, OnInit {
+export class Home implements AfterViewInit, OnInit, OnDestroy {
   activeIndex = 0;
   slides: EventItem[] = [];
   isLoading = true;
+
+  // Auto-refresh subscription
+  private refreshSubscription?: Subscription;
+  private readonly REFRESH_INTERVAL_MS = 60000; // 60 seconds
 
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
@@ -41,6 +48,17 @@ export class Home implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     // Load events from API
+    this.loadEvents();
+    // Start auto-refresh
+    this.startAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
+  }
+
+  // Load events from API
+  private loadEvents(): void {
     this.isLoading = true;
     this.dataSrv.getEventsAsync().subscribe({
       next: (events) => {
@@ -55,6 +73,29 @@ export class Home implements AfterViewInit, OnInit {
         this.zone.run(() => this.cdr.detectChanges());
       },
     });
+  }
+
+  // Start auto-refresh interval
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh(); // Clear any existing subscription
+    this.refreshSubscription = interval(this.REFRESH_INTERVAL_MS).subscribe(() => {
+      // Silent refresh - don't show loading spinner
+      this.dataSrv.getEventsAsync().subscribe({
+        next: (events) => {
+          this.slides = events.filter((e) => e.status === 'active') || [];
+          this.zone.run(() => this.cdr.detectChanges());
+        },
+        error: () => {}, // Silent fail on auto-refresh
+      });
+    });
+  }
+
+  // Stop auto-refresh interval
+  private stopAutoRefresh(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = undefined;
+    }
   }
 
   get sortedSlides(): any[] {

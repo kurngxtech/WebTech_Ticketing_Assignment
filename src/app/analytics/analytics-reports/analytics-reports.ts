@@ -341,12 +341,23 @@ export class AnalyticsReports implements OnInit, AfterViewInit {
     const pointX = this.chartDataPoints[index].x;
     const pointY = this.chartDataPoints[index].y;
 
-    // Adjust X position if near right edge
-    if (pointX > chartWidth - tooltipWidth) {
-      this.tooltipX = pointX - tooltipWidth / 2;
-    } else {
-      this.tooltipX = pointX;
+    // Calculate tooltip position - clamp within chart bounds
+    // The tooltip uses transform: translateX(-50%), so we calculate center position
+    let tooltipCenterX = pointX;
+
+    // Clamp to prevent tooltip from going off the right edge
+    const maxX = chartWidth - tooltipWidth / 2 - 10; // 10px buffer from edge
+    if (tooltipCenterX > maxX) {
+      tooltipCenterX = maxX;
     }
+
+    // Clamp to prevent tooltip from going off the left edge
+    const minX = tooltipWidth / 2 + 10; // 10px buffer from edge
+    if (tooltipCenterX < minX) {
+      tooltipCenterX = minX;
+    }
+
+    this.tooltipX = tooltipCenterX;
 
     // Adjust Y position if near top edge
     if (pointY < 100) {

@@ -1,4 +1,8 @@
 <div class="font default-bg-color">
+  <!-- Loading State -->
+  <app-loading-spinner [show]="isLoading" message="Loading events..."></app-loading-spinner>
+
+  @if (!isLoading) {
   <section class="padding-body r-mt-70">
     <div class="swiper-wrapper-center">
       <!-- main carousel -->
@@ -57,4 +61,5 @@
       </div>
     </section>
   </div>
+  }
 </div>

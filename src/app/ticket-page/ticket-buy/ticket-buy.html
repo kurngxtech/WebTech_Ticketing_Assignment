@@ -1,5 +1,20 @@
 <div class="default-bg-color">
-  @if (!isAuthenticated) {
+  <!-- Loading State -->
+  @if (isLoading) {
+  <section class="ticket-page container-fluid px-4 py-4">
+    <div
+      class="loading-container d-flex justify-content-center align-items-center"
+      style="min-height: 400px"
+    >
+      <div class="text-center text-white">
+        <div class="spinner-border text-warning mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading event details...</p>
+      </div>
+    </div>
+  </section>
+  } @else if (!isAuthenticated) {
   <section class="ticket-page container-fluid px-4 py-4">
     <div class="auth-required-message">
       <div class="message-box">
@@ -63,9 +78,6 @@
               aria-label="Coupon code"
             />
             <button type="button" (click)="applyCoupon()">Apply</button>
-            @if (message) {
-            <div class="coupon-msg" [class.success]="message.includes('✓')">{{ message }}</div>
-            }
           </div>
         </main>
       </div>
