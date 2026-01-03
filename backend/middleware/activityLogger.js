@@ -1,13 +1,8 @@
-/**
- * Activity Logger Middleware
- * Automatically logs API requests and provides helpers for manual logging
- */
+// Activity Logger Middleware - Auto-logs API requests and provides helpers
 
 const ActivityLog = require('../models/ActivityLog');
 
-/**
- * Get client IP address from request
- */
+// Get client IP address from request
 const getClientIP = (req) => {
   return (
     req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
@@ -18,10 +13,7 @@ const getClientIP = (req) => {
   );
 };
 
-/**
- * Express middleware to log API requests
- * Logs after response is sent (using response finish event)
- */
+// Express middleware to log API requests (logs after response)
 const requestLogger = (options = {}) => {
   const {
     excludePaths = ['/api/health', '/api/health/detailed', '/api/health/ready', '/api/health/live'],
@@ -74,9 +66,7 @@ const requestLogger = (options = {}) => {
   };
 };
 
-/**
- * Sanitize request body to remove sensitive data
- */
+// Sanitize request body to remove sensitive data
 const sanitizeBody = (body) => {
   if (!body) return {};
 
@@ -98,9 +88,7 @@ const sanitizeBody = (body) => {
   return sanitized;
 };
 
-/**
- * Helper function to log specific actions
- */
+// Helper function to log specific actions
 const logActivity = async (req, action, resource, resourceId, details = {}) => {
   try {
     await ActivityLog.log({
@@ -119,9 +107,7 @@ const logActivity = async (req, action, resource, resourceId, details = {}) => {
   }
 };
 
-/**
- * Pre-made helpers for common actions
- */
+// Pre-made helpers for common actions
 const logAuth = {
   login: (req, userId, success) => logActivity(req, 'login', 'user', userId, { success }),
 

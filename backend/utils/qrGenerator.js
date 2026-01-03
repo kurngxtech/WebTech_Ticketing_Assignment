@@ -1,15 +1,8 @@
-/**
- * QR Code Generator Utility
- */
+// QR Code Generator Utility
 
 const QRCode = require('qrcode');
 
-/**
- * Generate QR code data string for booking
- * @param {Object} booking - Booking document
- * @param {Object} event - Event document
- * @returns {string} QR code data string
- */
+// Generate QR code data string for booking
 const generateQRData = (booking, event) => {
   const data = {
     bookingId: booking._id.toString(),
@@ -17,17 +10,13 @@ const generateQRData = (booking, event) => {
     ticketCategoryId: booking.ticketCategoryId,
     quantity: booking.quantity,
     date: event.date,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
-  
+
   return `EMS|${data.bookingId}|${data.eventId}|${data.ticketCategoryId}|${data.quantity}|${data.date}`;
 };
 
-/**
- * Generate QR code as data URL (base64 image)
- * @param {string} data - Data to encode in QR
- * @returns {Promise<string>} Base64 data URL
- */
+// Generate QR code as data URL (base64 image)
 const generateQRCodeDataURL = async (data) => {
   try {
     const options = {
@@ -35,11 +24,11 @@ const generateQRCodeDataURL = async (data) => {
       margin: 2,
       color: {
         dark: '#000000',
-        light: '#ffffff'
+        light: '#ffffff',
       },
-      errorCorrectionLevel: 'M'
+      errorCorrectionLevel: 'M',
     };
-    
+
     return await QRCode.toDataURL(data, options);
   } catch (error) {
     console.error('Error generating QR code:', error);
@@ -47,25 +36,21 @@ const generateQRCodeDataURL = async (data) => {
   }
 };
 
-/**
- * Validate QR code data
- * @param {string} qrData - QR code data string
- * @returns {Object} Parsed QR data or null if invalid
- */
+// Validate and parse QR code data
 const parseQRData = (qrData) => {
   try {
     const parts = qrData.split('|');
-    
+
     if (parts.length < 5 || parts[0] !== 'EMS') {
       return null;
     }
-    
+
     return {
       bookingId: parts[1],
       eventId: parts[2],
       ticketCategoryId: parts[3],
       quantity: parseInt(parts[4]),
-      date: parts[5] || null
+      date: parts[5] || null,
     };
   } catch (error) {
     return null;
@@ -75,5 +60,5 @@ const parseQRData = (qrData) => {
 module.exports = {
   generateQRData,
   generateQRCodeDataURL,
-  parseQRData
+  parseQRData,
 };

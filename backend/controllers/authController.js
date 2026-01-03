@@ -1,17 +1,11 @@
-/**
- * Authentication Controller
- * Handles user registration, login, and password management
- */
+// Authentication Controller - Handles user registration, login, and password management
 
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const { sendWelcomeEmail } = require('../utils/emailService');
 const { generateRandomPassword } = require('../utils/helpers');
 
-/**
- * Register Event Organizer (Admin only)
- * POST /api/auth/register-eo
- */
+// POST /api/auth/register-eo - Register Event Organizer (Admin only)
 exports.registerEventOrganizer = async (req, res) => {
   try {
     const { fullName, email, phone, organizationName, username, password } = req.body;
@@ -71,10 +65,7 @@ exports.registerEventOrganizer = async (req, res) => {
   }
 };
 
-/**
- * Register User (Public)
- * POST /api/auth/register
- */
+// POST /api/auth/register - Register User (Public)
 exports.registerUser = async (req, res) => {
   try {
     const { fullName, email, phone, password, username: providedUsername } = req.body;
@@ -141,10 +132,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-/**
- * Login
- * POST /api/auth/login
- */
+// POST /api/auth/login
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -195,10 +183,7 @@ exports.login = async (req, res) => {
   }
 };
 
-/**
- * Change Password
- * POST /api/auth/change-password
- */
+// POST /api/auth/change-password
 exports.changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -256,10 +241,7 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-/**
- * Get current user profile
- * GET /api/auth/me
- */
+// GET /api/auth/me - Get current user profile
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -295,10 +277,7 @@ exports.getMe = async (req, res) => {
   }
 };
 
-/**
- * Verify token validity
- * GET /api/auth/verify
- */
+// GET /api/auth/verify - Verify token validity
 exports.verifyToken = async (req, res) => {
   // If we reach here, token is valid (middleware passed)
   res.json({
@@ -311,10 +290,7 @@ exports.verifyToken = async (req, res) => {
   });
 };
 
-/**
- * Check username availability
- * GET /api/auth/check-username/:username
- */
+// GET /api/auth/check-username/:username
 exports.checkUsernameAvailability = async (req, res) => {
   try {
     const { username } = req.params;
@@ -336,10 +312,7 @@ exports.checkUsernameAvailability = async (req, res) => {
   }
 };
 
-/**
- * Check email availability
- * GET /api/auth/check-email/:email
- */
+// GET /api/auth/check-email/:email
 exports.checkEmailAvailability = async (req, res) => {
   try {
     const { email } = req.params;
@@ -363,10 +336,7 @@ exports.checkEmailAvailability = async (req, res) => {
   }
 };
 
-/**
- * Forgot Password - Send reset email
- * POST /api/auth/forgot-password
- */
+// POST /api/auth/forgot-password - Send reset email
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -424,10 +394,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-/**
- * Reset Password - Using token from email
- * POST /api/auth/reset-password/:token
- */
+// POST /api/auth/reset-password/:token
 exports.resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
@@ -477,10 +444,7 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-/**
- * Refresh Token - Get new access token using refresh token
- * POST /api/auth/refresh-token
- */
+// POST /api/auth/refresh-token - Get new access token
 exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -531,10 +495,7 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-/**
- * Logout - Invalidate refresh token
- * POST /api/auth/logout
- */
+// POST /api/auth/logout - Invalidate refresh token
 exports.logout = async (req, res) => {
   try {
     const userId = req.userId;

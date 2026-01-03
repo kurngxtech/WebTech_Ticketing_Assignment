@@ -1,7 +1,4 @@
-/**
- * Waitlist Model - MongoDB Schema
- * Manages waitlist entries for sold-out events
- */
+// Waitlist Model - MongoDB Schema for sold-out event waitlists
 
 const mongoose = require('mongoose');
 

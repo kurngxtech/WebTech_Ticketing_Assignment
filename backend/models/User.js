@@ -1,7 +1,4 @@
-/**
- * User Model - MongoDB Schema
- * Supports roles: admin, eo (event organizer), user (attendee)
- */
+// User Model - MongoDB Schema (roles: admin, eo, user)
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');

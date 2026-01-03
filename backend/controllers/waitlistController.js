@@ -1,17 +1,11 @@
-/**
- * Waitlist Controller
- * Handles waitlist management for sold-out events
- */
+// Waitlist Controller - Handles waitlist for sold-out events
 
 const Waitlist = require('../models/Waitlist');
 const Event = require('../models/Event');
 const User = require('../models/User');
 const { sendWaitlistNotification, sendWaitlistJoinConfirmation } = require('../utils/emailService');
 
-/**
- * Join waitlist
- * POST /api/waitlist
- */
+// POST /api/waitlist - Join waitlist
 exports.joinWaitlist = async (req, res) => {
   try {
     const { eventId, ticketCategoryId, quantity = 1 } = req.body;
@@ -145,10 +139,7 @@ exports.joinWaitlist = async (req, res) => {
   }
 };
 
-/**
- * Leave waitlist
- * DELETE /api/waitlist/:id
- */
+// DELETE /api/waitlist/:id - Leave waitlist
 exports.leaveWaitlist = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,10 +179,7 @@ exports.leaveWaitlist = async (req, res) => {
   }
 };
 
-/**
- * Get waitlist for event (EO/Admin)
- * GET /api/waitlist/event/:eventId
- */
+// GET /api/waitlist/event/:eventId - Get waitlist for event (EO/Admin)
 exports.getWaitlistByEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -249,10 +237,7 @@ exports.getWaitlistByEvent = async (req, res) => {
   }
 };
 
-/**
- * Get user's waitlist entries
- * GET /api/waitlist/user/:userId
- */
+// GET /api/waitlist/user/:userId - Get user's waitlist entries
 exports.getWaitlistByUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -303,10 +288,7 @@ exports.getWaitlistByUser = async (req, res) => {
   }
 };
 
-/**
- * Notify waitlist entries when tickets available (EO/Admin)
- * POST /api/waitlist/notify/:eventId
- */
+// POST /api/waitlist/notify/:eventId - Notify waitlist when tickets available
 exports.notifyWaitlist = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -367,10 +349,7 @@ exports.notifyWaitlist = async (req, res) => {
   }
 };
 
-/**
- * Notify waitlisted users for events approaching (within 3 days)
- * POST /api/waitlist/notify-approaching
- */
+// POST /api/waitlist/notify-approaching - Notify for events within 3 days
 exports.notifyApproachingEvents = async (req, res) => {
   const { sendEventDateApproachingNotification } = require('../utils/emailService');
 

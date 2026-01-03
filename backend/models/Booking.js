@@ -1,7 +1,4 @@
-/**
- * Booking Model - MongoDB Schema
- * Stores ticket booking information with QR codes
- */
+// Booking Model - MongoDB Schema for ticket bookings with QR codes
 
 const mongoose = require('mongoose');
 

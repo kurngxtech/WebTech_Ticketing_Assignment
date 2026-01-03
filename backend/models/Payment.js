@@ -1,7 +1,4 @@
-/**
- * Payment Model - MongoDB Schema
- * Stores Midtrans payment transaction records
- */
+// Payment Model - MongoDB Schema for Midtrans transactions
 
 const mongoose = require('mongoose');
 

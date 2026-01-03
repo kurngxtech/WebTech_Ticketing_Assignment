@@ -1,6 +1,4 @@
-/**
- * Waitlist Routes
- */
+// Waitlist Routes
 
 const express = require('express');
 const router = express.Router();

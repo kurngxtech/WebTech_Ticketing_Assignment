@@ -1,6 +1,4 @@
-/**
- * Event Routes
- */
+// Event Routes
 
 const express = require('express');
 const router = express.Router();

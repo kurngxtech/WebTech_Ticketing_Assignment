@@ -1,7 +1,4 @@
-/**
- * Event Model - MongoDB Schema
- * Stores event information, ticket categories, and promotional codes
- */
+// Event Model - MongoDB Schema for events, tickets, and promo codes
 
 const mongoose = require('mongoose');
 
@@ -203,9 +200,7 @@ eventSchema.index(
 eventSchema.index({ status: 1, date: 1 });
 eventSchema.index({ organizerId: 1, status: 1 });
 
-/**
- * Static method for searching events with filters
- */
+// Static method for searching events with filters
 eventSchema.statics.searchEvents = async function (options = {}) {
   const {
     query, // Text search query

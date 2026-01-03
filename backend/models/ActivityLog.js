@@ -1,7 +1,4 @@
-/**
- * ActivityLog Model - MongoDB Schema
- * Tracks user actions for auditing and analytics
- */
+// ActivityLog Model - MongoDB Schema for user action tracking
 
 const mongoose = require('mongoose');
 
@@ -118,9 +115,7 @@ activityLogSchema.index({ resource: 1, resourceId: 1 });
 activityLogSchema.index({ timestamp: -1 });
 activityLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
 
-/**
- * Static method to log an activity
- */
+// Static method to log an activity
 activityLogSchema.statics.log = async function (data) {
   try {
     const log = new this(data);
@@ -132,9 +127,7 @@ activityLogSchema.statics.log = async function (data) {
   }
 };
 
-/**
- * Static method to get user activity history
- */
+// Static method to get user activity history
 activityLogSchema.statics.getUserActivity = function (userId, options = {}) {
   const { limit = 50, skip = 0, action } = options;
   const query = { userId };
@@ -143,9 +136,7 @@ activityLogSchema.statics.getUserActivity = function (userId, options = {}) {
   return this.find(query).sort({ timestamp: -1 }).skip(skip).limit(limit);
 };
 
-/**
- * Static method to get resource activity history
- */
+// Static method to get resource activity history
 activityLogSchema.statics.getResourceActivity = function (resource, resourceId, options = {}) {
   const { limit = 50, skip = 0 } = options;
 
@@ -156,9 +147,7 @@ activityLogSchema.statics.getResourceActivity = function (resource, resourceId, 
     .populate('userId', 'fullName email');
 };
 
-/**
- * Static method to get activity summary for analytics
- */
+// Static method to get activity summary for analytics
 activityLogSchema.statics.getActivitySummary = async function (startDate, endDate) {
   return this.aggregate([
     {

@@ -1,15 +1,9 @@
-/**
- * Event Controller
- * Handles event CRUD operations, ticket management, and promotional codes
- */
+// Event Controller - Handles event CRUD, tickets, and promo codes
 
 const Event = require('../models/Event');
 const mongoose = require('mongoose');
 
-/**
- * Get all events (public)
- * GET /api/events
- */
+// GET /api/events - Get all events (public)
 exports.getEvents = async (req, res) => {
   try {
     const { status, organizerId, page = 1, limit = 20 } = req.query;
@@ -56,10 +50,7 @@ exports.getEvents = async (req, res) => {
   }
 };
 
-/**
- * Search events with filters
- * GET /api/events/search
- */
+// GET /api/events/search - Search events with filters
 exports.searchEvents = async (req, res) => {
   try {
     const {
@@ -111,10 +102,7 @@ exports.searchEvents = async (req, res) => {
   }
 };
 
-/**
- * Get event by ID or slug
- * GET /api/events/:id
- */
+// GET /api/events/:id - Get event by ID or slug
 exports.getEventById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -155,10 +143,7 @@ exports.getEventById = async (req, res) => {
   }
 };
 
-/**
- * Get events by organizer
- * GET /api/events/organizer/:organizerId
- */
+// GET /api/events/organizer/:organizerId - Get events by organizer
 exports.getEventsByOrganizer = async (req, res) => {
   try {
     const { organizerId } = req.params;
@@ -185,10 +170,7 @@ exports.getEventsByOrganizer = async (req, res) => {
   }
 };
 
-/**
- * Create new event (EO only)
- * POST /api/events
- */
+// POST /api/events - Create new event (EO only)
 exports.createEvent = async (req, res) => {
   try {
     const {
@@ -240,10 +222,7 @@ exports.createEvent = async (req, res) => {
   }
 };
 
-/**
- * Update event (EO/Admin only)
- * PUT /api/events/:id
- */
+// PUT /api/events/:id - Update event (EO/Admin only)
 exports.updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -296,10 +275,7 @@ exports.updateEvent = async (req, res) => {
   }
 };
 
-/**
- * Delete event (EO/Admin only)
- * DELETE /api/events/:id
- */
+// DELETE /api/events/:id - Delete event (EO/Admin only)
 exports.deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -354,10 +330,7 @@ exports.deleteEvent = async (req, res) => {
   }
 };
 
-/**
- * Update ticket configuration
- * POST /api/events/:id/tickets
- */
+// POST /api/events/:id/tickets - Update ticket configuration
 exports.updateTickets = async (req, res) => {
   try {
     const { id } = req.params;
@@ -400,10 +373,7 @@ exports.updateTickets = async (req, res) => {
   }
 };
 
-/**
- * Add promotional code
- * POST /api/events/:id/promo
- */
+// POST /api/events/:id/promo - Add promotional code
 exports.addPromotionalCode = async (req, res) => {
   try {
     const { id } = req.params;
@@ -458,10 +428,7 @@ exports.addPromotionalCode = async (req, res) => {
   }
 };
 
-/**
- * Validate promotional code
- * POST /api/events/validate-promo
- */
+// POST /api/events/validate-promo - Validate promotional code
 exports.validatePromoCode = async (req, res) => {
   try {
     const { eventId, code } = req.body;

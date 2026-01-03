@@ -77,7 +77,6 @@ Navigate to the project directory and install dependencies for both Frontend and
 **For Frontend:**
 
 ```bash
-cd n:\code\Angular\ticket
 npm install
 ```
 
@@ -90,29 +89,47 @@ npm install
 
 #### 2. Environment Configuration (.env)
 
-Create a `.env` file in the `backend/` directory with the following keys:
+Copy the provided `.env.example` template and fill in your credentials:
 
-```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/ems_db  # Or your MongoDB Atlas URI
-JWT_SECRET=your_super_secure_secret_key
-FRONTEND_URL=http://localhost:4200
-
-# Email Configuration (Google)
-GMAIL_USER=your_email@gmail.com
-GMAIL_APP_PASSWORD=your_app_password      # Generate this in Google Account > Security
-
-# Payment Gateway (Midtrans)
-MIDTRANS_SERVER_KEY=your_midtrans_server_key
-MIDTRANS_CLIENT_KEY=your_midtrans_client_key
-MIDTRANS_IS_PRODUCTION=false
-
-# Optional: Activity Logging
-ENABLE_ACTIVITY_LOGGING=true
-LOG_ONLY_ERRORS=false
+```bash
+cd backend
+cp .env.example .env
 ```
 
-#### 3. Run the Application
+Edit the `.env` file with your own values:
+
+| Variable              | Description                      | How to Get                                                        |
+| --------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| `MONGODB_URI`         | MongoDB Atlas connection string  | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (free tier)  |
+| `JWT_SECRET`          | Secret key for JWT tokens        | Generate: `openssl rand -base64 32`                               |
+| `GMAIL_USER`          | Gmail address for sending emails | Your Gmail account                                                |
+| `GMAIL_APP_PASSWORD`  | Gmail App Password (16 chars)    | [Google App Passwords](https://myaccount.google.com/apppasswords) |
+| `MIDTRANS_SERVER_KEY` | Midtrans Sandbox Server Key      | [Midtrans Dashboard](https://dashboard.sandbox.midtrans.com)      |
+| `MIDTRANS_CLIENT_KEY` | Midtrans Sandbox Client Key      | Same as above                                                     |
+
+> **Note:** Email and payment features are optional for basic testing. Without these, emails are logged to console and payments can be mocked.
+
+#### 3. Seed the Database (Required for Reviewers)
+
+Populate the database with sample data including test accounts, events, and bookings:
+
+```bash
+cd backend
+npm run seed
+```
+
+This creates the following test accounts:
+
+| Role                  | Email                  | Password       |
+| --------------------- | ---------------------- | -------------- |
+| **Admin**             | `admin@auditorium.com` | `adminpass123` |
+| **Event Organizer 1** | `jane@events.com`      | `eopass123`    |
+| **Event Organizer 2** | `bob@events.com`       | `eopass456`    |
+| **Regular User**      | `john@example.com`     | `password123`  |
+
+Plus **5 sample events** with ticket categories and **sample bookings** for analytics testing.
+
+#### 4. Run the Application
 
 You need to run the backend and frontend servers simultaneously.
 
@@ -121,7 +138,7 @@ You need to run the backend and frontend servers simultaneously.
 ```bash
 cd backend
 npm run dev
-# Output should confirm: Server running on port 5000 & MongoDB Connected
+# Output: Server running on port 5000 & MongoDB Connected
 ```
 
 **Start Frontend:**

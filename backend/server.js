@@ -1,7 +1,4 @@
-/**
- * EMS Backend Server - Entry Point
- * Event Management System API Server
- */
+// EMS Backend Server - Entry Point
 
 require('dotenv').config();
 const express = require('express');
@@ -113,10 +110,7 @@ registerRoutes(app);
 // Health Check Endpoints
 // ============================================
 
-/**
- * Basic health check - always returns OK if server is running
- * GET /api/health
- */
+// GET /api/health - Basic health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -125,10 +119,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-/**
- * Detailed health check - includes DB status, memory, and uptime
- * GET /api/health/detailed
- */
+// GET /api/health/detailed - Detailed health check
 app.get('/api/health/detailed', async (req, res) => {
   const memoryUsage = process.memoryUsage();
   const uptime = process.uptime();
@@ -180,11 +171,7 @@ app.get('/api/health/detailed', async (req, res) => {
   });
 });
 
-/**
- * Readiness probe - Kubernetes style
- * Returns 200 only if all dependencies are ready
- * GET /api/health/ready
- */
+// GET /api/health/ready - Readiness probe (Kubernetes style)
 app.get('/api/health/ready', async (req, res) => {
   const checks = {
     database: false,
@@ -208,11 +195,7 @@ app.get('/api/health/ready', async (req, res) => {
   });
 });
 
-/**
- * Liveness probe - Kubernetes style
- * Returns 200 if the server is running (not frozen)
- * GET /api/health/live
- */
+// GET /api/health/live - Liveness probe (Kubernetes style)
 app.get('/api/health/live', (req, res) => {
   res.json({
     alive: true,
@@ -220,10 +203,7 @@ app.get('/api/health/live', (req, res) => {
   });
 });
 
-/**
- * Metrics endpoint - APM data
- * GET /api/metrics
- */
+// GET /api/metrics - APM data
 app.get('/api/metrics', (req, res) => {
   // Optional: Add basic auth protection for metrics
   // const authHeader = req.headers.authorization;
@@ -269,9 +249,7 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-/**
- * Format uptime to human readable
- */
+// Format uptime to human readable
 function formatUptime(ms) {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -290,10 +268,10 @@ app.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║   🎫 EMS Backend Server Started Successfully! 🎫           ║
+║   🎫 EMS Backend Server Started Successfully! 🎫          ║
 ║                                                            ║
-║   Server running on: http://localhost:${PORT}                ║
-║   Environment: ${process.env.NODE_ENV || 'development'}                            ║
+║   Server running on: http://localhost:${PORT}              ║
+║   Environment: ${process.env.NODE_ENV || 'development'}    ║
 ║                                                            ║
 ║   Health:  /api/health                                     ║
 ║   Metrics: /api/metrics                                    ║

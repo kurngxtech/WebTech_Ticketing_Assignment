@@ -1,13 +1,4 @@
-/**
- * Payment Controller
- * Handles Midtrans payment integration
- *
- * CURRENCY NOTE:
- * - All prices in the database are stored in MYR (Malaysian Ringgit)
- * - Midtrans only accepts IDR (Indonesian Rupiah)
- * - We convert MYR to IDR when creating payment transactions
- * - Default rate: 1 MYR ≈ 3,500 IDR (can be updated via API)
- */
+// Payment Controller - Handles Midtrans integration (MYR to IDR conversion)
 
 const midtransClient = require('midtrans-client');
 const Payment = require('../models/Payment');
@@ -21,20 +12,12 @@ const { sendBookingConfirmation, sendPaymentReceipt } = require('../utils/emailS
 // This is an approximate rate. For production, consider using a real-time API
 const MYR_TO_IDR_RATE = 3500;
 
-/**
- * Convert MYR to IDR for Midtrans
- * @param {number} amountMYR - Amount in Malaysian Ringgit
- * @returns {number} - Amount in Indonesian Rupiah (rounded)
- */
+// Convert MYR to IDR for Midtrans
 const convertMYRToIDR = (amountMYR) => {
   return Math.round(amountMYR * MYR_TO_IDR_RATE);
 };
 
-/**
- * Convert IDR to MYR (for display purposes)
- * @param {number} amountIDR - Amount in Indonesian Rupiah
- * @returns {number} - Amount in Malaysian Ringgit
- */
+// Convert IDR to MYR (for display)
 const convertIDRToMYR = (amountIDR) => {
   return amountIDR / MYR_TO_IDR_RATE;
 };
@@ -53,10 +36,7 @@ const coreApi = new midtransClient.CoreApi({
   clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
 
-/**
- * Create payment transaction (get Snap token)
- * POST /api/payments/create
- */
+// POST /api/payments/create - Create payment (get Snap token)
 exports.createPayment = async (req, res) => {
   try {
     const { bookingId } = req.body;
@@ -196,10 +176,7 @@ exports.createPayment = async (req, res) => {
   }
 };
 
-/**
- * Handle Midtrans webhook notification
- * POST /api/payments/notification
- */
+// POST /api/payments/notification - Handle Midtrans webhook
 exports.handleNotification = async (req, res) => {
   try {
     const notificationJson = req.body;
@@ -326,10 +303,7 @@ exports.handleNotification = async (req, res) => {
   }
 };
 
-/**
- * Get payment status
- * GET /api/payments/:orderId/status
- */
+// GET /api/payments/:orderId/status - Get payment status
 exports.getPaymentStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -372,11 +346,7 @@ exports.getPaymentStatus = async (req, res) => {
   }
 };
 
-/**
- * Check transaction status from Midtrans and update booking
- * GET /api/payments/:orderId/check
- * This is crucial for localhost development where webhooks can't be received
- */
+// GET /api/payments/:orderId/check - Check transaction from Midtrans (for localhost dev)
 exports.checkTransaction = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -486,10 +456,7 @@ exports.checkTransaction = async (req, res) => {
   }
 };
 
-/**
- * Get Midtrans client key (for frontend)
- * GET /api/payments/client-key
- */
+// GET /api/payments/client-key - Get Midtrans client key
 exports.getClientKey = async (req, res) => {
   res.json({
     success: true,
@@ -497,10 +464,7 @@ exports.getClientKey = async (req, res) => {
   });
 };
 
-/**
- * Mock payment for testing (development only)
- * POST /api/payments/mock-complete
- */
+// POST /api/payments/mock-complete - Mock payment (dev only)
 exports.mockCompletePayment = async (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({

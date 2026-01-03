@@ -1,18 +1,12 @@
-/**
- * User Controller
- * Handles user management operations
- */
+// User Controller - Handles user management operations
 
 const User = require('../models/User');
 
-/**
- * Get all users (Admin only)
- * GET /api/users
- */
+// GET /api/users - Get all users (Admin only)
 exports.getAllUsers = async (req, res) => {
   try {
     const { role, page = 1, limit = 20 } = req.query;
-    
+
     const query = {};
     if (role) {
       query.role = role;
@@ -32,46 +26,39 @@ exports.getAllUsers = async (req, res) => {
         total,
         page: parseInt(page),
         limit: parseInt(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Get all users error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get users',
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-/**
- * Get all Event Organizers
- * GET /api/users/eos
- */
+// GET /api/users/eos - Get all Event Organizers
 exports.getEventOrganizers = async (req, res) => {
   try {
-    const eos = await User.find({ role: 'eo', isActive: true })
-      .sort({ createdAt: -1 });
+    const eos = await User.find({ role: 'eo', isActive: true }).sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      eventOrganizers: eos
+      eventOrganizers: eos,
     });
   } catch (error) {
     console.error('Get EOs error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get Event Organizers',
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-/**
- * Get user by ID
- * GET /api/users/:id
- */
+// GET /api/users/:id - Get user by ID
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -79,28 +66,25 @@ exports.getUserById = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
     res.json({
       success: true,
-      user
+      user,
     });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get user',
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-/**
- * Update user profile
- * PUT /api/users/:id
- */
+// PUT /api/users/:id - Update user profile
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -110,7 +94,7 @@ exports.updateUser = async (req, res) => {
     if (req.userId.toString() !== id && req.userRole !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to update this user'
+        message: 'Not authorized to update this user',
       });
     }
 
@@ -132,29 +116,26 @@ exports.updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
     res.json({
       success: true,
       message: 'User updated successfully',
-      user
+      user,
     });
   } catch (error) {
     console.error('Update user error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update user',
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-/**
- * Deactivate user (Admin only)
- * DELETE /api/users/:id
- */
+// DELETE /api/users/:id - Deactivate user (Admin only)
 exports.deactivateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -163,7 +144,7 @@ exports.deactivateUser = async (req, res) => {
     if (req.userId.toString() === id) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot deactivate your own account'
+        message: 'Cannot deactivate your own account',
       });
     }
 
@@ -176,20 +157,20 @@ exports.deactivateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
     res.json({
       success: true,
-      message: 'User deactivated successfully'
+      message: 'User deactivated successfully',
     });
   } catch (error) {
     console.error('Deactivate user error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to deactivate user',
-      error: error.message
+      error: error.message,
     });
   }
 };

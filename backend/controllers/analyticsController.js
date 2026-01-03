@@ -1,16 +1,10 @@
-/**
- * Analytics Controller
- * Uses MongoDB Aggregation Pipeline for reports
- */
+// Analytics Controller - MongoDB Aggregation Pipeline for reports
 
 const mongoose = require('mongoose');
 const Event = require('../models/Event');
 const Booking = require('../models/Booking');
 
-/**
- * Get event analytics
- * GET /api/analytics/event/:eventId
- */
+// GET /api/analytics/event/:eventId - Get event analytics
 exports.getEventAnalytics = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -159,10 +153,7 @@ exports.getEventAnalytics = async (req, res) => {
   }
 };
 
-/**
- * Get auditorium-wide analytics (Admin)
- * GET /api/analytics/auditorium
- */
+// GET /api/analytics/auditorium - Get auditorium-wide analytics (Admin)
 exports.getAuditoriumAnalytics = async (req, res) => {
   try {
     const { startDate, endDate, period = 'monthly' } = req.query;
@@ -326,10 +317,7 @@ exports.getAuditoriumAnalytics = async (req, res) => {
   }
 };
 
-/**
- * Get revenue report
- * GET /api/analytics/revenue
- */
+// GET /api/analytics/revenue - Get revenue report
 exports.getRevenueReport = async (req, res) => {
   try {
     const { eventId, period = 'daily', startDate, endDate } = req.query;
@@ -432,10 +420,7 @@ exports.getRevenueReport = async (req, res) => {
   }
 };
 
-/**
- * Get occupancy report
- * GET /api/analytics/occupancy
- */
+// GET /api/analytics/occupancy - Get occupancy report
 exports.getOccupancyReport = async (req, res) => {
   try {
     const { eventId } = req.query;
@@ -528,10 +513,7 @@ exports.getOccupancyReport = async (req, res) => {
   }
 };
 
-/**
- * Get sales report
- * GET /api/analytics/sales
- */
+// GET /api/analytics/sales - Get sales report
 exports.getSalesReport = async (req, res) => {
   try {
     const { eventId, period = 'daily' } = req.query;

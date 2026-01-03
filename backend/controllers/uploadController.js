@@ -1,7 +1,4 @@
-/**
- * Upload Controller
- * Handles file uploads for event images
- */
+// Upload Controller - Handles file uploads for event images
 
 const path = require('path');
 const fs = require('fs');
@@ -22,10 +19,7 @@ if (!fs.existsSync(eventsDir)) {
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
-/**
- * Upload event image
- * POST /api/upload/event-image
- */
+// POST /api/upload/event-image - Upload event image
 exports.uploadEventImage = async (req, res) => {
   try {
     // Check if file was provided
@@ -101,10 +95,7 @@ exports.uploadEventImage = async (req, res) => {
   }
 };
 
-/**
- * Delete uploaded image
- * DELETE /api/upload/event-image/:filename
- */
+// DELETE /api/upload/event-image/:filename - Delete image
 exports.deleteEventImage = async (req, res) => {
   try {
     const { filename } = req.params;
@@ -144,10 +135,7 @@ exports.deleteEventImage = async (req, res) => {
   }
 };
 
-/**
- * Get image info
- * GET /api/upload/event-image/:filename
- */
+// GET /api/upload/event-image/:filename - Get image info
 exports.getImageInfo = async (req, res) => {
   try {
     const { filename } = req.params;

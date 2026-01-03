@@ -1,7 +1,4 @@
-/**
- * APM (Application Performance Monitoring) Middleware
- * Tracks request timing, memory usage, and error rates
- */
+// APM (Application Performance Monitoring) Middleware
 
 // In-memory metrics storage (for simplicity, consider Redis for production)
 const metrics = {
@@ -36,9 +33,7 @@ const metrics = {
 const responseTimes = [];
 const MAX_SAMPLES = 1000;
 
-/**
- * Record response time sample
- */
+// Record response time sample
 const recordResponseTime = (time) => {
   responseTimes.push(time);
   if (responseTimes.length > MAX_SAMPLES) {
@@ -46,9 +41,7 @@ const recordResponseTime = (time) => {
   }
 };
 
-/**
- * Calculate percentile from samples
- */
+// Calculate percentile from samples
 const getPercentile = (percentile) => {
   if (responseTimes.length === 0) return 0;
 
@@ -57,9 +50,7 @@ const getPercentile = (percentile) => {
   return sorted[Math.max(0, index)];
 };
 
-/**
- * Express middleware for APM
- */
+// Express middleware for APM
 const apmMiddleware = (options = {}) => {
   const { excludePaths = ['/api/health', '/api/metrics'] } = options;
 
@@ -124,9 +115,7 @@ const apmMiddleware = (options = {}) => {
   };
 };
 
-/**
- * Record memory usage (call periodically)
- */
+// Record memory usage (call periodically)
 const recordMemoryUsage = () => {
   const usage = process.memoryUsage();
   metrics.memory.samples.push({
@@ -148,9 +137,7 @@ const recordMemoryUsage = () => {
   }
 };
 
-/**
- * Record error
- */
+// Record error
 const recordError = (error, req = null) => {
   const errorInfo = {
     timestamp: Date.now(),
@@ -175,9 +162,7 @@ const recordError = (error, req = null) => {
   metrics.errors.byType[errorType]++;
 };
 
-/**
- * Get current metrics
- */
+// Get current metrics
 const getMetrics = () => {
   const memoryUsage = process.memoryUsage();
   const uptime = Date.now() - metrics.uptime.startTime;
@@ -235,9 +220,7 @@ const getMetrics = () => {
   };
 };
 
-/**
- * Get top paths by request count
- */
+// Get top paths by request count
 const getTopPaths = (limit = 10) => {
   return Object.entries(metrics.requests.byPath)
     .map(([path, data]) => ({
@@ -250,9 +233,7 @@ const getTopPaths = (limit = 10) => {
     .slice(0, limit);
 };
 
-/**
- * Format bytes to human readable
- */
+// Format bytes to human readable
 const formatBytes = (bytes) => {
   const units = ['B', 'KB', 'MB', 'GB'];
   let unitIndex = 0;
@@ -266,9 +247,7 @@ const formatBytes = (bytes) => {
   return `${value.toFixed(2)} ${units[unitIndex]}`;
 };
 
-/**
- * Format uptime to human readable
- */
+// Format uptime to human readable
 const formatUptime = (ms) => {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -281,9 +260,7 @@ const formatUptime = (ms) => {
   return `${seconds}s`;
 };
 
-/**
- * Reset metrics (useful for testing)
- */
+// Reset metrics (for testing)
 const resetMetrics = () => {
   metrics.requests = { total: 0, success: 0, errors: 0, byPath: {}, byMethod: {} };
   metrics.response = { totalTime: 0, count: 0, slowest: 0, slowestPath: '', percentiles: [] };

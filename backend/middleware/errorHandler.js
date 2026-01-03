@@ -1,17 +1,15 @@
-/**
- * Global Error Handler Middleware
- */
+// Global Error Handler Middleware
 
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map(e => e.message);
+    const messages = Object.values(err.errors).map((e) => e.message);
     return res.status(400).json({
       success: false,
       message: 'Validation error',
-      errors: messages
+      errors: messages,
     });
   }
 
@@ -20,7 +18,7 @@ const errorHandler = (err, req, res, next) => {
     const field = Object.keys(err.keyPattern)[0];
     return res.status(400).json({
       success: false,
-      message: `${field} already exists`
+      message: `${field} already exists`,
     });
   }
 
@@ -28,7 +26,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'CastError') {
     return res.status(400).json({
       success: false,
-      message: 'Invalid ID format'
+      message: 'Invalid ID format',
     });
   }
 
@@ -41,7 +39,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message: message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
 

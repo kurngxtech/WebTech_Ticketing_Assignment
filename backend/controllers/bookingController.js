@@ -1,7 +1,4 @@
-/**
- * Booking Controller
- * Handles ticket booking, cancellation, and check-in
- */
+// Booking Controller - Handles ticket booking, cancellation, and check-in
 
 const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
@@ -15,10 +12,7 @@ const {
   sendWaitlistNotification,
 } = require('../utils/emailService');
 
-/**
- * Create booking
- * POST /api/bookings
- */
+// POST /api/bookings - Create booking
 exports.createBooking = async (req, res) => {
   // Start a session for transaction
   const session = await mongoose.startSession();
@@ -184,10 +178,7 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-/**
- * Get bookings by user
- * GET /api/bookings/user/:userId
- */
+// GET /api/bookings/user/:userId - Get bookings by user
 exports.getBookingsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -268,10 +259,7 @@ exports.getBookingsByUser = async (req, res) => {
   }
 };
 
-/**
- * Get bookings by event (EO/Admin)
- * GET /api/bookings/event/:eventId
- */
+// GET /api/bookings/event/:eventId - Get bookings by event (EO/Admin)
 exports.getBookingsByEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -310,10 +298,7 @@ exports.getBookingsByEvent = async (req, res) => {
   }
 };
 
-/**
- * Get booking by ID
- * GET /api/bookings/:id
- */
+// GET /api/bookings/:id - Get booking by ID
 exports.getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -351,10 +336,7 @@ exports.getBookingById = async (req, res) => {
   }
 };
 
-/**
- * Cancel booking
- * POST /api/bookings/:id/cancel
- */
+// POST /api/bookings/:id/cancel - Cancel booking
 exports.cancelBooking = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -468,10 +450,7 @@ exports.cancelBooking = async (req, res) => {
   }
 };
 
-/**
- * Check-in booking (scan QR code)
- * POST /api/bookings/:id/checkin
- */
+// POST /api/bookings/:id/checkin - Check-in booking (scan QR code)
 exports.checkIn = async (req, res) => {
   try {
     const { id } = req.params;
@@ -532,10 +511,7 @@ exports.checkIn = async (req, res) => {
   }
 };
 
-/**
- * Validate QR code for check-in
- * POST /api/bookings/validate-qr
- */
+// POST /api/bookings/validate-qr - Validate QR code for check-in
 exports.validateQRCode = async (req, res) => {
   try {
     const { qrCode } = req.body;
@@ -578,10 +554,7 @@ exports.validateQRCode = async (req, res) => {
   }
 };
 
-/**
- * Get booked seats for an event (public)
- * GET /api/bookings/seats/:eventId
- */
+// GET /api/bookings/seats/:eventId - Get booked seats (public)
 exports.getBookedSeats = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -616,10 +589,7 @@ exports.getBookedSeats = async (req, res) => {
   }
 };
 
-/**
- * Delete booking completely (frees up seats)
- * DELETE /api/bookings/:id
- */
+// DELETE /api/bookings/:id - Delete booking (frees up seats)
 exports.deleteBooking = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
