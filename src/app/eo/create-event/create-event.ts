@@ -13,11 +13,12 @@ import { DataEventService } from '../../data-event-service/data-event.service';
 import { EventItem, TicketCategory } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
 import { ToastService } from '../../services/toast.service';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 
 @Component({
   selector: 'app-create-event',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, SvgIcon],
   templateUrl: './create-event.html',
   styleUrls: ['./create-event.css'],
 })

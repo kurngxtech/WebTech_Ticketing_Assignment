@@ -57,6 +57,61 @@ exports.getEvents = async (req, res) => {
 };
 
 /**
+ * Search events with filters
+ * GET /api/events/search
+ */
+exports.searchEvents = async (req, res) => {
+  try {
+    const {
+      q, // Text search query
+      status,
+      organizerId,
+      minPrice,
+      maxPrice,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 20,
+      sortBy = 'date',
+      sortOrder = 'asc',
+    } = req.query;
+
+    const result = await Event.searchEvents({
+      query: q,
+      status: status || 'active',
+      organizerId,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      startDate,
+      endDate,
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit),
+      sortBy,
+      sortOrder,
+    });
+
+    res.json({
+      success: true,
+      events: result.events,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: parseInt(limit),
+        totalPages: result.totalPages,
+        hasMore: result.hasMore,
+      },
+    });
+  } catch (error) {
+    console.error('Search events error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to search events',
+      error: error.message,
+    });
+  }
+};
+
+/**
  * Get event by ID or slug
  * GET /api/events/:id
  */

@@ -809,6 +809,82 @@ const sendEventDateApproachingNotification = async (
   }
 };
 
+/**
+ * Send password reset email
+ */
+const sendPasswordResetEmail = async (email, fullName, resetUrl) => {
+  const transporter = createTransporter();
+  if (!transporter) {
+    console.log('📧 [MOCK] Password reset email would be sent to:', email);
+    return { success: true, mock: true };
+  }
+
+  const mailOptions = {
+    from: `"EMS - Event Management System" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: '🔐 Password Reset Request - EMS',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: ${THEME.styles.font}; background-color: ${THEME.colors.bg}; margin: 0; padding: 0; }
+          .container { ${THEME.styles.container} }
+          .header { ${THEME.styles.header} }
+          .content { ${THEME.styles.content} }
+          .warning-box { ${THEME.styles.card} border-left: 4px solid #ff9800; }
+          .btn { ${THEME.styles.button} }
+          .footer { ${THEME.styles.footer} }
+          h1, h2, h3 { color: ${THEME.colors.primary}; }
+          p { color: ${THEME.colors.text}; }
+          strong { color: ${THEME.colors.primary}; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔐 Password Reset</h1>
+            <p style="color: #fff;">Reset your EMS account password</p>
+          </div>
+          <div class="content">
+            <h2>Hello, ${fullName}!</h2>
+            <p>We received a request to reset your password. Click the button below to create a new password:</p>
+            
+            <center>
+              <a href="${resetUrl}" class="btn">Reset Password</a>
+            </center>
+            
+            <div class="warning-box" style="margin-top: 30px;">
+              <p style="margin: 0;">⏰ <strong>This link expires in 1 hour.</strong></p>
+              <p style="margin: 10px 0 0 0; color: #ccc;">If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 12px; color: #888;">
+              If the button doesn't work, copy and paste this link into your browser:<br/>
+              <span style="color: ${THEME.colors.primary}; word-break: break-all;">${resetUrl}</span>
+            </p>
+            
+            <div class="footer">
+              <p>This email was sent by EMS - Event Management System</p>
+              <p>If you didn't request this, please contact support immediately.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent to:', email);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Failed to send password reset email:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendWelcomeEmail,
   sendBookingConfirmation,
@@ -818,4 +894,5 @@ module.exports = {
   sendCancellationConfirmation,
   sendPendingPaymentNotification,
   sendEventDateApproachingNotification,
+  sendPasswordResetEmail,
 };

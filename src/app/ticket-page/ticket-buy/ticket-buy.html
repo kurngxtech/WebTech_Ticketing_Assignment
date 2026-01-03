@@ -117,6 +117,7 @@
                       type="number"
                       name="qty-{{ t.id }}"
                       [(ngModel)]="quantities[t.id]"
+                      (change)="validateQuantity(t.id, t)"
                       min="1"
                       [max]="getRemaining(t)"
                       step="1"
@@ -257,15 +258,19 @@
   </section>
   } @if (showSelectionSeats) {
   <!-- Selection Seats -->
-  <div class="modal-overlay">
+  <div class="modal-overlay seat-modal-overlay">
+    <!-- Close Button - Outside modal content, in the dark background -->
+    <button
+      class="seat-map-close-btn overlay-close"
+      (click)="closeSeatMap()"
+      aria-label="Close Seat Map"
+    >
+      ×
+    </button>
+
     <!-- <div class="modal-dialog"> -->
     <div class="modal-content-seat">
       <div class="seat-map-scroll-wrapper default-bg-color font">
-        <!-- Close Button -->
-        <button class="seat-map-close-btn" (click)="closeSeatMap()" aria-label="Close Seat Map">
-          ×
-        </button>
-
         <!-- Auditorium Custom Seat -->
         <div class="auditorium-map-container">
           <div class="map-title-bar">

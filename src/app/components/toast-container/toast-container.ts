@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService, Toast } from '../../services/toast.service';
 import { Subscription } from 'rxjs';
+import { SvgIcon } from '../svg-icon/svg-icon';
 
 @Component({
   selector: 'app-toast-container',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SvgIcon],
   template: `
     <div class="toast-container">
       <div
@@ -16,10 +17,30 @@ import { Subscription } from 'rxjs';
         (click)="dismiss(toast.id)"
       >
         <div class="toast-icon">
-          <span *ngIf="toast.type === 'success'">✓</span>
-          <span *ngIf="toast.type === 'error'">✕</span>
-          <span *ngIf="toast.type === 'warning'">⚠</span>
-          <span *ngIf="toast.type === 'info'">ℹ</span>
+          <app-svg-icon
+            *ngIf="toast.type === 'success'"
+            name="check"
+            [size]="18"
+            color="currentColor"
+          ></app-svg-icon>
+          <app-svg-icon
+            *ngIf="toast.type === 'error'"
+            name="close"
+            [size]="18"
+            color="currentColor"
+          ></app-svg-icon>
+          <app-svg-icon
+            *ngIf="toast.type === 'warning'"
+            name="warning"
+            [size]="18"
+            color="currentColor"
+          ></app-svg-icon>
+          <app-svg-icon
+            *ngIf="toast.type === 'info'"
+            name="info"
+            [size]="18"
+            color="currentColor"
+          ></app-svg-icon>
         </div>
         <div class="toast-message">{{ toast.message }}</div>
         <button class="toast-close" (click)="dismiss(toast.id); $event.stopPropagation()">×</button>

@@ -41,9 +41,9 @@
         </div>
         <button class="time-toggle-btn" (click)="toggleTimePeriodMenu($event)" title="Time period">
           @if (!showTimePeriodMenu) {
-          <span class="icon">⋮</span>
+          <app-svg-icon name="menu-vertical" [size]="20"></app-svg-icon>
           } @else {
-          <span class="icon">✕</span>
+          <app-svg-icon name="close" [size]="20"></app-svg-icon>
           }
         </button>
       </div>
@@ -96,15 +96,21 @@
           <div class="tooltip-header">{{ hoveredPoint.label }}</div>
           <div class="tooltip-content">
             <div class="tooltip-row">
-              <span class="tooltip-label">🎫 Tickets Sold:</span>
+              <span class="tooltip-label"
+                ><app-svg-icon name="ticket" [size]="14"></app-svg-icon> Tickets Sold:</span
+              >
               <span class="tooltip-value">{{ hoveredPoint.ticketsSold }}</span>
             </div>
             <div class="tooltip-row">
-              <span class="tooltip-label">💰 Revenue:</span>
+              <span class="tooltip-label"
+                ><app-svg-icon name="money" [size]="14"></app-svg-icon> Revenue:</span
+              >
               <span class="tooltip-value">{{ formatPrice(hoveredPoint.revenue) }}</span>
             </div>
             <div class="tooltip-row">
-              <span class="tooltip-label">📋 Bookings:</span>
+              <span class="tooltip-label"
+                ><app-svg-icon name="clipboard" [size]="14"></app-svg-icon> Bookings:</span
+              >
               <span class="tooltip-value">{{ hoveredPoint.bookings }}</span>
             </div>
           </div>
@@ -116,7 +122,7 @@
         <div class="time-period-overlay">
           <div class="overlay-content">
             <button class="overlay-close-btn" (click)="closeTimePeriodMenu()" title="Close">
-              ✕
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
             </button>
             <p class="overlay-label">Select Time Period</p>
             <div class="period-buttons">

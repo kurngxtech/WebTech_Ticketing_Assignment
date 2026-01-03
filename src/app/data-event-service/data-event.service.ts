@@ -409,7 +409,7 @@ export class DataEventService {
               byTicketType: response.analytics.byTicketType || {},
               bookingsByDate:
                 response.analytics.bookingsByDate?.reduce((acc: any, d: any) => {
-                  acc[d.date] = { count: d.count, revenue: d.revenue };
+                  acc[d.date] = { count: d.count, revenue: d.revenue, ticketsSold: d.ticketsSold };
                   return acc;
                 }, {}) || {},
             } as EventAnalytics;

@@ -2,6 +2,65 @@
 
 A complete Node.js/Express backend for the Event Management System (EMS) ticketing application. Built with MongoDB, Express.js, JWT authentication, Midtrans payment integration, and Nodemailer for email notifications.
 
+---
+
+## 🎓 For Reviewers / Lecturers - Quick Start
+
+> **Want to quickly test the application with sample data?** Follow these 4 steps:
+
+### Step 1: Set Up MongoDB Atlas (Free)
+
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a new cluster (free M0 tier)
+3. Add a database user with read/write access
+4. Whitelist all IPs: `0.0.0.0/0` (for testing)
+5. Copy the connection string
+
+### Step 2: Configure Environment
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Edit `.env` and fill in your MongoDB URI, JWT secret, and optionally Gmail/Midtrans credentials.
+
+### Step 3: Seed the Database
+
+```bash
+npm install
+npm run seed
+```
+
+This populates the database with sample data including:
+
+| Role                  | Email                  | Password       |
+| --------------------- | ---------------------- | -------------- |
+| **Admin**             | `admin@auditorium.com` | `adminpass123` |
+| **Event Organizer 1** | `jane@events.com`      | `eopass123`    |
+| **Event Organizer 2** | `bob@events.com`       | `eopass456`    |
+| **Regular User**      | `john@example.com`     | `password123`  |
+
+Plus **5 sample events** with various ticket types and **sample bookings** for analytics testing.
+
+### Step 4: Run the Application
+
+```bash
+# Terminal 1 - Backend
+cd backend
+npm run dev
+
+# Terminal 2 - Frontend (from project root)
+npm install
+ng serve
+```
+
+Access at: **http://localhost:4200**
+
+> **Note:** Email and payment features require Gmail App Password and Midtrans Sandbox keys. See detailed setup below. Without these, emails are logged to console and payments can be mocked.
+
+---
+
 ## 📋 Features
 
 - **Authentication System** (JWT-based)

@@ -12,7 +12,7 @@
         </div>
 
         <button class="logout-btn" (click)="logout()" title="Logout">
-          <span class="logout-icon">🚪</span>
+          <app-svg-icon name="logout" [size]="20" color="#feb706"></app-svg-icon>
         </button>
         }
       </div>
@@ -49,7 +49,9 @@
             @if (event.img) {
             <img [src]="event.img" [alt]="event.title" class="event-image" />
             } @else {
-            <div class="image-placeholder">📸</div>
+            <div class="image-placeholder">
+              <app-svg-icon name="camera" [size]="48" color="#666"></app-svg-icon>
+            </div>
             }
             <div class="event-status-badge" [ngClass]="getStatusBadgeClass(event.status)">
               {{ getStatusText(event.status) }}
@@ -70,15 +72,21 @@
             <!-- Event Details -->
             <div class="event-details">
               <div class="detail-item">
-                <span class="detail-label">📍 Location:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="location" [size]="14"></app-svg-icon> Location:</span
+                >
                 <span class="detail-text">{{ event.location }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">📅 Date:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="calendar" [size]="14"></app-svg-icon> Date:</span
+                >
                 <span class="detail-text">{{ event.date }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">💰 Revenue:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="money" [size]="14"></app-svg-icon> Revenue:</span
+                >
                 <span class="detail-text">{{ formatPrice(getTotalRevenue(event)) }}</span>
               </div>
             </div>
@@ -92,9 +100,9 @@
               title="Event options"
             >
               @if (!expandedEventMenuId || expandedEventMenuId !== event.id) {
-              <span class="icon">⋯</span>
+              <app-svg-icon name="menu-horizontal" [size]="20"></app-svg-icon>
               } @else {
-              <span class="icon">✕</span>
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
               }
             </button>
           </div>
@@ -108,19 +116,19 @@
               (click)="toggleEventMenu(event.id, $event)"
               title="Close menu"
             >
-              ✕
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
             </button>
 
             <div class="action-group">
               <div class="action-buttons">
                 <button class="action-item edit" (click)="editEvent(event)">
-                  <span class="action-icon">✎</span> Edit Event
+                  <app-svg-icon name="edit" [size]="18"></app-svg-icon> Edit Event
                 </button>
                 <button class="action-item analysis" (click)="viewAnalytics(event)">
-                  <span class="action-icon">📊</span> In-depth Analysis
+                  <app-svg-icon name="chart" [size]="18"></app-svg-icon> In-depth Analysis
                 </button>
                 <button class="action-item delete" (click)="deleteEvent(event)">
-                  <span class="action-icon">🗑</span> Delete Event
+                  <app-svg-icon name="trash" [size]="18"></app-svg-icon> Delete Event
                 </button>
               </div>
             </div>

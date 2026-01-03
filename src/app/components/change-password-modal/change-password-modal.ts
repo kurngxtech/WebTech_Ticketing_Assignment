@@ -7,28 +7,32 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
+import { SvgIcon } from '../svg-icon/svg-icon';
 
 @Component({
   selector: 'app-change-password-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SvgIcon],
   template: `
     <div class="modal-overlay" (click)="onOverlayClick($event)">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>🔐 Change Your Password</h3>
+          <h3>
+            <app-svg-icon name="lock" [size]="24" color="#ffd700"></app-svg-icon> Change Your
+            Password
+          </h3>
           <p class="subtitle">For your security, please change your temporary password</p>
         </div>
 
         <div class="modal-body">
           @if (errorMessage) {
           <div class="alert alert-error">
-            <span class="alert-icon">⚠️</span>
+            <app-svg-icon name="warning" [size]="16" color="#ff6b6b"></app-svg-icon>
             {{ errorMessage }}
           </div>
           } @if (successMessage) {
           <div class="alert alert-success">
-            <span class="alert-icon">✅</span>
+            <app-svg-icon name="check-circle" [size]="16" color="#22c55e"></app-svg-icon>
             {{ successMessage }}
           </div>
           }

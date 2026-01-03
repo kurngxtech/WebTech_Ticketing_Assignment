@@ -85,6 +85,7 @@ export class TicketBuy implements OnInit {
 
   // Booking state
   bookingInProgress = false;
+  paymentInProgress = false; // Prevents double payment submissions
   currentBooking: Booking | null = null;
   showPaymentModal = false;
   showQRCodeDisplay = false;
@@ -345,8 +346,15 @@ export class TicketBuy implements OnInit {
 
   incrementQuantity(ticketId: string, maxRemaining: number): void {
     const currentQty = this.quantities[ticketId] || 1;
-    if (currentQty < maxRemaining) {
+    // Check what's already in cart for this ticket
+    const inCartQty = this.cart.find((item) => item.ticket.id === ticketId)?.qty || 0;
+    // Can only add up to remaining minus what's already in cart
+    const effectiveMax = maxRemaining - inCartQty;
+
+    if (currentQty < effectiveMax) {
       this.quantities[ticketId] = currentQty + 1;
+    } else {
+      this.toast.warning(`Only ${effectiveMax} more ticket(s) available`);
     }
   }
 
@@ -359,6 +367,35 @@ export class TicketBuy implements OnInit {
 
   getRemaining(t: TicketCategory): number {
     return t.total - t.sold;
+  }
+
+  /**
+   * Validates and clamps the quantity input to valid range
+   * Called when user manually types a value in the quantity input
+   */
+  validateQuantity(ticketId: string, ticket: TicketCategory): void {
+    const remaining = this.getRemaining(ticket);
+    const inCartQty = this.cart.find((item) => item.ticket.id === ticketId)?.qty || 0;
+    const maxAllowed = remaining - inCartQty;
+
+    let currentQty = this.quantities[ticketId];
+
+    // Ensure it's a valid number
+    if (isNaN(currentQty) || currentQty < 1) {
+      currentQty = 1;
+    }
+
+    // Clamp to max allowed
+    if (currentQty > maxAllowed) {
+      currentQty = Math.max(1, maxAllowed);
+      if (maxAllowed <= 0) {
+        this.toast.warning(`All available ${ticket.type} tickets are in your cart`);
+      } else {
+        this.toast.warning(`Only ${maxAllowed} more ${ticket.type} ticket(s) available`);
+      }
+    }
+
+    this.quantities[ticketId] = currentQty;
   }
 
   ticketPriceAfterDiscount(t: TicketCategory): number {
@@ -419,9 +456,20 @@ export class TicketBuy implements OnInit {
 
   addToCart(ticket: TicketCategory): void {
     const qty = this.quantities[ticket.id] || 1;
+    const remaining = this.getRemaining(ticket);
 
-    if (this.getRemaining(ticket) < qty) {
-      this.toast.error('Not enough tickets available');
+    // Check what's already in cart for this ticket
+    const inCartQty = this.cart.find((item) => item.ticket.id === ticket.id)?.qty || 0;
+    const totalRequestedQty = inCartQty + qty;
+
+    // Validate against remaining tickets
+    if (totalRequestedQty > remaining) {
+      const canAddMore = remaining - inCartQty;
+      if (canAddMore <= 0) {
+        this.toast.error(`All available ${ticket.type} tickets are already in your cart`);
+      } else {
+        this.toast.error(`Only ${canAddMore} more ${ticket.type} ticket(s) available`);
+      }
       return;
     }
 
@@ -515,6 +563,12 @@ export class TicketBuy implements OnInit {
   }
 
   processPayment(): void {
+    // Prevent double submission
+    if (this.paymentInProgress) {
+      this.toast.warning('Payment already in progress...');
+      return;
+    }
+
     // Create booking and then initiate Midtrans payment
     if (!this.event || !this.isAuthenticated) {
       this.message = 'Please login to complete purchase';
@@ -540,6 +594,8 @@ export class TicketBuy implements OnInit {
       return;
     }
 
+    // Lock payment to prevent double submission
+    this.paymentInProgress = true;
     this.isLoading = true;
     this.message = 'Creating your booking...';
 
@@ -579,12 +635,14 @@ export class TicketBuy implements OnInit {
             this.initiatePayment(bookingId);
           } else {
             this.isLoading = false;
+            this.paymentInProgress = false; // Reset lock
             this.message = result.message || 'Booking failed';
             this.toast.error(result.message || 'Failed to create booking');
           }
         },
         error: (err) => {
           this.isLoading = false;
+          this.paymentInProgress = false; // Reset lock
           console.error('Booking error:', err);
           this.message = 'Failed to create booking. Please try again.';
           this.toast.error('Booking failed. Please try again.');
@@ -625,10 +683,12 @@ export class TicketBuy implements OnInit {
         } else {
           this.message = response.message || 'Failed to create payment';
           this.toast.error('Failed to create payment');
+          this.paymentInProgress = false; // Reset lock
         }
       },
       error: (err) => {
         this.isLoading = false;
+        this.paymentInProgress = false; // Reset lock
         console.error('Payment error:', err);
         this.message = 'Failed to create payment';
         this.toast.error('Payment failed. Please try again.');
@@ -667,6 +727,7 @@ export class TicketBuy implements OnInit {
     this.showSelectionSeats = false;
     this.showQRCodeDisplay = true;
     this.cart = [];
+    this.paymentInProgress = false; // Reset lock
     this.message = '✓ Payment successful! Your ticket is confirmed.';
     this.zone.run(() => this.cdr.detectChanges());
   }
@@ -676,6 +737,7 @@ export class TicketBuy implements OnInit {
     this.toast.info('Payment pending. Please complete your payment.');
     this.message = 'Payment pending - please complete your payment';
     this.showPaymentModal = false;
+    this.paymentInProgress = false; // Reset lock
     this.router.navigate(['/my-bookings'], { queryParams: { payment: 'pending' } });
   }
 
@@ -684,12 +746,14 @@ export class TicketBuy implements OnInit {
     this.toast.error('Payment failed. Please try again.');
     this.message = 'Payment failed';
     this.showPaymentModal = false;
+    this.paymentInProgress = false; // Reset lock to allow retry
   }
 
   private onPaymentClose(): void {
     console.log('Payment popup closed');
     this.message = 'Payment cancelled';
     this.showPaymentModal = false;
+    this.paymentInProgress = false; // Reset lock to allow retry
   }
 
   createSimpleQRVisual(data: string): string {

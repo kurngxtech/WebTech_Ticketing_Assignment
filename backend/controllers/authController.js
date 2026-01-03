@@ -362,3 +362,201 @@ exports.checkEmailAvailability = async (req, res) => {
     res.status(500).json({ available: false, message: 'Error checking availability' });
   }
 };
+
+/**
+ * Forgot Password - Send reset email
+ * POST /api/auth/forgot-password
+ */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase(), isActive: true });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'If an account exists with that email, a password reset link will be sent.',
+      });
+    }
+
+    // Generate reset token
+    const resetToken = user.generatePasswordResetToken();
+    await user.save();
+
+    // Send reset email
+    const { sendPasswordResetEmail } = require('../utils/emailService');
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    try {
+      await sendPasswordResetEmail(user.email, user.fullName, resetUrl);
+    } catch (emailError) {
+      // Clear token if email fails
+      user.clearPasswordResetToken();
+      await user.save();
+
+      console.error('Failed to send reset email:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send password reset email',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'If an account exists with that email, a password reset link will be sent.',
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process request',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Reset Password - Using token from email
+ * POST /api/auth/reset-password/:token
+ */
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password is required',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters',
+      });
+    }
+
+    // Find user by reset token
+    const user = await User.findByResetToken(token);
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token',
+      });
+    }
+
+    // Update password and clear reset token
+    user.password = password;
+    user.clearPasswordResetToken();
+    user.isFirstLogin = false;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully. You can now login with your new password.',
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset password',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Refresh Token - Get new access token using refresh token
+ * POST /api/auth/refresh-token
+ */
+exports.refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required',
+      });
+    }
+
+    // Find user by refresh token
+    const user = await User.findByRefreshToken(refreshToken);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token',
+      });
+    }
+
+    // Generate new access token
+    const accessToken = generateToken(user);
+
+    // Rotate refresh token (generate new one)
+    const newRefreshToken = user.generateRefreshToken();
+    await user.save();
+
+    res.json({
+      success: true,
+      token: accessToken,
+      refreshToken: newRefreshToken,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to refresh token',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Logout - Invalidate refresh token
+ * POST /api/auth/logout
+ */
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        user.clearRefreshToken();
+        await user.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully',
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Logout failed',
+      error: error.message,
+    });
+  }
+};

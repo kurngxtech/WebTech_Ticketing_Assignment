@@ -9,6 +9,7 @@ const { authenticate, optionalAuth, authorize } = require('../middleware/auth');
 
 // Public routes
 router.get('/', optionalAuth, eventController.getEvents);
+router.get('/search', optionalAuth, eventController.searchEvents);
 router.get('/:id', optionalAuth, eventController.getEventById);
 router.post('/validate-promo', eventController.validatePromoCode);
 
@@ -22,6 +23,11 @@ router.get('/organizer/:organizerId', authenticate, eventController.getEventsByO
 
 // Ticket and promo management
 router.post('/:id/tickets', authenticate, authorize('eo', 'admin'), eventController.updateTickets);
-router.post('/:id/promo', authenticate, authorize('eo', 'admin'), eventController.addPromotionalCode);
+router.post(
+  '/:id/promo',
+  authenticate,
+  authorize('eo', 'admin'),
+  eventController.addPromotionalCode
+);
 
 module.exports = router;

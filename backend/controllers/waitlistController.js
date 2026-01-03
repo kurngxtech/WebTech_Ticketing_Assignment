@@ -17,6 +17,14 @@ exports.joinWaitlist = async (req, res) => {
     const { eventId, ticketCategoryId, quantity = 1 } = req.body;
     const userId = req.userId;
 
+    // Validate required fields
+    if (!eventId || !ticketCategoryId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Event ID and ticket category ID are required',
+      });
+    }
+
     // Validate event
     const event = await Event.findById(eventId);
     if (!event) {
@@ -35,29 +43,31 @@ exports.joinWaitlist = async (req, res) => {
       });
     }
 
-    // Check if tickets are actually sold out
-    const remaining = ticket.total - ticket.sold;
-    if (remaining > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Tickets still available, no need to join waitlist',
-      });
-    }
+    // Note: We no longer block users from joining waitlist even if tickets are available
+    // This allows users to join waitlist as a backup option
+    // The frontend already shows waitlist button only when sold out
 
-    // Check for existing waitlist entry
-    const existingEntry = await Waitlist.findOne({
+    // Check for existing active waitlist entry
+    const existingActiveEntry = await Waitlist.findOne({
       eventId,
       userId,
       ticketCategoryId,
       status: 'waiting',
     });
 
-    if (existingEntry) {
+    if (existingActiveEntry) {
       return res.status(400).json({
         success: false,
         message: 'You are already on the waitlist for this ticket type',
       });
     }
+
+    // Check for any existing entry (removed, expired, etc.) to reactivate
+    const existingEntry = await Waitlist.findOne({
+      eventId,
+      userId,
+      ticketCategoryId,
+    });
 
     // Check waitlist capacity
     const currentWaitlistCount = await Waitlist.countDocuments({
@@ -75,19 +85,31 @@ exports.joinWaitlist = async (req, res) => {
       });
     }
 
-    // Create waitlist entry
-    const entry = new Waitlist({
-      eventId,
-      userId,
-      ticketCategoryId,
-      quantity: Math.min(quantity, 10), // Max 10 per entry
-    });
-
-    await entry.save();
+    let entry;
+    if (existingEntry) {
+      // Reactivate existing entry
+      existingEntry.status = 'waiting';
+      existingEntry.quantity = Math.min(quantity, 10);
+      existingEntry.registeredAt = new Date();
+      existingEntry.notified = false;
+      existingEntry.notifiedAt = null;
+      existingEntry.expiresAt = null;
+      await existingEntry.save();
+      entry = existingEntry;
+    } else {
+      // Create new waitlist entry
+      entry = new Waitlist({
+        eventId,
+        userId,
+        ticketCategoryId,
+        quantity: Math.min(quantity, 10), // Max 10 per entry
+      });
+      await entry.save();
+    }
 
     // Send confirmation email
     const user = await User.findById(userId);
-    if (user) {
+    if (user && user.email) {
       const eventDate = new Date(event.date).toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',

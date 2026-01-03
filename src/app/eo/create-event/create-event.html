@@ -142,7 +142,7 @@
 
     <div class="seat-map-action">
       <button type="button" class="btn btn-outline-small" (click)="toggleSeatMapPreview()">
-        🗺️ View Seat Map Layout
+        <app-svg-icon name="seat" [size]="16"></app-svg-icon> View Seat Map Layout
       </button>
     </div>
 
@@ -224,7 +224,7 @@
           class="btn-icon-small btn-danger"
           (click)="removeTicketCategory(ticketCategories.indexOf(ticket))"
         >
-          🗑️
+          <app-svg-icon name="trash" [size]="16"></app-svg-icon>
         </button>
       </div>
       }
@@ -324,7 +324,7 @@
           class="btn-icon-small btn-danger"
           (click)="removePromo(promotionalCodes.indexOf(promo))"
         >
-          🗑️
+          <app-svg-icon name="trash" [size]="16"></app-svg-icon>
         </button>
       </div>
       }
@@ -378,7 +378,8 @@
     <div class="button-group">
       <button class="btn btn-outline" (click)="goToStep('promo')">← Back</button>
       <button class="btn btn-success" (click)="saveEvent()">
-        {{ isEditMode ? '✓ Update Event' : '✓ Create Event' }}
+        <app-svg-icon name="check" [size]="16"></app-svg-icon>
+        {{ isEditMode ? 'Update Event' : 'Create Event' }}
       </button>
     </div>
   </div>
@@ -389,7 +390,10 @@
   <div class="modal-overlay" (click)="toggleSeatMapPreview()">
     <div class="seat-map-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>🗺️ Auditorium Seating Layout</h3>
+        <h3>
+          <app-svg-icon name="seat" [size]="20" color="#feb706"></app-svg-icon> Auditorium Seating
+          Layout
+        </h3>
         <button class="close-btn" (click)="toggleSeatMapPreview()">×</button>
       </div>
       <div class="seat-map-content">

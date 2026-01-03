@@ -20,6 +20,7 @@ import { AuthService } from '../../auth/auth.service';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { EventItem } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 
 type ChartType = 'revenue' | 'tickets' | 'events';
 type TimePeriod = 'daily' | 'weekly' | 'monthly';
@@ -36,7 +37,7 @@ interface ChartDataPoint {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SvgIcon],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css'],
 })

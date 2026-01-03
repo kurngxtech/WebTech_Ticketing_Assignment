@@ -14,6 +14,7 @@ import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
 import { EventItem, EventAnalytics } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 
 interface ChartDataPoint {
   x: number;
@@ -31,7 +32,7 @@ type TimePeriod = 'daily' | 'weekly' | 'monthly';
 @Component({
   selector: 'app-analytics-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SvgIcon],
   templateUrl: './analytics-reports.html',
   styleUrls: ['./analytics-reports.css'],
 })

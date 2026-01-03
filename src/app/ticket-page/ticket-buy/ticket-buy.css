@@ -1620,9 +1620,21 @@
   transition: all 0.3s ease;
 }
 
+/* Close button positioned on overlay (dark background) */
+.seat-map-close-btn.overlay-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+}
+
 .seat-map-close-btn:hover {
   background: #fff;
   transform: scale(1.1);
+}
+
+.seat-modal-overlay {
+  position: relative;
 }
 
 .seat-map-scroll-wrapper {
@@ -1718,4 +1730,244 @@
 .legend-seat.general {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border-color: #3b82f6;
+}
+
+/* ====== MOBILE RESPONSIVE SEAT MAP ====== */
+
+/* Tablet and smaller */
+@media (max-width: 992px) {
+  .modal-content-seat {
+    max-width: 100%;
+    width: 100%;
+    max-height: 100vh;
+    height: 100%;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .seat-map-scroll-wrapper {
+    height: 100%;
+    padding: 15px;
+  }
+
+  .auditorium-map-container {
+    min-width: auto;
+    width: 100%;
+    padding: 15px;
+  }
+
+  .map-title {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+  }
+
+  .seat-legend {
+    gap: 10px;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .legend-item {
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .legend-seat {
+    width: 16px;
+    height: 16px;
+  }
+
+  .seat-button {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+
+  .seat-number {
+    font-size: 8px;
+  }
+
+  .block-label {
+    font-size: 0.75em;
+  }
+
+  .section-label {
+    font-size: 1em;
+    margin: 15px 0 10px;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 576px) {
+  .seat-map-close-btn.overlay-close {
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .modal-content-seat {
+    border: none;
+  }
+
+  .seat-map-scroll-wrapper {
+    padding: 10px;
+    padding-top: 50px; /* Space for close button */
+  }
+
+  .auditorium-map-container {
+    padding: 10px;
+    min-width: 600px; /* Allow horizontal scroll */
+  }
+
+  .map-title-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .map-title {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+  }
+
+  .seat-selection-info {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 5px;
+  }
+
+  .selected-count {
+    font-size: 14px;
+  }
+
+  .limit-reached {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .seat-legend {
+    gap: 8px;
+    padding: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    flex: 0 0 auto;
+  }
+
+  .legend-seat {
+    width: 14px;
+    height: 14px;
+  }
+
+  .seat-button {
+    width: 22px;
+    height: 22px;
+    font-size: 8px;
+    margin: 1px;
+  }
+
+  .seat-row {
+    gap: 1px;
+  }
+
+  .seat-number {
+    font-size: 7px;
+  }
+
+  .block-label {
+    font-size: 0.65em;
+    padding: 2px 4px;
+  }
+
+  .section-label {
+    font-size: 0.9em;
+    margin: 10px 0 8px;
+  }
+
+  .seating-row {
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .seat-block {
+    margin-bottom: 15px;
+  }
+
+  .center-foyer-stack {
+    gap: 10px;
+  }
+
+  .map-footer {
+    margin-top: 15px;
+    padding: 10px;
+  }
+
+  .book-button {
+    padding: 8px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 375px) {
+  .seat-button {
+    width: 18px;
+    height: 18px;
+    font-size: 7px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+  }
+
+  .map-title {
+    font-size: 1em;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .modal-content-seat {
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  .seat-map-scroll-wrapper {
+    padding-top: 40px;
+    min-height: auto;
+  }
+
+  .map-title {
+    font-size: 1.1em;
+  }
+
+  .seat-legend {
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10;
+    margin-top: 0;
+  }
+}
+
+/* Touch-friendly seat buttons */
+@media (hover: none) and (pointer: coarse) {
+  .seat-button {
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  .seat-button:active {
+    transform: scale(0.95);
+  }
+
+  .seat-button.available:active {
+    background: rgba(254, 183, 6, 0.3);
+  }
 }

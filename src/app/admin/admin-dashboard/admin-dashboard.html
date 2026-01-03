@@ -12,7 +12,7 @@
         </div>
 
         <button class="logout-btn" (click)="logout()" title="Logout">
-          <span class="logout-icon">🚪</span>
+          <app-svg-icon name="logout" [size]="20" color="#feb706"></app-svg-icon>
         </button>
         }
       </div>
@@ -33,9 +33,9 @@
             </div>
             <button class="menu-button" (click)="toggleChartOptions()" title="Chart options">
               @if (!showChartOptions) {
-              <span class="icon">⋯</span>
+              <app-svg-icon name="menu-horizontal" [size]="20"></app-svg-icon>
               } @else {
-              <span class="icon">✕</span>
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
               }
             </button>
           </div>
@@ -91,15 +91,21 @@
               <div class="tooltip-header">{{ hoveredPoint.label }}</div>
               <div class="tooltip-content">
                 <div class="tooltip-row">
-                  <span class="tooltip-label">🎫 Tickets Sold:</span>
+                  <span class="tooltip-label"
+                    ><app-svg-icon name="ticket" [size]="14"></app-svg-icon> Tickets Sold:</span
+                  >
                   <span class="tooltip-value">{{ hoveredPoint.ticketsSold }}</span>
                 </div>
                 <div class="tooltip-row">
-                  <span class="tooltip-label">💰 Revenue:</span>
+                  <span class="tooltip-label"
+                    ><app-svg-icon name="money" [size]="14"></app-svg-icon> Revenue:</span
+                  >
                   <span class="tooltip-value">{{ formatPrice(hoveredPoint.revenue) }}</span>
                 </div>
                 <div class="tooltip-row">
-                  <span class="tooltip-label">📋 Bookings:</span>
+                  <span class="tooltip-label"
+                    ><app-svg-icon name="clipboard" [size]="14"></app-svg-icon> Bookings:</span
+                  >
                   <span class="tooltip-value">{{ hoveredPoint.bookings }}</span>
                 </div>
               </div>
@@ -115,9 +121,9 @@
               title="Time period"
             >
               @if (!showTimePeriodMenu) {
-              <span class="icon">⋮</span>
+              <app-svg-icon name="menu-vertical" [size]="20"></app-svg-icon>
               } @else {
-              <span class="icon">✕</span>
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
               }
             </button>
 
@@ -224,7 +230,9 @@
             @if (event.img) {
             <img [src]="event.img" [alt]="event.title" class="event-image" />
             } @else {
-            <div class="image-placeholder">📸</div>
+            <div class="image-placeholder">
+              <app-svg-icon name="camera" [size]="48" color="#666"></app-svg-icon>
+            </div>
             }
             <div class="event-status-badge" [ngClass]="getStatusBadgeClass(event.status)">
               {{ getStatusText(event.status) }}
@@ -245,15 +253,21 @@
             <!-- Event Details -->
             <div class="event-details">
               <div class="detail-item">
-                <span class="detail-label">📍 Location:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="location" [size]="14"></app-svg-icon> Location:</span
+                >
                 <span class="detail-text">{{ event.location }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">📅 Date:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="calendar" [size]="14"></app-svg-icon> Date:</span
+                >
                 <span class="detail-text">{{ event.date }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">💰 Revenue:</span>
+                <span class="detail-label"
+                  ><app-svg-icon name="money" [size]="14"></app-svg-icon> Revenue:</span
+                >
                 <span class="detail-text">{{ formatPrice(getTotalRevenue(event)) }}</span>
               </div>
             </div>
@@ -267,9 +281,9 @@
               title="Event options"
             >
               @if (!expandedEventMenuId || expandedEventMenuId !== event.id) {
-              <span class="icon">⋯</span>
+              <app-svg-icon name="menu-horizontal" [size]="20"></app-svg-icon>
               } @else {
-              <span class="icon">✕</span>
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
               }
             </button>
           </div>
@@ -283,13 +297,13 @@
               (click)="toggleEventMenu(event.id, $event)"
               title="Close menu"
             >
-              ✕
+              <app-svg-icon name="close" [size]="20"></app-svg-icon>
             </button>
 
             <div class="action-group">
               <div class="action-buttons" style="grid-template-columns: 1fr">
                 <button class="action-item analysis" (click)="viewAnalytics(event)">
-                  <span class="action-icon">📊</span> In-depth Analysis
+                  <app-svg-icon name="chart" [size]="24"></app-svg-icon> In-depth Analysis
                 </button>
               </div>
             </div>
@@ -437,19 +451,27 @@
 
           <div class="eo-details">
             <div class="detail-item">
-              <span class="detail-label">📧 Email:</span>
+              <span class="detail-label"
+                ><app-svg-icon name="email" [size]="14"></app-svg-icon> Email:</span
+              >
               <span class="detail-text">{{ eo.email }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">📱 Phone:</span>
+              <span class="detail-label"
+                ><app-svg-icon name="phone" [size]="14"></app-svg-icon> Phone:</span
+              >
               <span class="detail-text">{{ eo.phone }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">🏢 Organization:</span>
+              <span class="detail-label"
+                ><app-svg-icon name="building" [size]="14"></app-svg-icon> Organization:</span
+              >
               <span class="detail-text">{{ eo.organizationName }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">📅 Registered:</span>
+              <span class="detail-label"
+                ><app-svg-icon name="calendar" [size]="14"></app-svg-icon> Registered:</span
+              >
               <span class="detail-text">{{ eo.createdAt }}</span>
             </div>
           </div>
@@ -460,7 +482,7 @@
               (click)="removeEventOrganizer(eo.id)"
               title="Remove EO"
             >
-              <span class="icon">🗑</span> Remove
+              <app-svg-icon name="trash" [size]="14"></app-svg-icon> Remove
             </button>
           </div>
         </div>

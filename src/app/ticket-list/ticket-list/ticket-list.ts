@@ -12,6 +12,7 @@ import { register } from 'swiper/element/bundle';
 import { Router } from '@angular/router';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { EventItem } from '../../data-event-service/data-event';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 // Pendaftaran Swiper di sini tidak diperlukan untuk tampilan list/grid sederhana ini,
 // tetapi saya biarkan jika komponen ini juga akan digunakan untuk tampilan lain.
 register();
@@ -76,6 +77,18 @@ export class TicketList implements AfterViewInit, OnInit {
     if (!slideData) return;
     // navigate to ticket page using id
     this.router.navigate(['/ticket', slideData.id]);
+  }
+
+  // Check if an event is sold out (all tickets sold)
+  isSoldOut(event: EventItem): boolean {
+    if (!event.tickets || event.tickets.length === 0) return false;
+    return event.tickets.every((ticket) => ticket.sold >= ticket.total);
+  }
+
+  // Get remaining tickets count for an event
+  getRemainingTickets(event: EventItem): number {
+    if (!event.tickets || event.tickets.length === 0) return 0;
+    return event.tickets.reduce((sum, t) => sum + (t.total - t.sold), 0);
   }
 
   // Fungsi untuk mendapatkan data event yang unik, diurutkan, dan dipetakan ke indeks.

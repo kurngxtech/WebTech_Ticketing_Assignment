@@ -1,6 +1,12 @@
 /**
  * Payment Controller
  * Handles Midtrans payment integration
+ *
+ * CURRENCY NOTE:
+ * - All prices in the database are stored in MYR (Malaysian Ringgit)
+ * - Midtrans only accepts IDR (Indonesian Rupiah)
+ * - We convert MYR to IDR when creating payment transactions
+ * - Default rate: 1 MYR ≈ 3,500 IDR (can be updated via API)
  */
 
 const midtransClient = require('midtrans-client');
@@ -10,6 +16,28 @@ const Event = require('../models/Event');
 const User = require('../models/User');
 const { generateOrderId } = require('../utils/helpers');
 const { sendBookingConfirmation, sendPaymentReceipt } = require('../utils/emailService');
+
+// Currency conversion rate: MYR to IDR
+// This is an approximate rate. For production, consider using a real-time API
+const MYR_TO_IDR_RATE = 3500;
+
+/**
+ * Convert MYR to IDR for Midtrans
+ * @param {number} amountMYR - Amount in Malaysian Ringgit
+ * @returns {number} - Amount in Indonesian Rupiah (rounded)
+ */
+const convertMYRToIDR = (amountMYR) => {
+  return Math.round(amountMYR * MYR_TO_IDR_RATE);
+};
+
+/**
+ * Convert IDR to MYR (for display purposes)
+ * @param {number} amountIDR - Amount in Indonesian Rupiah
+ * @returns {number} - Amount in Malaysian Ringgit
+ */
+const convertIDRToMYR = (amountIDR) => {
+  return amountIDR / MYR_TO_IDR_RATE;
+};
 
 // Initialize Midtrans Snap
 const snap = new midtransClient.Snap({
@@ -63,6 +91,28 @@ exports.createPayment = async (req, res) => {
       });
     }
 
+    // Check for existing pending payment
+    const existingPayment = await Payment.findOne({
+      bookingId: booking._id,
+      transactionStatus: 'pending',
+    });
+
+    if (existingPayment && existingPayment.snapToken) {
+      // Return existing payment instead of creating duplicate
+      return res.json({
+        success: true,
+        message: 'Existing payment found',
+        payment: {
+          orderId: existingPayment.orderId,
+          snapToken: existingPayment.snapToken,
+          snapRedirectUrl: existingPayment.snapRedirectUrl,
+          grossAmount: booking.totalPrice,
+          clientKey: process.env.MIDTRANS_CLIENT_KEY,
+        },
+        existing: true,
+      });
+    }
+
     // Get user
     const user = await User.findById(userId);
 
@@ -74,16 +124,20 @@ exports.createPayment = async (req, res) => {
     // Generate unique order ID
     const orderId = generateOrderId();
 
-    // Create Midtrans transaction
+    // Convert MYR to IDR for Midtrans (Midtrans only accepts IDR)
+    const grossAmountIDR = convertMYRToIDR(booking.totalPrice);
+    const pricePerTicketIDR = convertMYRToIDR(booking.pricePerTicket);
+
+    // Create Midtrans transaction with IDR amounts
     const transactionParams = {
       transaction_details: {
         order_id: orderId,
-        gross_amount: Math.round(booking.totalPrice),
+        gross_amount: grossAmountIDR,
       },
       item_details: [
         {
           id: booking.ticketCategoryId,
-          price: Math.round(booking.pricePerTicket),
+          price: pricePerTicketIDR,
           quantity: booking.quantity,
           name: `${event.title} - ${ticketType} Ticket`,
         },

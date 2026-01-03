@@ -187,11 +187,110 @@ const eventSchema = new mongoose.Schema(
 );
 
 // Indexes for faster queries
+// Note: slug already has an index from unique:true
 eventSchema.index({ organizerId: 1 });
 eventSchema.index({ status: 1 });
 eventSchema.index({ date: 1 });
 eventSchema.index({ 'tickets.id': 1 });
-eventSchema.index({ slug: 1 });
+
+// Text index for full-text search
+eventSchema.index(
+  { title: 'text', description: 'text', location: 'text' },
+  { weights: { title: 10, location: 5, description: 1 } }
+);
+
+// Compound index for common filter combinations
+eventSchema.index({ status: 1, date: 1 });
+eventSchema.index({ organizerId: 1, status: 1 });
+
+/**
+ * Static method for searching events with filters
+ */
+eventSchema.statics.searchEvents = async function (options = {}) {
+  const {
+    query, // Text search query
+    status, // Event status filter
+    organizerId, // Filter by organizer
+    minPrice, // Minimum price filter
+    maxPrice, // Maximum price filter
+    startDate, // Date range start
+    endDate, // Date range end
+    limit = 20, // Results limit
+    skip = 0, // Pagination offset
+    sortBy = 'date', // Sort field
+    sortOrder = 'asc', // Sort direction
+  } = options;
+
+  const filter = {};
+
+  // Text search
+  if (query && query.trim()) {
+    filter.$text = { $search: query };
+  }
+
+  // Status filter
+  if (status) {
+    filter.status = status;
+  }
+
+  // Organizer filter
+  if (organizerId) {
+    filter.organizerId = organizerId;
+  }
+
+  // Price range filter (check min price of tickets)
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    filter['tickets'] = { $elemMatch: {} };
+    if (minPrice !== undefined) {
+      filter['tickets'].$elemMatch.price = { $gte: minPrice };
+    }
+    if (maxPrice !== undefined) {
+      filter['tickets'].$elemMatch.price = {
+        ...filter['tickets'].$elemMatch.price,
+        $lte: maxPrice,
+      };
+    }
+  }
+
+  // Date range filter
+  if (startDate || endDate) {
+    filter.date = {};
+    if (startDate) {
+      filter.date.$gte = startDate;
+    }
+    if (endDate) {
+      filter.date.$lte = endDate;
+    }
+  }
+
+  // Build sort options
+  const sort = {};
+  if (query && query.trim()) {
+    // If text search, include text score
+    sort.score = { $meta: 'textScore' };
+  }
+  sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+  // Execute query
+  let queryBuilder = this.find(filter);
+
+  if (query && query.trim()) {
+    queryBuilder = queryBuilder.select({ score: { $meta: 'textScore' } });
+  }
+
+  const [events, total] = await Promise.all([
+    queryBuilder.sort(sort).skip(skip).limit(limit),
+    this.countDocuments(filter),
+  ]);
+
+  return {
+    events,
+    total,
+    page: Math.floor(skip / limit) + 1,
+    totalPages: Math.ceil(total / limit),
+    hasMore: skip + events.length < total,
+  };
+};
 
 // Pre-save hook to generate slug from title
 eventSchema.pre('save', async function (next) {

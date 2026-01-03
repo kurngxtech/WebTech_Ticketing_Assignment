@@ -39,6 +39,42 @@ exports.createBooking = async (req, res) => {
       });
     }
 
+    // Check for existing pending booking for same user/event/ticket category
+    const existingPendingBooking = await Booking.findOne({
+      userId,
+      eventId,
+      ticketCategoryId,
+      status: 'pending',
+      paymentStatus: 'pending',
+    }).session(session);
+
+    if (existingPendingBooking) {
+      await session.abortTransaction();
+      // Return existing booking instead of creating duplicate
+      const ticket = event.tickets.find((t) => t.id === ticketCategoryId);
+      return res.status(200).json({
+        success: true,
+        message: 'Existing pending booking found. Please complete payment.',
+        booking: {
+          id: existingPendingBooking._id,
+          eventId: event._id,
+          ticketCategoryId,
+          ticketType: ticket?.type || 'Standard',
+          quantity: existingPendingBooking.quantity,
+          pricePerTicket: existingPendingBooking.pricePerTicket,
+          totalPrice: existingPendingBooking.totalPrice,
+          discountApplied: existingPendingBooking.discountApplied,
+          status: existingPendingBooking.status,
+          paymentStatus: existingPendingBooking.paymentStatus,
+          qrCode: existingPendingBooking.qrCode,
+          bookingDate: existingPendingBooking.bookingDate,
+          selectedSeats: existingPendingBooking.selectedSeats,
+        },
+        existing: true,
+        remaining: ticket ? ticket.total - ticket.sold : 0,
+      });
+    }
+
     // Find ticket category
     const ticketIndex = event.tickets.findIndex((t) => t.id === ticketCategoryId);
     if (ticketIndex === -1) {

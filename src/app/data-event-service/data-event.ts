@@ -89,6 +89,7 @@ export interface EventAnalytics {
     [date: string]: {
       count: number;
       revenue: number;
+      ticketsSold: number;
     };
   };
 }

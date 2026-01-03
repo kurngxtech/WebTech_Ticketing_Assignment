@@ -6,96 +6,97 @@ import { DataEventService } from '../../data-event-service/data-event.service';
 import { AuthService } from '../../auth/auth.service';
 import { EventItem } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 
 @Component({
-   standalone: true,
-   selector: 'app-header',
-   imports: [CommonModule, FormsModule],
-   templateUrl: './header.html',
-   styleUrls: ['./header.css'],
+  standalone: true,
+  selector: 'app-header',
+  imports: [CommonModule, FormsModule, SvgIcon],
+  templateUrl: './header.html',
+  styleUrls: ['./header.css'],
 })
 export class Header implements OnInit {
-   query = '';
-   suggestions: EventItem[] = [];
-   currentUser: User | null = null;
-   isAuthenticated = false;
-   isDropdownOpen = false;
+  query = '';
+  suggestions: EventItem[] = [];
+  currentUser: User | null = null;
+  isAuthenticated = false;
+  isDropdownOpen = false;
 
-   constructor(
-      private dataSrv: DataEventService,
-      private authService: AuthService,
-      private router: Router,
-      private scroller: ViewportScroller
-   ) { }
+  constructor(
+    private dataSrv: DataEventService,
+    private authService: AuthService,
+    private router: Router,
+    private scroller: ViewportScroller
+  ) {}
 
-   toggleDropdown(): void {
-      this.isDropdownOpen = !this.isDropdownOpen;
-   }
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
 
-   ngOnInit(): void {
-      this.dataSrv.searchResults$.subscribe((list) => {
-         this.suggestions = list.slice(0, 6);
-      });
+  ngOnInit(): void {
+    this.dataSrv.searchResults$.subscribe((list) => {
+      this.suggestions = list.slice(0, 6);
+    });
 
-      this.authService.authState$.subscribe(state => {
-         this.currentUser = state.currentUser;
-         this.isAuthenticated = state.isAuthenticated;
-      });
-   }
-   goToHome(): void {
+    this.authService.authState$.subscribe((state) => {
+      this.currentUser = state.currentUser;
+      this.isAuthenticated = state.isAuthenticated;
+    });
+  }
+  goToHome(): void {
+    this.router.navigate(['/']);
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  goToDashboard(): void {
+    if (this.currentUser?.role === 'eo') {
+      this.router.navigate(['/eo']);
+    } else if (this.currentUser?.role === 'admin') {
+      this.router.navigate(['/admin']);
+    } else {
       this.router.navigate(['/']);
-   }
+    }
+  }
 
-   goToLogin(): void {
-      this.router.navigate(['/login']);
-   }
+  goToFAQ(): void {
+    this.router.navigate(['/faq']);
+    this.isDropdownOpen = false;
+  }
 
-   goToDashboard(): void {
-      if (this.currentUser?.role === 'eo') {
-         this.router.navigate(['/eo']);
-      } else if (this.currentUser?.role === 'admin') {
-         this.router.navigate(['/admin']);
-      } else {
-         this.router.navigate(['/']);
-      }
-   }
+  goToAbout(): void {
+    this.router.navigate(['/about']);
+    this.isDropdownOpen = false;
+  }
 
-   goToFAQ(): void {
-      this.router.navigate(['/faq']);
-      this.isDropdownOpen = false;
-   }
+  goToMyBookings(): void {
+    this.router.navigate(['/my-bookings']);
+  }
 
-   goToAbout(): void {
-      this.router.navigate(['/about']);
-      this.isDropdownOpen = false;
-   }
+  goToTicketList(): void {
+    this.router.navigate(['/ticket-list']);
+  }
 
-   goToMyBookings(): void {
-      this.router.navigate(['/my-bookings']);
-   }
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 
-   goToTicketList(): void {
-      this.router.navigate(['/ticket-list']);
-   }
+  onSearchInput(): void {
+    this.dataSrv.setSearchQuery(this.query);
+  }
 
-   logout(): void {
-      this.authService.logout();
-      this.router.navigate(['/']);
-   }
+  scrollToFooter(): void {
+    this.scroller.scrollToAnchor('page-footer');
+    this.isDropdownOpen = false; // Tutup dropdown setelah klik
+  }
 
-   onSearchInput(): void {
-      this.dataSrv.setSearchQuery(this.query);
-   }
-
-   scrollToFooter(): void {
-      this.scroller.scrollToAnchor('page-footer');
-      this.isDropdownOpen = false; // Tutup dropdown setelah klik
-   }
-
-   selectSuggestion(ev: EventItem): void {
-      this.query = ev.title;
-      this.dataSrv.setSearchQuery(this.query);
-      this.suggestions = [];
-      this.router.navigate(['/ticket', ev.id]);
-   }
+  selectSuggestion(ev: EventItem): void {
+    this.query = ev.title;
+    this.dataSrv.setSearchQuery(this.query);
+    this.suggestions = [];
+    this.router.navigate(['/ticket', ev.id]);
+  }
 }

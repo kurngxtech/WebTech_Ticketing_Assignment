@@ -5,11 +5,12 @@ import { AuthService } from '../../auth/auth.service';
 import { DataEventService } from '../../data-event-service/data-event.service';
 import { EventItem } from '../../data-event-service/data-event';
 import { User } from '../../auth/auth.types';
+import { SvgIcon } from '../../components/svg-icon/svg-icon';
 
 @Component({
   selector: 'app-eo-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SvgIcon],
   templateUrl: './eo-dashboard.html',
   styleUrls: ['./eo-dashboard.css'],
 })
