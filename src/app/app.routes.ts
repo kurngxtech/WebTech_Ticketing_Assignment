@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'about', component: About },
   { path: 'ticket/:id', component: TicketBuy },
   { path: 'login', component: UserLoginPage },
+  { path: 'sign-up', component: UserLoginPage }, // Redirects to login page with register mode
   { path: 'my-bookings', component: MyBookings },
   { path: 'faq', component: Faq },
   { path: 'ticket-list', component: TicketList },

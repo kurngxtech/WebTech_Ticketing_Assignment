@@ -70,6 +70,11 @@ export class UserLoginPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Auto-switch to register mode if navigated to /sign-up
+    if (this.router.url === '/sign-up') {
+      this.viewMode = 'register';
+    }
+
     // Auto-fill remembered credentials (only if localStorage is available)
     if (typeof localStorage !== 'undefined') {
       const rememberedUsername = localStorage.getItem('rememberedUsername');

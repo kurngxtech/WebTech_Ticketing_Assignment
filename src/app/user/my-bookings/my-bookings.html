@@ -448,7 +448,10 @@
             <span class="badge-waitlist">Waiting...</span>
           </div>
           <div class="waitlist-info">
-            <p><strong>Ticket Type:</strong> {{ entry.ticketCategoryId }}</p>
+            <p>
+              <strong>Ticket Type:</strong>
+              {{ getTicketTypeName(entry.eventId, entry.ticketCategoryId) }}
+            </p>
             <p><strong>Quantity:</strong> {{ entry.quantity }}</p>
           </div>
           <div class="waitlist-actions">

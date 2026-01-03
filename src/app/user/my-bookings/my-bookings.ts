@@ -315,6 +315,14 @@ export class MyBookings implements OnInit, OnDestroy {
     return event?.title || 'Loading...';
   }
 
+  // Helper method to get ticket type name for waitlist entries
+  getTicketTypeName(eventId: number | string, ticketCategoryId: string): string {
+    const event = this.eventCache.get(eventId?.toString());
+    if (!event) return 'Loading...';
+    const ticket = event.tickets.find((t) => t.id === ticketCategoryId);
+    return ticket?.type || 'Standard';
+  }
+
   selectBooking(bookingId: string) {
     if (!this.currentUserId) return;
     if (!bookingId) {
