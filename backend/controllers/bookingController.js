@@ -211,7 +211,20 @@ exports.getBookingsByUser = async (req, res) => {
     // Enhance booking data with event details and payment info
     const enhancedBookings = bookings.map((booking) => {
       const event = booking.eventId;
-      const ticketCategory = event?.tickets?.find((t) => t.id === booking.ticketCategoryId);
+      const ticketCategory = event?.tickets?.find(
+        (t) =>
+          t.id === booking.ticketCategoryId ||
+          t.id?.toString() === booking.ticketCategoryId?.toString()
+      );
+
+      // Debug log for ticket type matching
+      if (!ticketCategory && event?.tickets?.length > 0) {
+        console.log(
+          `⚠️ Ticket type lookup failed for booking ${booking._id}. ` +
+            `ticketCategoryId: "${booking.ticketCategoryId}", ` +
+            `Available ticket IDs: [${event.tickets.map((t) => `"${t.id}"`).join(', ')}]`
+        );
+      }
       const payment = paymentMap[booking._id.toString()];
 
       if (booking.status === 'pending') {
@@ -230,6 +243,7 @@ exports.getBookingsByUser = async (req, res) => {
         eventTime: event?.time,
         eventLocation: event?.location,
         eventImg: event?.img,
+        ticketCategoryId: booking.ticketCategoryId, // Include for frontend ticket lookup
         ticketType: ticketCategory?.type || 'Standard',
         quantity: booking.quantity,
         pricePerTicket: booking.pricePerTicket,
@@ -243,6 +257,7 @@ exports.getBookingsByUser = async (req, res) => {
         expiresAt: booking.expiresAt, // 24-hour payment expiration
         checkedIn: booking.checkedIn,
         checkedInAt: booking.checkedInAt,
+        selectedSeats: booking.selectedSeats, // Include for seat info
       };
     });
 

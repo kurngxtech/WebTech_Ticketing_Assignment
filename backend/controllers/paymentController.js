@@ -231,7 +231,23 @@ exports.handleNotification = async (req, res) => {
 
           if (user && event) {
             const ticketType =
-              event.tickets.find((t) => t.id === booking.ticketCategoryId)?.type || 'Standard';
+              event.tickets.find(
+                (t) =>
+                  t.id === booking.ticketCategoryId ||
+                  t.id?.toString() === booking.ticketCategoryId?.toString()
+              )?.type || 'Standard';
+
+            // Debug log for ticket type in email
+            console.log(
+              `📧 Sending email - ticketCategoryId: "${booking.ticketCategoryId}", resolved type: "${ticketType}"`
+            );
+            if (ticketType === 'Standard') {
+              console.log(
+                `   Available tickets: [${event.tickets
+                  .map((t) => `{id:"${t.id}",type:"${t.type}"}`)
+                  .join(', ')}]`
+              );
+            }
 
             // Send payment receipt with QR code (includes everything needed)
             await sendPaymentReceipt(
@@ -397,7 +413,11 @@ exports.checkTransaction = async (req, res) => {
 
               if (user && event) {
                 const ticketType =
-                  event.tickets.find((t) => t.id === booking.ticketCategoryId)?.type || 'Standard';
+                  event.tickets.find(
+                    (t) =>
+                      t.id === booking.ticketCategoryId ||
+                      t.id?.toString() === booking.ticketCategoryId?.toString()
+                  )?.type || 'Standard';
 
                 // Send payment receipt with QR code (includes everything needed)
                 await sendPaymentReceipt(

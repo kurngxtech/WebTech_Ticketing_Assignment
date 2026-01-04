@@ -592,9 +592,18 @@ export class MyBookings implements OnInit, OnDestroy {
   }
 
   private generatePDF(booking: Booking, event: EventItem) {
-    const ticketCategory = event.tickets.find((t) => t.id === booking.ticketCategoryId);
+    const ticketCategory = event.tickets.find(
+      (t) =>
+        t.id === booking.ticketCategoryId ||
+        t.id?.toString() === booking.ticketCategoryId?.toString()
+    );
     if (!ticketCategory) {
-      console.error('Ticket category not found');
+      console.error(
+        'Ticket category not found. ticketCategoryId:',
+        booking.ticketCategoryId,
+        'Available IDs:',
+        event.tickets.map((t) => t.id)
+      );
       return;
     }
 
