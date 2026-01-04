@@ -2,7 +2,7 @@
 
 const QRCode = require('qrcode');
 
-// Generate QR code data string for booking
+// Generate QR code data string for booking (includes seat IDs)
 const generateQRData = (booking, event) => {
   const data = {
     bookingId: booking._id.toString(),
@@ -10,10 +10,13 @@ const generateQRData = (booking, event) => {
     ticketCategoryId: booking.ticketCategoryId,
     quantity: booking.quantity,
     date: event.date,
+    seats: booking.selectedSeats || [],
     timestamp: Date.now(),
   };
 
-  return `EMS|${data.bookingId}|${data.eventId}|${data.ticketCategoryId}|${data.quantity}|${data.date}`;
+  // Format: EMS|bookingId|eventId|ticketCategoryId|qty|date|seats (comma-separated)
+  const seatsStr = data.seats.length > 0 ? data.seats.join(',') : 'NO_SEATS';
+  return `EMS|${data.bookingId}|${data.eventId}|${data.ticketCategoryId}|${data.quantity}|${data.date}|${seatsStr}`;
 };
 
 // Generate QR code as data URL (base64 image)
@@ -36,7 +39,7 @@ const generateQRCodeDataURL = async (data) => {
   }
 };
 
-// Validate and parse QR code data
+// Validate and parse QR code data (includes seats)
 const parseQRData = (qrData) => {
   try {
     const parts = qrData.split('|');
@@ -45,12 +48,17 @@ const parseQRData = (qrData) => {
       return null;
     }
 
+    // Parse seats (comma-separated in position 6)
+    const seatsStr = parts[6] || '';
+    const seats = seatsStr && seatsStr !== 'NO_SEATS' ? seatsStr.split(',') : [];
+
     return {
       bookingId: parts[1],
       eventId: parts[2],
       ticketCategoryId: parts[3],
       quantity: parseInt(parts[4]),
       date: parts[5] || null,
+      seats: seats,
     };
   } catch (error) {
     return null;

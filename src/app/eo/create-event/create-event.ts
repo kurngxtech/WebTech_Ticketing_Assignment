@@ -38,15 +38,23 @@ export class CreateEvent implements OnInit {
 
   ticketCategories: TicketCategory[] = [];
 
-  // Auditorium seating sections with max capacity
+  // Auditorium seating sections - synced with attendee seating layout
+  // Total: 765 seats
   sectionConfig = [
-    { id: 'LF-A', name: 'LF-A (General)', category: 'Lower Foyer', maxSeats: 90, order: 1 },
+    // LOWER FOYER - GENERAL (LF-A: 12 rows × 15 seats = 180)
+    { id: 'LF-A', name: 'LF-A (General)', category: 'Lower Foyer', maxSeats: 180, order: 1 },
+    // VIP Section (4 rows × 15 seats = 60)
     { id: 'VIP', name: 'VIP', category: 'Lower Foyer', maxSeats: 60, order: 2 },
-    { id: 'LF-B', name: 'LF-B (General)', category: 'Lower Foyer', maxSeats: 90, order: 3 },
-    { id: 'LF-C', name: 'LF-C (Premium)', category: 'Lower Foyer', maxSeats: 120, order: 4 },
-    { id: 'B-A', name: 'B-A (General)', category: 'Balcony', maxSeats: 69, order: 5 },
-    { id: 'B-B', name: 'B-B (General)', category: 'Balcony', maxSeats: 69, order: 6 },
-    { id: 'B-C', name: 'B-C (General)', category: 'Balcony', maxSeats: 69, order: 7 },
+    // LOWER FOYER - GENERAL (LF-B: 8 rows × 15 seats = 120)
+    { id: 'LF-B', name: 'LF-B (General)', category: 'Lower Foyer', maxSeats: 120, order: 3 },
+    // LOWER FOYER - GENERAL (LF-C: 12 rows × 15 seats = 180)
+    { id: 'LF-C', name: 'LF-C (General)', category: 'Lower Foyer', maxSeats: 180, order: 4 },
+    // BALCONY - PREMIUM (B-A: 5 rows × 11 seats = 55)
+    { id: 'B-A', name: 'B-A (Premium)', category: 'Balcony', maxSeats: 55, order: 5 },
+    // BALCONY - PREMIUM (B-B: 5 rows × 23 seats = 115)
+    { id: 'B-B', name: 'B-B (Premium)', category: 'Balcony', maxSeats: 115, order: 6 },
+    // BALCONY - PREMIUM (B-C: 5 rows × 11 seats = 55)
+    { id: 'B-C', name: 'B-C (Premium)', category: 'Balcony', maxSeats: 55, order: 7 },
   ];
 
   sections = this.sectionConfig.map((s) => s.name);

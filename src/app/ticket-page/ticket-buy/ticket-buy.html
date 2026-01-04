@@ -159,11 +159,15 @@
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Right: Shopping Cart -->
-    <div class="col-lg-12 text-white">
-      <div class="shopping-cart-section w-50">
-        <h3 class="text-white">
+  <!-- Floating Cart Bar - Only shows when cart has items -->
+  @if (cart.length > 0) {
+  <div class="floating-cart-bar" [class.expanded]="isCartExpanded">
+    <!-- Collapsed View -->
+    <div class="cart-bar-collapsed" (click)="toggleCartExpand()">
+      <div class="cart-bar-left">
+        <div class="cart-icon-badge">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -177,25 +181,76 @@
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
           </svg>
-          Shopping Cart
-        </h3>
-        @if (cart.length > 0) {
-        <div class="cart-items">
+          <span class="badge">{{ getTotalCartItems() }}</span>
+        </div>
+        <div class="cart-bar-items">
           @for (item of cart; track item.ticket.id) {
-          <div class="cart-item">
-            <div class="item-details">
-              <div class="item-type">{{ item.ticket.type }}</div>
-              <div class="item-qty">Qty: {{ item.qty }}</div>
-            </div>
-            <div class="item-price">
-              {{ formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty) }}
-            </div>
+          <span class="cart-bar-pill">{{ item.ticket.type }} ×{{ item.qty }}</span>
+          }
+        </div>
+      </div>
+      <div class="cart-bar-right">
+        <div class="cart-bar-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{
+            formattedPrice(totalCartPrice * (1 - appliedDiscount / 100))
+          }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-checkout-float"
+          (click)="checkoutCart(); $event.stopPropagation()"
+        >
+          Select Seats
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Expanded View -->
+    @if (isCartExpanded) {
+    <div class="cart-bar-expanded">
+      <div class="expanded-header">
+        <h4>Your Cart</h4>
+        <button class="btn-close-expand" (click)="toggleCartExpand(); $event.stopPropagation()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </button>
+      </div>
+      <div class="expanded-items">
+        @for (item of cart; track item.ticket.id) {
+        <div class="expanded-item">
+          <div class="item-info">
+            <span class="item-type">{{ item.ticket.type }}</span>
+            <span class="item-qty">× {{ item.qty }}</span>
+          </div>
+          <div class="item-actions">
+            <span class="item-price">{{
+              formattedPrice(ticketPriceAfterDiscount(item.ticket) * item.qty)
+            }}</span>
             <button
-              type="button"
-              class="btn-remove"
-              (click)="removeFromCart(item.ticket.id)"
-              title="Remove from cart"
-              [attr.aria-label]="'Remove ' + item.ticket.type + ' from cart'"
+              class="btn-remove-item"
+              (click)="removeFromCart(item.ticket.id); $event.stopPropagation()"
+              title="Remove"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -211,65 +266,64 @@
               </svg>
             </button>
           </div>
-          }
-        </div>
-
-        <div class="cart-summary">
-          <div class="summary-row">
-            <span>Subtotal:</span>
-            <span>{{ formattedPrice(totalCartPrice) }}</span>
-          </div>
-          @if (appliedDiscount > 0) {
-          <div class="summary-row discount">
-            <span>Discount ({{ appliedDiscount }}%):</span>
-            <span>-{{ formattedPrice((totalCartPrice * appliedDiscount) / 100) }}</span>
-          </div>
-          }
-          <div class="summary-row total">
-            <span>Total:</span>
-            <span>{{ formattedPrice(totalCartPrice * (1 - appliedDiscount / 100)) }}</span>
-          </div>
-        </div>
-
-        <button type="button" class="btn btn-checkout" (click)="checkoutCart()">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 01-8 0" />
-          </svg>
-          Proceed to Checkout
-        </button>
-        } @else {
-        <div class="empty-cart">
-          <p class="pb-3">Your cart is empty</p>
-          <p class="hint">Add tickets from the left to get started</p>
         </div>
         }
       </div>
+      @if (appliedDiscount > 0) {
+      <div class="expanded-discount">
+        <span>Discount ({{ appliedDiscount }}%)</span>
+        <span>-{{ formattedPrice((totalCartPrice * appliedDiscount) / 100) }}</span>
+      </div>
+      }
     </div>
-  </section>
-  } @if (showSelectionSeats) {
-  <!-- Selection Seats -->
+    }
+  </div>
+  } } @if (showSelectionSeats) {
+  <!-- Selection Seats Modal -->
   <div class="modal-overlay seat-modal-overlay">
-    <!-- Close Button - Outside modal content, in the dark background -->
-    <button
-      class="seat-map-close-btn overlay-close"
-      (click)="closeSeatMap()"
-      aria-label="Close Seat Map"
-    >
-      ×
-    </button>
-
-    <!-- <div class="modal-dialog"> -->
     <div class="modal-content-seat">
+      <!-- Mini Cart Header - Shows ticket context -->
+      <div class="seat-modal-header">
+        <div class="seat-modal-header-left">
+          <h2 class="seat-modal-title">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            Select Your Seats
+          </h2>
+          @if (event) {
+          <p class="seat-modal-event-name">{{ event.title }}</p>
+          }
+        </div>
+        <div class="seat-modal-header-right">
+          <div class="mini-cart-preview">
+            @for (item of cart; track item.ticket.id) {
+            <div class="mini-cart-pill">
+              <span class="pill-type">{{ item.ticket.type }}</span>
+              <span class="pill-qty">×{{ item.qty }}</span>
+            </div>
+            }
+          </div>
+          <div class="mini-cart-total">
+            <span class="total-label">Total:</span>
+            <span class="total-value">{{
+              formattedPrice(totalCartPrice * (1 - appliedDiscount / 100))
+            }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="seat-map-scroll-wrapper default-bg-color font">
         <!-- Auditorium Custom Seat -->
         <div class="auditorium-map-container">
@@ -290,9 +344,7 @@
             <div class="legend-item"><span class="legend-seat available"></span> Available</div>
             <div class="legend-item"><span class="legend-seat selected"></span> Selected</div>
             <div class="legend-item"><span class="legend-seat booked"></span> Booked</div>
-            <div class="legend-item"><span class="legend-seat vip"></span> VIP</div>
-            <div class="legend-item"><span class="legend-seat premium"></span> Premium</div>
-            <div class="legend-item"><span class="legend-seat general"></span> General</div>
+
           </div>
 
           <div class="seating-section lower-foyer">
@@ -301,51 +353,9 @@
             <div class="seating-row upper-row">
               <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 0 : 1">
                 <div class="block-label">{{ block.name }}</div>
-                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                  <button
-                    *ngFor="let seat of row; let j = index"
-                    class="seat-button"
-                    [ngClass]="{
-                      available: seat.status === 'available',
-                      booked: seat.status === 'booked',
-                      selected: seat.status === 'selected'
-                    }"
-                    [disabled]="seat.status === 'booked'"
-                    (click)="toggleSeat(block.name, i, j)"
-                    [attr.aria-label]="'Kursi ' + seat.id"
-                  >
-                    <span class="seat-number">{{ j + 1 }}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="center-foyer-stack">
-                <div
-                  class="seat-block vip-block"
-                  *ngFor="let block of seatingBlocks | slice : 1 : 2"
-                >
-                  <div class="block-label">{{ block.name }}</div>
-                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                    <button
-                      *ngFor="let seat of row; let j = index"
-                      class="seat-button vip-seat"
-                      [ngClass]="{
-                        available: seat.status === 'available',
-                        booked: seat.status === 'booked',
-                        selected: seat.status === 'selected'
-                      }"
-                      [disabled]="seat.status === 'booked'"
-                      (click)="toggleSeat(block.name, i, j)"
-                      [attr.aria-label]="'Kursi ' + seat.id"
-                    >
-                      <span class="seat-number">{{ j + 1 }}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 2 : 3">
-                  <div class="block-label">{{ block.name }}</div>
-                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                  <div class="seat-row">
                     <button
                       *ngFor="let seat of row; let j = index"
                       class="seat-button"
@@ -356,31 +366,93 @@
                       }"
                       [disabled]="seat.status === 'booked'"
                       (click)="toggleSeat(block.name, i, j)"
-                      [attr.aria-label]="'Kursi ' + seat.id"
+                      [attr.aria-label]="'Seat ' + seat.id"
+                      [title]="seat.id"
                     >
                       <span class="seat-number">{{ j + 1 }}</span>
                     </button>
+                  </div>
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                </div>
+              </div>
+
+              <div class="center-foyer-stack">
+                <div
+                  class="seat-block vip-block"
+                  *ngFor="let block of seatingBlocks | slice : 1 : 2"
+                >
+                  <div class="block-label">{{ block.name }}</div>
+                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                    <span class="row-label">{{ getRowLabel(i) }}</span>
+                    <div class="seat-row">
+                      <button
+                        *ngFor="let seat of row; let j = index"
+                        class="seat-button vip-seat"
+                        [ngClass]="{
+                          available: seat.status === 'available',
+                          booked: seat.status === 'booked',
+                          selected: seat.status === 'selected'
+                        }"
+                        [disabled]="seat.status === 'booked'"
+                        (click)="toggleSeat(block.name, i, j)"
+                        [attr.aria-label]="'Seat ' + seat.id"
+                        [title]="seat.id"
+                      >
+                        <span class="seat-number">{{ j + 1 }}</span>
+                      </button>
+                    </div>
+                    <span class="row-label">{{ getRowLabel(i) }}</span>
+                  </div>
+                </div>
+
+                <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 2 : 3">
+                  <div class="block-label">{{ block.name }}</div>
+                  <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                    <span class="row-label">{{ getRowLabel(i) }}</span>
+                    <div class="seat-row">
+                      <button
+                        *ngFor="let seat of row; let j = index"
+                        class="seat-button"
+                        [ngClass]="{
+                          available: seat.status === 'available',
+                          booked: seat.status === 'booked',
+                          selected: seat.status === 'selected'
+                        }"
+                        [disabled]="seat.status === 'booked'"
+                        (click)="toggleSeat(block.name, i, j)"
+                        [attr.aria-label]="'Seat ' + seat.id"
+                        [title]="seat.id"
+                      >
+                        <span class="seat-number">{{ j + 1 }}</span>
+                      </button>
+                    </div>
+                    <span class="row-label">{{ getRowLabel(i) }}</span>
                   </div>
                 </div>
               </div>
 
               <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 3 : 4">
                 <div class="block-label">{{ block.name }}</div>
-                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                  <button
-                    *ngFor="let seat of row; let j = index"
-                    class="seat-button"
-                    [ngClass]="{
-                      available: seat.status === 'available',
-                      booked: seat.status === 'booked',
-                      selected: seat.status === 'selected'
-                    }"
-                    [disabled]="seat.status === 'booked'"
-                    (click)="toggleSeat(block.name, i, j)"
-                    [attr.aria-label]="'Kursi ' + seat.id"
-                  >
-                    <span class="seat-number">{{ j + 1 }}</span>
-                  </button>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                  <div class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Seat ' + seat.id"
+                      [title]="seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
                 </div>
               </div>
             </div>
@@ -394,73 +466,128 @@
             <div class="seating-row lower-row">
               <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 4 : 5">
                 <div class="block-label">{{ block.name }}</div>
-                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                  <button
-                    *ngFor="let seat of row; let j = index"
-                    class="seat-button"
-                    [ngClass]="{
-                      available: seat.status === 'available',
-                      booked: seat.status === 'booked',
-                      selected: seat.status === 'selected'
-                    }"
-                    [disabled]="seat.status === 'booked'"
-                    (click)="toggleSeat(block.name, i, j)"
-                    [attr.aria-label]="'Kursi ' + seat.id"
-                  >
-                    <span class="seat-number">{{ j + 1 }}</span>
-                  </button>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                  <div class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Seat ' + seat.id"
+                      [title]="seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
                 </div>
               </div>
 
               <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 5 : 6">
                 <div class="block-label">{{ block.name }}</div>
-                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                  <button
-                    *ngFor="let seat of row; let j = index"
-                    class="seat-button"
-                    [ngClass]="{
-                      available: seat.status === 'available',
-                      booked: seat.status === 'booked',
-                      selected: seat.status === 'selected'
-                    }"
-                    [disabled]="seat.status === 'booked'"
-                    (click)="toggleSeat(block.name, i, j)"
-                    [attr.aria-label]="'Kursi ' + seat.id"
-                  >
-                    <span class="seat-number">{{ j + 1 }}</span>
-                  </button>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                  <div class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Seat ' + seat.id"
+                      [title]="seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
                 </div>
               </div>
 
               <div class="seat-block" *ngFor="let block of seatingBlocks | slice : 6 : 7">
                 <div class="block-label">{{ block.name }}</div>
-                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row">
-                  <button
-                    *ngFor="let seat of row; let j = index"
-                    class="seat-button"
-                    [ngClass]="{
-                      available: seat.status === 'available',
-                      booked: seat.status === 'booked',
-                      selected: seat.status === 'selected'
-                    }"
-                    [disabled]="seat.status === 'booked'"
-                    (click)="toggleSeat(block.name, i, j)"
-                    [attr.aria-label]="'Kursi ' + seat.id"
-                  >
-                    <span class="seat-number">{{ j + 1 }}</span>
-                  </button>
+                <div *ngFor="let row of block.seatsData; let i = index" class="seat-row-wrapper">
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
+                  <div class="seat-row">
+                    <button
+                      *ngFor="let seat of row; let j = index"
+                      class="seat-button"
+                      [ngClass]="{
+                        available: seat.status === 'available',
+                        booked: seat.status === 'booked',
+                        selected: seat.status === 'selected'
+                      }"
+                      [disabled]="seat.status === 'booked'"
+                      (click)="toggleSeat(block.name, i, j)"
+                      [attr.aria-label]="'Seat ' + seat.id"
+                      [title]="seat.id"
+                    >
+                      <span class="seat-number">{{ j + 1 }}</span>
+                    </button>
+                  </div>
+                  <span class="row-label">{{ getRowLabel(i) }}</span>
                 </div>
               </div>
             </div>
           </div>
+          <!-- Floating Action Bar -->
+          <div class="map-footer floating-action-bar">
+            <button class="btn-cancel-seats" (click)="closeSeatMap()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              Cancel
+            </button>
 
-          <div class="map-footer">
+            <div class="seat-summary-bar">
+              <div class="seat-icons">
+                @for (seat of getSelectedSeats(); track seat.id; let i = $index) { @if (i < 5) {
+                <span class="seat-icon-mini">{{ i + 1 }}</span>
+                } } @if (getSelectedSeats().length > 5) {
+                <span class="seat-icon-more">+{{ getSelectedSeats().length - 5 }}</span>
+                }
+              </div>
+              <span class="seat-summary-text">
+                {{ getSelectedSeats().length }} of {{ maxSeatsAllowed }} seats selected
+              </span>
+            </div>
+
             <button
-              class="book-button"
+              class="book-button btn-confirm-seats"
               [disabled]="!isAnySeatSelected"
               (click)="startPaymentProcess()"
             >
-              Book Selected Seats ({{ getSelectedSeats().length }})
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              Confirm Seats & Checkout
             </button>
           </div>
         </div>

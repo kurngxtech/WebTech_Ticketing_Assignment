@@ -97,12 +97,23 @@ export class TicketBuy implements OnInit {
   totalCartPrice = 0;
   selectedSeats: Array<string> = [];
   selectedTicketCategory: TicketCategory | null = null; // The ticket category user is buying
+  isCartExpanded = false; // For floating cart bar expand/collapse
   paymentMethods = [
     { id: 'credit-card', name: 'Credit Card' },
     { id: 'debit-card', name: 'Debit Card' },
     { id: 'e-wallet', name: 'E-Wallet' },
     { id: 'bank-transfer', name: 'Bank Transfer' },
   ];
+
+  // Toggle floating cart bar expand/collapse
+  toggleCartExpand(): void {
+    this.isCartExpanded = !this.isCartExpanded;
+  }
+
+  // Get total items in cart
+  getTotalCartItems(): number {
+    return this.cart.reduce((total, item) => total + item.qty, 0);
+  }
 
   // Max seats allowed based on cart quantity
   get maxSeatsAllowed(): number {
@@ -120,16 +131,34 @@ export class TicketBuy implements OnInit {
       if (!block) return;
 
       // Find the ticket definition for this category
-      const ticket = this.event?.tickets.find(
-        (t) => (t.section || 'GENERAL').toUpperCase() === block.category
-      );
+      // Match by: 1) section contains block name, 2) section contains category keyword, 3) exact category match
+      const ticket = this.event?.tickets.find((t) => {
+        const section = (t.section || '').toUpperCase();
+        const category = block.category.toUpperCase();
+
+        // Check if section ID starts with block name (e.g., 'LF-A (General)' starts with 'LF-A')
+        if (section.startsWith(block.name.toUpperCase())) {
+          return true;
+        }
+        // Check if section contains the category keyword (e.g., 'LF-A (General)' contains 'GENERAL')
+        if (section.includes(category)) {
+          return true;
+        }
+        // For VIP, check exact section name
+        if (category === 'VIP' && section === 'VIP') {
+          return true;
+        }
+        return false;
+      });
+
       if (ticket) {
         totalPrice += this.ticketPriceAfterDiscount(ticket);
       } else {
-        // Fallback if ticket not found (shouldn't happen if data is consistent)
-        // Try to find any ticket
-        const fallbackTicket = this.event?.tickets[0];
-        totalPrice += fallbackTicket ? this.ticketPriceAfterDiscount(fallbackTicket) : 50;
+        // Fallback: Log warning and use a reasonable default
+        console.warn(
+          `No ticket found for seat ${seatId} in block ${block.name} (${block.category})`
+        );
+        // Don't use fallback to avoid wrong pricing - just skip this seat
       }
     });
 
@@ -210,11 +239,30 @@ export class TicketBuy implements OnInit {
 
       // Find cart quantity for this category
       // Map ticket.section (from DB/Mock) to block.category
-      // Assuming ticket.section values roughly match 'VIP', 'PREMIUM', 'GENERAL'
-      const cartItemForCategory = this.cart.find(
-        (item) => (item.ticket.section || 'GENERAL').toUpperCase() === block.category
-      );
+      // Check by: section starts with block name OR section contains category keyword
+      const cartItemForCategory = this.cart.find((item) => {
+        const section = (item.ticket.section || '').toUpperCase();
+        const category = block.category.toUpperCase();
 
+        // Check if section starts with any block name of this category
+        const blocksOfSameCategory = this.seatingBlocks.filter(
+          (b) => b.category === block.category
+        );
+        for (const b of blocksOfSameCategory) {
+          if (section.startsWith(b.name.toUpperCase())) {
+            return true;
+          }
+        }
+        // Check if section contains category keyword
+        if (section.includes(category)) {
+          return true;
+        }
+        // For VIP, exact match
+        if (category === 'VIP' && section === 'VIP') {
+          return true;
+        }
+        return false;
+      });
       if (!cartItemForCategory) {
         this.toast.warning(`You haven't purchased any ${block.category} tickets.`);
         return;
@@ -246,6 +294,8 @@ export class TicketBuy implements OnInit {
       });
     });
     this.showSelectionSeats = false;
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
   }
 
   // Getter: Mendapatkan array semua kursi yang dipilih
@@ -540,6 +590,8 @@ export class TicketBuy implements OnInit {
         }
 
         this.showSelectionSeats = true;
+        // Lock body scroll when modal opens
+        document.body.style.overflow = 'hidden';
         this.zone.run(() => this.cdr.detectChanges());
       },
       error: (err) => {
@@ -547,6 +599,8 @@ export class TicketBuy implements OnInit {
         console.error('Failed to load booked seats:', err);
         // Still show seat map, all seats will be available
         this.showSelectionSeats = true;
+        // Lock body scroll when modal opens
+        document.body.style.overflow = 'hidden';
         this.zone.run(() => this.cdr.detectChanges());
       },
     });
@@ -699,6 +753,8 @@ export class TicketBuy implements OnInit {
   private onPaymentSuccess(result: any): void {
     console.log('Payment success:', result);
     this.toast.success('Payment successful!');
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
 
     // Sync status with backend (CRITICAL for localhost/webhook failure)
     if (this.paymentOrderId) {
@@ -735,6 +791,8 @@ export class TicketBuy implements OnInit {
   private onPaymentPending(result: any): void {
     console.log('Payment pending:', result);
     this.toast.info('Payment pending. Please complete your payment.');
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
     this.message = 'Payment pending - please complete your payment';
     this.showPaymentModal = false;
     this.paymentInProgress = false; // Reset lock
@@ -744,6 +802,8 @@ export class TicketBuy implements OnInit {
   private onPaymentError(result: any): void {
     console.error('Payment error:', result);
     this.toast.error('Payment failed. Please try again.');
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
     this.message = 'Payment failed';
     this.showPaymentModal = false;
     this.paymentInProgress = false; // Reset lock to allow retry
@@ -751,6 +811,8 @@ export class TicketBuy implements OnInit {
 
   private onPaymentClose(): void {
     console.log('Payment popup closed');
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
     this.message = 'Payment cancelled';
     this.showPaymentModal = false;
     this.paymentInProgress = false; // Reset lock to allow retry
@@ -837,6 +899,8 @@ export class TicketBuy implements OnInit {
   }
 
   backToHome(): void {
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
     this.showQRCodeDisplay = false;
     this.currentBooking = null;
     this.qrCodeData = '';
@@ -848,9 +912,14 @@ export class TicketBuy implements OnInit {
     this.showPaymentModal = false;
     this.currentBooking = null;
     this.message = 'Booking cancelled';
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
   }
 
   closeQRCodeDisplay(): void {
+    // Restore body scroll
+    document.body.style.overflow = 'auto';
+
     if (this.showContinueShopping) {
       this.showQRCodeDisplay = false;
       this.continueShopping();

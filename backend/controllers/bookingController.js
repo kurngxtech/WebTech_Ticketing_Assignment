@@ -240,6 +240,7 @@ exports.getBookingsByUser = async (req, res) => {
         paymentOrderId: payment ? payment.orderId : null, // Include orderId for status checks
         qrCode: booking.qrCode,
         bookingDate: booking.bookingDate,
+        expiresAt: booking.expiresAt, // 24-hour payment expiration
         checkedIn: booking.checkedIn,
         checkedInAt: booking.checkedInAt,
       };

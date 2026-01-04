@@ -9,8 +9,8 @@ const { generateOrderId } = require('../utils/helpers');
 const { sendBookingConfirmation, sendPaymentReceipt } = require('../utils/emailService');
 
 // Currency conversion rate: MYR to IDR
-// This is an approximate rate. For production, consider using a real-time API
-const MYR_TO_IDR_RATE = 3500;
+// Updated: Jan 2026 (approximate market rate)
+const MYR_TO_IDR_RATE = 3650;
 
 // Convert MYR to IDR for Midtrans
 const convertMYRToIDR = (amountMYR) => {
@@ -286,6 +286,21 @@ exports.handleNotification = async (req, res) => {
       }
     } else if (transactionStatus === 'pending') {
       booking.paymentStatus = 'pending';
+      booking.paymentMethod = statusResponse.payment_type;
+
+      // Update expiresAt from Midtrans expiry_time if available
+      // Different payment methods have different expiration times:
+      // - QRIS: 15 minutes
+      // - e-Wallet (ShopeePay, Dana): 15 minutes
+      // - Virtual Account: 24 hours
+      // - GoPay: 24 hours
+      if (statusResponse.expiry_time) {
+        booking.expiresAt = new Date(statusResponse.expiry_time);
+        console.log(
+          `Updated booking expiry to: ${statusResponse.expiry_time} (${statusResponse.payment_type})`
+        );
+      }
+
       await booking.save();
     }
 
@@ -437,6 +452,14 @@ exports.checkTransaction = async (req, res) => {
           }
         } else if (transactionStatus === 'pending') {
           booking.paymentStatus = 'pending';
+          booking.paymentMethod = statusResponse.payment_type;
+
+          // Update expiresAt from Midtrans expiry_time if available
+          if (statusResponse.expiry_time) {
+            booking.expiresAt = new Date(statusResponse.expiry_time);
+            console.log(`Updated booking expiry to: ${statusResponse.expiry_time}`);
+          }
+
           await booking.save();
         }
       }

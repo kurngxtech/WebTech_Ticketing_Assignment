@@ -289,47 +289,7 @@
             </div>
             } @else if (booking.status === 'pending') {
             <div class="pending-payment-section">
-              <div
-                class="countdown-timer"
-                [class.expiring-soon]="isExpiringSoon(booking.expiresAt)"
-              >
-                @if (!isExpired(booking.expiresAt)) {
-                <svg
-                  class="countdown-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                <span class="countdown-text">{{ getCountdownText(booking.expiresAt) }}</span>
-                } @else {
-                <svg
-                  class="countdown-icon warning"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ef4444"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                  />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                <span class="countdown-text expired">Payment Expired</span>
-                }
-              </div>
               <p class="pending-text">Complete payment to confirm booking</p>
-              @if (!isExpired(booking.expiresAt)) {
               <button
                 class="btn btn-continue-payment"
                 (click)="continuePayment(booking.id); $event.stopPropagation()"
@@ -349,7 +309,6 @@
                 </svg>
                 Complete Payment
               </button>
-              }
               <button
                 class="btn btn-remove-booking"
                 (click)="showRemoveBookingConfirm(booking.id); $event.stopPropagation()"
